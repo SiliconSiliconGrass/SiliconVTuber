@@ -1,17 +1,16 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <MaoDemo/>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+// import CozeBot from './components/CozeBot.vue'
+import MaoDemo from './components/MaoDemo.vue';
 
 export default {
-  name: 'App',
   components: {
-    HelloWorld
-  }
-}
+    MaoDemo
+  },
+};
 </script>
 
 <style>
