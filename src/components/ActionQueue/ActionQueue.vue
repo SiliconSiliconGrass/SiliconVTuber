@@ -1,4 +1,31 @@
 <script>
+
+function delay(ms) {
+    return new Promise(resolve => {
+        setTimeout(resolve, ms);
+    });
+}
+
+const MOTION_DICT = { // MOTION_DICT中存储了每隔动作的持续时间
+  'shy': 3500,
+  'comfy': 5000,
+  'touch_hat': 4600,
+  'draw_heart_success': 8000,
+  'draw_heart_failed': 10000,
+  'rabbit_magic': 9700,
+};
+
+const EXPRESSION_DICT = {
+  'smile': 'exp_01',
+  'smile_with_eyes_closed': 'exp_02',
+  'close_eyes': 'exp_03',
+  'stars_in_eyes': 'exp_04',
+  'doubtful': 'exp_05',
+  'blush': 'exp_06',
+  'shocked': 'exp_07',
+  'disdainful': 'exp_08'
+}
+
 export class Action {
     constructor(type, data) {
         this.type = type;
@@ -68,6 +95,30 @@ export default class ActionQueue {
         if (action.type === 'SayAloud') {
             await this.parent.resourceManager.playAudio(action.resources[0], false); // 播放音频，播放结束后不删除
             // 等到一段话结束时再删除所有音频，减小性能开支
+        }
+
+        if (action.type === 'Expression/Motion') {
+            let name = action.data;
+            if (name in MOTION_DICT) {
+                let event = new Event('launchMotion');
+                event.motionName = name;
+                document.getElementById('l2dEventTrigger').dispatchEvent(event);
+
+                await delay(MOTION_DICT[name]); // MOTION_DICT中存储了每隔动作的持续时间
+
+                // motionEnd的触发时机似乎不是很正确, 故弃用
+                // return new Promise((resolve) => {
+                //     document.getElementById('l2dCallbackTrigger').addEventListener('motionEnd', async () => {
+                //         console.log('motionEnd!');
+                //         resolve();
+                //     }, { once: true }); // 该listener只触发一次
+                // });
+
+            } else if (name in EXPRESSION_DICT) {
+                let event = new Event('setExpression');
+                event.expressionName = name;
+                document.getElementById('l2dEventTrigger').dispatchEvent(event);
+            }
         }
 
         if (action.type === 'EndOfResponse') {
