@@ -36,6 +36,7 @@ export default class ResourceManager {
         this.mainLoop();
 
         this.ttsBot = new TtsBot(this.parent.ttsPat, this.parent.ttsBotID, 'tts_user_id');
+        this.ttsBot.createConv(); // 初始化时自动创建ConvID, 以提高首句TTS生成速度
     }
 
     get(id) {
@@ -43,14 +44,12 @@ export default class ResourceManager {
     }
 
     add(resource) {
-        console.log('add resource:', resource);
         let id = resource.id;
         this.resourceBank[`resource-${id}`] = resource;
         this.resourceIds.push(id);
     }
 
     remove(id) {
-        console.log('remove resource:', this.resourceBank[`resource-${id}`]);
         this.resourceBank[`resource-${id}`] = undefined;
         this.resourceIds.splice(this.resourceIds.indexOf(id), 1);
     }
@@ -69,7 +68,7 @@ export default class ResourceManager {
             let resource = this.get(id);
             // if ((!resource.ready) && (!resource.requesting)) {
             if (!resource) {
-                console.log(`undefined resource (id: ${id})`);
+                console.warn(`undefined resource (id: ${id})`);
                 continue;
             }
 
@@ -95,10 +94,11 @@ export default class ResourceManager {
             try {
                 let audioUrl = await ttsBot.generateAudio(text + '------'); // add "----" to the end of text, to prevent audio from sharp stops
                 resource.url = audioUrl;
-
-                this.audioBank.add(audioUrl);
+                if (resource.url) {
+                    this.audioBank.add(audioUrl);
+                } // 若url为null，则不添加该audio
             } catch(e) {
-                console.log("An error occurred when requesting for a TTS resource.", `TTS text: "${text}"`, e);
+                console.warn("An error occurred when requesting for a TTS resource.", `TTS text: "${text}"`, e);
                 resource.url = null; // TTS生成失败，直接不再播放这句
             }
         }

@@ -49,12 +49,9 @@ export default class CozeBot {
     }
 
     async respondTo(message) {
-        console.log('checking convID:', this.convID);
         if (!this.convID) {
             await this.createConv(); // 这是创建会话的方法
         }
-
-        console.log('using convID:', this.convID);
 
         const url = `https://api.coze.cn/v3/chat?conversation_id=${this.convID}`;
         const headers = {
@@ -124,7 +121,7 @@ export default class CozeBot {
                                 return this.response;
                             }
                         } catch(e) {
-                            console.log('[CozeBot] An error occurred when is parsing event data:', e);
+                            console.error('[CozeBot] An error occurred when is parsing event data:', e);
                         }
                     }
                 }

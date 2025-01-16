@@ -90,10 +90,15 @@ export default class ActionQueue {
 
     async doAction(action) {
 
-        console.log('do action:', action);
+        console.log('doing action:', action);
 
         if (action.type === 'SayAloud') {
-            await this.parent.resourceManager.playAudio(action.resources[0], false); // 播放音频，播放结束后不删除
+            try {
+                await this.parent.resourceManager.playAudio(action.resources[0], false); // 播放音频，播放结束后不会立即删除
+            } catch(e) {
+                console.warn(`Skipping SayAloud Action (text: ${action.data}), because an error occurred:`, e);
+            }
+            
             // 等到一段话结束时再删除所有音频，减小性能开支
         }
 
@@ -121,9 +126,9 @@ export default class ActionQueue {
             }
         }
 
-        if (action.type === 'EndOfResponse') {
+        if (action.type === 'EndOfResponse' && this.queue.length === 1) {
             this.parent.resourceManager.clearResources();
-            this.queue = [];
+            // this.queue = [];
         }
     }
 }

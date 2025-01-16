@@ -38,7 +38,6 @@ export default {
         },
 
         getAudioElement(index) {
-            console.log('get audio element:', `audioPlayer${index}`);
             return document.getElementById(`audioPlayer${index}`);
         },
 
@@ -91,7 +90,6 @@ export default {
                 audio.play();
                 audio.addEventListener('ended', async () => {
                     if (callback) {
-                        console.log(this.currAudioUrl);
                         callback(this, url);
                     }
                     this.currAudioUrl = null;

@@ -49,7 +49,7 @@
 <script>
 import AudioBank from './ResourceManager/AudioBank.vue';
 import Mao from './BotBrain/MaoCore.vue';
-import ResourceManager from './ResourceManager/ResourceManager.vue';
+import ResourceManager, { Resource } from './ResourceManager/ResourceManager.vue';
 import axios from 'axios';
 
 export default {
@@ -58,7 +58,7 @@ export default {
     },
     data() {
         return {
-            debug: false,
+            debug: true,
 
             // Using two tokens. Maybe unnecessary
             PAT: '', // bot brain token
@@ -85,17 +85,61 @@ export default {
                 const response = await axios.get('/CozeToken/token.txt', {
                 responseType: 'text' // 确保响应类型是文本
                 });
-                console.log('got token:', response.data);
                 this.PAT = response.data;
                 this.PAT2 = this.PAT;
             } catch (error) {
-                console.error('Error fetching the text file:', error);
+                console.error('Error getting token:', error);
             }
         },
 
         enableAudioActivities() {
-            // enableAudio();
             this.$refs.mao_audio_bank.handleUserGesture();
+        },
+
+        broadcast(text) {
+            /* 口播 */
+            function multipleSplit(inputString, delimiters) {
+                // 构建一个正则表达式，匹配任一指定的分隔符
+                const delimiterRegex = new RegExp('[' + delimiters.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&') + ']+');
+                // 使用正则表达式分割字符串
+                return inputString.split(delimiterRegex);
+            }
+
+            const seps = "。？！?!\n";
+            var splitList = multipleSplit(text, seps);
+            var self = this.Mao;
+            for (var i = 0; i < splitList.length; i++) {
+                // 处理一个短句
+                let sentence = splitList[i];
+
+                // 处理方括号[]中的motion/expression信息
+                let sentenceSplit = sentence.split('[');
+
+                for (let split of sentenceSplit) {
+                    let splitSplit = split.split(']');
+                    if (splitSplit.length == 1) {
+                        if (splitSplit[0] !== '') {
+                            let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[0]});
+                            self.resourceManager.add(resource); // 注册所需TTS audio 资源
+                            self.actionQueue.enqueue({type: "SayAloud", data: splitList[i], resources: [resource]}); // 将SayAloud动作加入队列
+                        }
+                    } else {
+                        // splitSplit[0]: expression/motion name
+                        // splitSplit[1]: tts text
+
+                        // expression/motion 应该不需要resource
+                        this.actionQueue.enqueue({type: "Expression/Motion", data: splitSplit[0], resources: []}); // Expression/Motion动作入队
+                        
+                        if (splitSplit[1] !== '') {
+                            let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[1]});
+                            self.resourceManager.add(resource); // 注册所需TTS audio 资源
+                            self.actionQueue.enqueue({type: "SayAloud", data: splitList[i], resources: [resource]}); // 将SayAloud动作加入队列
+                        }
+                    }
+                }
+            }
+
+            self.actionQueue.enqueue({type: "EndOfResponse", data: {}, resources: []}); // 将EndOfResponse动作加入队列
         },
 
         sendChat(message) {
@@ -107,6 +151,9 @@ export default {
 
         this.getToken()
         .then(() => {
+
+            // [setup]
+
             this.Mao = new Mao(
                 this.PAT, this.MAO_BOT_ID, this.USER_ID,
                 this.PAT2, this.TTS_BOT_ID,
@@ -117,6 +164,9 @@ export default {
             var resourceManager = new ResourceManager(this.Mao, this.$refs.mao_audio_bank);
             this.Mao.resourceManager = resourceManager;
             this.resourceManager = resourceManager;
+
+            // this.Mao.respondTo("你好呀! 今天过的怎么样? 想我了吗?"); // Test
+            this.broadcast(" ？ ？"); // Test
         });
 
         setInterval(() => {
@@ -142,8 +192,6 @@ export default {
                 this.inputText = '';
             }
         });
-
-        // this.Mao.respondTo("你好呀! 今天过的怎么样? 想我了吗?"); // Test
     },
 };
 </script>
@@ -163,11 +211,12 @@ export default {
 }
 
 .user-interface {
-    position: absolute;
+    z-index: 2;
+    position: fixed;
     width: 100%;
     left: 50vw;
     top: 100vh;
-    transform: translate(-50%, -200%);
+    transform: translate(-50%, -150%);
 }
 
 .user-interface > * {
@@ -182,6 +231,7 @@ export default {
 
 .visualize-area {
     position: absolute;
+    z-index: 2;
     right: 5%;
     width: 20vw;
 }

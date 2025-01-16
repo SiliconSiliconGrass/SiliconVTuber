@@ -14,18 +14,17 @@ export default class TtsBot extends CozeBot {
     }
 
     async generateAudio(text) {
-        console.log('generating audio:', text);
-        return new Promise((resolve, reject) => {
+        // console.log('generating audio:', text);
+        return new Promise((resolve) => {
             this.respondTo(text)
             .then((response) => {
-                console.log(response);
                 var url = JSON.parse(response).output;
-                console.log(`[audio gen] text: ${text}, url: ${url}`);
+                // console.log(`[audio gen] text: ${text}, url: ${url}`);
                 resolve(url);
             })
             .catch(e => {
-                console.log('[TtsBot]: An error occurred when generating url', e);
-                reject();
+                console.warn('[TtsBot]: An error occurred when generating url', e);
+                resolve(null)
             });
         });
     }

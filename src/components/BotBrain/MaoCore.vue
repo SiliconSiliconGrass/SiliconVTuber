@@ -30,7 +30,7 @@ const msgDelta = (self, data) => {
                 if (splitSplit[0] !== '') {
                     let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[0]});
                     self.resourceManager.add(resource); // 注册所需TTS audio 资源
-                    self.actionQueue.enqueue({type: "SayAloud", data: splitList[i], resources: [resource]}); // 将SayAloud动作加入队列
+                    self.actionQueue.enqueue({type: "SayAloud", data: splitSplit[0], resources: [resource]}); // 将SayAloud动作加入队列
                 }
             } else {
                 // splitSplit[0]: expression/motion name
@@ -42,7 +42,7 @@ const msgDelta = (self, data) => {
                 if (splitSplit[1] !== '') {
                     let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[1]});
                     self.resourceManager.add(resource); // 注册所需TTS audio 资源
-                    self.actionQueue.enqueue({type: "SayAloud", data: splitList[i], resources: [resource]}); // 将SayAloud动作加入队列
+                    self.actionQueue.enqueue({type: "SayAloud", data: splitSplit[1], resources: [resource]}); // 将SayAloud动作加入队列
                 }
             }
         }
@@ -50,16 +50,47 @@ const msgDelta = (self, data) => {
     self.buffer = splitList[splitList.length - 1];
 };
 
+const responseDone = (self) => {
+    console.log(self.response);
+
+    let sentence = self.buffer;
+
+    // 处理方括号[]中的motion/expression信息
+    let sentenceSplit = sentence.split('[');
+
+    for (let split of sentenceSplit) {
+        let splitSplit = split.split(']');
+        if (splitSplit.length == 1) {
+            if (splitSplit[0] !== '') {
+                let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[0]});
+                self.resourceManager.add(resource); // 注册所需TTS audio 资源
+                self.actionQueue.enqueue({type: "SayAloud", data: splitSplit[0], resources: [resource]}); // 将SayAloud动作加入队列
+            }
+        } else {
+            // splitSplit[0]: expression/motion name
+            // splitSplit[1]: tts text
+
+            // expression/motion 应该不需要resource
+            self.actionQueue.enqueue({type: "Expression/Motion", data: splitSplit[0], resources: []}); // Expression/Motion动作入队
+            
+            if (splitSplit[1] !== '') {
+                let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[1]});
+                self.resourceManager.add(resource); // 注册所需TTS audio 资源
+                self.actionQueue.enqueue({type: "SayAloud", data: splitSplit[1], resources: [resource]}); // 将SayAloud动作加入队列
+            }
+        }
+    }
+
+    self.actionQueue.enqueue({type: "EndOfResponse", data: {}, resources: []}); // 将EndOfResponse动作加入队列
+    self.response = '';
+    self.buffer = '';
+}
+
 export default class Mao extends CozeBot {
     constructor(pat, botID, userID, ttsPat, ttsBotID, resourceManager, actionQueue) {
         var eventCallBacks = {
             'conversation.message.delta': msgDelta,
-            'done': (self) => {
-                console.log(self.response);
-                self.actionQueue.enqueue({type: "EndOfResponse", data: {}, resources: []}); // 将EndOfResponse动作加入队列
-                self.response = '';
-                self.buffer = '';
-            },
+            'done': responseDone
         }
         super(pat, botID, userID, eventCallBacks);
 
@@ -73,6 +104,8 @@ export default class Mao extends CozeBot {
         this.buffer = ''; // 缓冲区
 
         this.uuidFacotry = 0;
+
+        this.createConv(); // 初始化时自动创建ConvID, 以提高首句TTS生成速度
     }
 
     uuid() {
