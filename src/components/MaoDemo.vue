@@ -1,7 +1,5 @@
 <template>
     <div>
-        
-
         <div class="user-interface">
             <button @click="enableAudioActivities">启用音频</button>
             <input ref="input_area" type="text" v-model="inputText" placeholder="请输入...">
@@ -58,7 +56,7 @@ export default {
     },
     data() {
         return {
-            debug: true,
+            debug: false,
 
             // Using two tokens. Maybe unnecessary
             PAT: '', // bot brain token
@@ -166,7 +164,7 @@ export default {
             this.resourceManager = resourceManager;
 
             // this.Mao.respondTo("你好呀! 今天过的怎么样? 想我了吗?"); // Test
-            this.broadcast(" ？ ？"); // Test
+            // this.broadcast(" ？ ？"); // Test
         });
 
         setInterval(() => {
@@ -226,7 +224,8 @@ export default {
     font-size: 2em;
 }
 .user-interface > input {
-    width: 800px;
+    width: 80%;
+    max-width: 800px;
 }
 
 .visualize-area {

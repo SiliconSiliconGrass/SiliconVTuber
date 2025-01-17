@@ -2,6 +2,13 @@
 import axios from 'axios';
 
 export default class CozeBot {
+    /**
+     * A delegate used to communicate with coze api
+     * @param pat coze token
+     * @param botID coze bot id
+     * @param userID coze user id (any string, except empty)
+     * @param eventCallBacks {'eventName': function(){}}, defines callbacks for each coze response events
+     */
     constructor(pat, botID, userID, eventCallBacks) {
         this.pat = pat;
         this.botID = botID;
@@ -29,6 +36,11 @@ export default class CozeBot {
     }
 
     async createConv() {
+        /**
+         * To set a conversation id for this bot
+         * This function will be called automatically in "respondTo()" if current convID is null
+         * But it is recommended to manually call it in advance
+         */
         return new Promise((resolve, reject) => {
             const url = 'https://api.coze.cn/v1/conversation/create';
             const headers = {
@@ -49,6 +61,10 @@ export default class CozeBot {
     }
 
     async respondTo(message) {
+        /**
+         * To send chat message to coze bot, and return its response
+         * @param message [string]
+         */
         if (!this.convID) {
             await this.createConv(); // 这是创建会话的方法
         }
@@ -131,31 +147,4 @@ export default class CozeBot {
         }
     }
 }
-
-// export default {
-//     props: {
-//         pat: {
-//             type: String
-//         },
-//         botID: {
-//             type: String
-//         },
-//         userID: {
-//             type: String
-//         },
-//         eventCallBacks: {
-//             type: Object
-//         },
-//     },
-
-//     data() {
-//         return {
-//             bot: null
-//         }
-//     },
-
-//     mounted() {
-//         this.bot = new CozeBot(this.pat, this.botID, this.userID, this.eventCallBacks);
-//     }
-// }
 </script>

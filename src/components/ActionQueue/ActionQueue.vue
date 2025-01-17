@@ -27,6 +27,10 @@ const EXPRESSION_DICT = {
 }
 
 export class Action {
+    /**
+     * @param type [string] type of action
+     * @param data [Object] data of action
+     */
     constructor(type, data) {
         this.type = type;
         this.data = data;
@@ -34,6 +38,10 @@ export class Action {
 }
 
 export default class ActionQueue {
+    /**
+     * A delegate used to manage and carry out actions
+     * @param parent [Mao] parent chat bot
+     */
     constructor(parent) {
         this.queue = [];
         this.busy = false;

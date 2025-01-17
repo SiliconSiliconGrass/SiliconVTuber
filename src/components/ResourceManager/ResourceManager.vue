@@ -12,6 +12,12 @@ function delay(ms) {
 }
 
 export class Resource {
+    /**
+     * 
+     * @param id [Number] the id of resource (must be unique)
+     * @param type [String] type of resource
+     * @param data [Object] data of resource
+     */
     constructor(id, type, data) {
         this.id = id;
         this.type = type;

@@ -12,8 +12,10 @@
 //     });
 // }
 
+/**
+ * AudioBank: audio loading, playing, and real time volume calculating
+ */
 export default {
-
     data() {
         return {
             urls: [],

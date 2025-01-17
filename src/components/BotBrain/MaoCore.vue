@@ -87,6 +87,16 @@ const responseDone = (self) => {
 }
 
 export default class Mao extends CozeBot {
+    /**
+     * A common chat bot model, using coze api
+     * @param pat coze token for bot brain
+     * @param botID coze bot id for bot brain
+     * @param userID coze user id (any string, except empty)
+     * @param ttsPat coze token for TTS bot
+     * @param ttsBotID coze bot id for TTS bot
+     * @param resourceManager resourceManager (used for resource management, such as TTS audios)
+     * @param actionQueue actionQueue (used for action management)
+     */
     constructor(pat, botID, userID, ttsPat, ttsBotID, resourceManager, actionQueue) {
         var eventCallBacks = {
             'conversation.message.delta': msgDelta,

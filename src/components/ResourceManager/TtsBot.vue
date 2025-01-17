@@ -6,6 +6,12 @@ const msgDelta = (self, data) => {
 };
 
 export default class TtsBot extends CozeBot {
+    /**
+     * A common TTS bot model, using coze api
+     * @param pat coze token
+     * @param botID coze bot id
+     * @param userID coze user id (any string, except empty)
+     */
     constructor(pat, botID, userID) {
         var eventCallBacks = {
             'conversation.message.delta': msgDelta,
