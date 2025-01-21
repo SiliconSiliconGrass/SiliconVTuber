@@ -1,12 +1,8 @@
 <template>
     <div>
-        <div class="user-interface">
-            <button @click="enableAudioActivities">启用音频</button>
+        <div class="user-interface" id="user-interface">
+            <button v-if="!audioEnabled" @click="enableAudioActivities">启用音频</button>
             <input ref="input_area" type="text" v-model="inputText" placeholder="请输入...">
-        </div>
-
-        <div id="live2d-area">
-            <canvas id="live2d-canvas" class="live2d-canvas">您的浏览器不支持canvas!</canvas>
         </div>
 
         <div v-if="debug" class="visualize-area">
@@ -57,6 +53,7 @@ export default {
     data() {
         return {
             debug: false,
+            audioEnabled: false, // The user needs to interact with the page (by clicking the button) to enable audio
 
             // Using two tokens. Maybe unnecessary
             PAT: '', // bot brain token
@@ -91,6 +88,7 @@ export default {
         },
 
         enableAudioActivities() {
+            this.audioEnabled = true;
             this.$refs.mao_audio_bank.handleUserGesture();
         },
 
@@ -209,12 +207,15 @@ export default {
 }
 
 .user-interface {
-    z-index: 2;
+    z-index: 999;
     position: fixed;
-    width: 100%;
+    width: 90vh;
     left: 50vw;
     top: 100vh;
     transform: translate(-50%, -150%);
+    /* border: 1px solid black; */
+    /* background-color: yellow; */
+    /* -webkit-app-region: drag; */
 }
 
 .user-interface > * {
