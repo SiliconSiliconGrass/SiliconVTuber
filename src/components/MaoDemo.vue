@@ -35,6 +35,8 @@
             <div id="lipSyncVal">{{ (this.$refs.mao_audio_bank) ? this.$refs.mao_audio_bank.volume : 0 }}</div>
             <div id="l2dEventTrigger"></div>
             <div id="l2dCallbackTrigger"></div>
+            <div id="l2dResourcesPath">{{ l2dResourcesPath }}</div>
+            <div id="l2dModelDirPath">{{ l2dModelDirPath }}</div>
         </div>
 
     </div>
@@ -54,6 +56,9 @@ export default {
         return {
             debug: false,
             audioEnabled: false, // The user needs to interact with the page (by clicking the button) to enable audio
+
+            l2dResourcesPath: '',
+            l2dModelDirPath: '',
 
             // Using two tokens. Maybe unnecessary
             PAT: '', // bot brain token

@@ -1,6 +1,6 @@
 <template>
   <div class="move-box" id="move-box"></div>
-  <MaoDemo/>
+  <MaoDemo ref="MaoDemo"/>
 </template>
 
 <script>
@@ -11,6 +11,24 @@ export default {
   components: {
     MaoDemo
   },
+
+  data() {
+    return {
+      // when using electron, useElectron should be true;
+      // when using normal browsers, useElectron shuold be false
+      useElectron: true,
+    }
+  },
+
+  mounted() {
+    if (this.useElectron) {
+      this.$refs.MaoDemo.l2dResourcesPath = 'http://127.0.0.1:8080/Resources/';
+      this.$refs.MaoDemo.l2dModelDirPath = 'http://127.0.0.1:8080/Resources/model_dir.txt';
+    } else {
+      this.$refs.MaoDemo.l2dResourcesPath = '/Resources/';
+      this.$refs.MaoDemo.l2dModelDirPath = '/Resources/model_dir.txt';
+    }
+  }
 };
 </script>
 
