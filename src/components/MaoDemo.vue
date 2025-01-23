@@ -39,6 +39,7 @@
             <div id="l2dModelDirPath">{{ l2dModelDirPath }}</div>
         </div>
 
+        <!-- {{ (audioRecognition) ? Math.round(audioRecognition.volume) : null }} -->
     </div>
 </template>
 
@@ -46,6 +47,7 @@
 import AudioBank from './ResourceManager/AudioBank.vue';
 import Mao from './BotBrain/MaoCore.vue';
 import ResourceManager, { Resource } from './ResourceManager/ResourceManager.vue';
+import AudioRecognition from './AudioRecognition.vue';
 import axios from 'axios';
 
 export default {
@@ -73,7 +75,9 @@ export default {
             Mao: null,
             actionQueue: null,
             resourceManager: null,
+            audioRecognition: null,
 
+            // Visualizers
             actionQueueWatcher: [],
             resourcesWatcher: []
         };
@@ -193,6 +197,20 @@ export default {
                 this.inputText = '';
             }
         });
+
+        this.audioRecognition = new AudioRecognition((text) => {
+            if (text === '') return;
+            this.sendChat(text);
+        });
+        this.audioRecognition.launch();
+
+        // setTimeout(() => {
+        //     this.audioRecognition.stop();
+        // }, 800);
+
+        // setTimeout(() => {
+        //     this.audioRecognition.launch();
+        // }, 1600);
     },
 };
 </script>

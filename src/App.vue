@@ -16,7 +16,7 @@ export default {
     return {
       // when using electron, useElectron should be true;
       // when using normal browsers, useElectron shuold be false
-      useElectron: true,
+      useElectron: false,
     }
   },
 
