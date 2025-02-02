@@ -51,7 +51,14 @@ const msgDelta = (self, data) => {
 };
 
 const responseDone = (self) => {
-    console.log(self.response);
+    // console.log(self.response);
+    // 记录智能体输出的信息
+    self.messages.push({
+        role: "assistant",
+        content: self.response,
+        content_type: "text"
+    });
+    // console.log('recorded messgaes:', self.messages);
 
     let sentence = self.buffer;
 
@@ -82,7 +89,7 @@ const responseDone = (self) => {
     }
 
     self.actionQueue.enqueue({type: "EndOfResponse", data: {}, resources: []}); // 将EndOfResponse动作加入队列
-    self.response = '';
+    // self.response = '';
     self.buffer = '';
 }
 

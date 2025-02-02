@@ -1,6 +1,6 @@
 <script>
 import axios from 'axios';
-import Recorder, { ENCODE_TYPE } from 'recorderx';
+import Recorder, { ENCODE_TYPE } from 'recorderx'; // 使用了RecorderX
 
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
@@ -21,7 +21,6 @@ export default class AudioRecognition {
             encodeType: ENCODE_TYPE.WAV, // 编码类型
         });
 
-
         this.url = 'http://127.0.0.1:8081/upload'; // 本地运行Python Whisper服务的url
 
         this.volume = 0;
@@ -39,7 +38,9 @@ export default class AudioRecognition {
 
         this.soundDetected = false; // 是否监测到声音
         this.chunks = []; // 存储已经捕捉的声音
-        this.callback = callback;
+        this.callback = callback; // callback将在每次语音识别后执行
+
+        this.isRecording = false;
     }
 
     async launch() {
@@ -55,11 +56,38 @@ export default class AudioRecognition {
         this.soundDetected = false;
 
         this.recorder.start(this.stream);
+        this.isRecording = true;
         this.mainLoop();
-    
+    }
+
+    async pause() {
+        this.recorder.pause();
+        
+        if (this.isRecording) {
+            let text = await this.recognize();
+            this.callback(text);
+            this.soundDetected = false;
+        }
+
+        this.recorder.clear();
+        this.isRecording = false;
+        this.soundDetected = false;
+    }
+
+    resume() {
+        this.recorder.clear();
+        this.recorder.start(this.stream);
+        this.soundEndTime = null;
+        this.isRecording = true;
     }
     
     async mainLoop(){
+        if (!this.isRecording) {
+            this.volume = 0;
+            setTimeout(async() => {await this.mainLoop()}, 100);
+            return;
+        }
+
         this.volume = this.getVolume();
 
         if (this.volume > this.volumeThreshold) {
@@ -78,7 +106,6 @@ export default class AudioRecognition {
             this.recorder.pause();
             this.soundDetected = false;
             let text = await this.recognize();
-            console.log('[AudioRecognition] Recognition result:', text);
 
             this.recorder.clear();
             this.recorder.start(this.stream); // 识别后立即重新开始录音，以免语音开头录不上
@@ -110,6 +137,8 @@ export default class AudioRecognition {
         } catch(e) {
             console.warn(e);
         }
+
+        console.log('[AudioRecognition] Recognition result:', response.data.transcription);
 
         return response.data.transcription;
     }

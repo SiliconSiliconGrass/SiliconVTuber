@@ -3,6 +3,7 @@
         <div class="user-interface" id="user-interface">
             <button v-if="!audioEnabled" @click="enableAudioActivities">启用音频</button>
             <input ref="input_area" type="text" v-model="inputText" placeholder="请输入...">
+            <button @click="switchMicrophoneMode">{{ (microphoneOn) ? '闭麦' : '开麦' }}</button>
         </div>
 
         <div v-if="debug" class="visualize-area">
@@ -49,6 +50,8 @@ import Mao from './BotBrain/MaoCore.vue';
 import ResourceManager, { Resource } from './ResourceManager/ResourceManager.vue';
 import AudioRecognition from './AudioRecognition.vue';
 import axios from 'axios';
+import MemoryWriter from './MemoryManagement/MemoryWriter.vue';
+import MemoryFilter from './MemoryManagement/MemoryFilter.vue';
 
 export default {
     components: {
@@ -62,6 +65,7 @@ export default {
             l2dResourcesPath: '',
             l2dModelDirPath: '',
 
+            // Coze Params
             // Using two tokens. Maybe unnecessary
             PAT: '', // bot brain token
             PAT2: '', // tts bot token
@@ -70,14 +74,21 @@ export default {
             TTS_BOT_ID: '7444603592826159141', // Mao Speaker
             USER_ID: 'some_user_id', // The user ID
 
+            // UI
             inputText: '',
+            microphoneOn: true,
 
+            // Mao Core
             Mao: null,
             actionQueue: null,
             resourceManager: null,
             audioRecognition: null,
 
-            // Visualizers
+            // Memory Management
+            memoryWriter: null,
+            memoryFilter: null,
+
+            // Visualization
             actionQueueWatcher: [],
             resourcesWatcher: []
         };
@@ -99,6 +110,16 @@ export default {
         enableAudioActivities() {
             this.audioEnabled = true;
             this.$refs.mao_audio_bank.handleUserGesture();
+        },
+
+        switchMicrophoneMode() {
+            if (this.microphoneOn) {
+                this.audioRecognition.pause();
+                this.microphoneOn = false;
+            } else {
+                this.audioRecognition.resume();
+                this.microphoneOn = true;
+            }
         },
 
         broadcast(text) {
@@ -147,8 +168,40 @@ export default {
             self.actionQueue.enqueue({type: "EndOfResponse", data: {}, resources: []}); // 将EndOfResponse动作加入队列
         },
 
-        sendChat(message) {
-            this.Mao.respondTo(message);
+        async getMemory() {
+            let response = await axios.get('http://127.0.0.1:8082/getAllMemory');
+            return response.data;
+        },
+
+        async sendChat(message) {
+            // 获取当前全部记忆
+            let memoryList = await this.getMemory();
+            console.log('all memories:', memoryList);
+
+            // 通过memoryFilter来获取relatedMemories
+            let relatedMemoryIds = await this.memoryFilter.selectRelatedMemoryIds(this.Mao.messages, message, memoryList);
+
+            console.log('relatedMemoryIds', relatedMemoryIds);
+
+            let relatedMemories = [];
+            for (let memory of memoryList) {
+                if (relatedMemoryIds.includes(memory.id)) {
+                    relatedMemories.push(memory);
+                }
+            }
+
+            console.log('relatedMemories:', relatedMemories);
+
+            // 获取智能体的response
+            this.Mao.messages.push({
+                role: "user",
+                content: `你的记忆: ${JSON.stringify(relatedMemories)};\n用户的输入: ${message}`,
+                content_type: "text"
+            });
+            await this.Mao.respondToContext();
+
+            // 写入新的记忆
+            await this.memoryWriter.createNewMemories(this.Mao.messages, memoryList);
         }
     },
 
@@ -169,6 +222,11 @@ export default {
             var resourceManager = new ResourceManager(this.Mao, this.$refs.mao_audio_bank);
             this.Mao.resourceManager = resourceManager;
             this.resourceManager = resourceManager;
+
+            this.memoryWriter = new MemoryWriter(this.PAT, this.MAO_BOT_ID, this.USER_ID);
+            this.memoryFilter = new MemoryFilter(this.PAT, this.MAO_BOT_ID, this.USER_ID);
+
+            this.audioRecognition.launch();
 
             // this.Mao.respondTo("你好呀! 今天过的怎么样? 想我了吗?"); // Test
             // this.broadcast(" ？ ？"); // Test
@@ -202,7 +260,6 @@ export default {
             if (text === '') return;
             this.sendChat(text);
         });
-        this.audioRecognition.launch();
 
         // setTimeout(() => {
         //     this.audioRecognition.stop();
@@ -232,7 +289,7 @@ export default {
 .user-interface {
     z-index: 999;
     position: fixed;
-    width: 90vh;
+    width: 90vw; /* 1vw = 视口宽的的1% */
     left: 50vw;
     top: 100vh;
     transform: translate(-50%, -150%);

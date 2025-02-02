@@ -98,7 +98,7 @@ export default class ActionQueue {
 
     async doAction(action) {
 
-        console.log('doing action:', action);
+        // console.log('doing action:', action);
 
         if (action.type === 'SayAloud') {
             try {
