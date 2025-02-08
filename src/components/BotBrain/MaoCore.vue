@@ -11,6 +11,7 @@ function multipleSplit(inputString, delimiters) {
 }
 
 const msgDelta = (self, data) => {
+    // 定义收到流式请求中的message delta时的处理过程
     self.response += data['content'];
     self.buffer += data['content'];
 
@@ -31,6 +32,9 @@ const msgDelta = (self, data) => {
                     let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[0]});
                     self.resourceManager.add(resource); // 注册所需TTS audio 资源
                     self.actionQueue.enqueue({type: "SayAloud", data: splitSplit[0], resources: [resource]}); // 将SayAloud动作加入队列
+
+                    // // 使用本地GPT-SoVITS，则不需要注册TTS资源，直接流式合成，一边合成一边播放
+                    // self.actionQueue.enqueue({type: "SayAloud", data: splitSplit[0], resources: []}); // 将SayAloud动作加入队列, 不使用coze生成resource
                 }
             } else {
                 // splitSplit[0]: expression/motion name
@@ -43,6 +47,7 @@ const msgDelta = (self, data) => {
                     let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[1]});
                     self.resourceManager.add(resource); // 注册所需TTS audio 资源
                     self.actionQueue.enqueue({type: "SayAloud", data: splitSplit[1], resources: [resource]}); // 将SayAloud动作加入队列
+                    // self.actionQueue.enqueue({type: "SayAloud", data: splitSplit[1], resources: []}); // 将SayAloud动作加入队列, 不使用coze生成resource
                 }
             }
         }
@@ -72,6 +77,7 @@ const responseDone = (self) => {
                 let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[0]});
                 self.resourceManager.add(resource); // 注册所需TTS audio 资源
                 self.actionQueue.enqueue({type: "SayAloud", data: splitSplit[0], resources: [resource]}); // 将SayAloud动作加入队列
+                // self.actionQueue.enqueue({type: "SayAloud", data: splitSplit[0], resources: []}); // 将SayAloud动作加入队列, 不使用coze生成resource
             }
         } else {
             // splitSplit[0]: expression/motion name
@@ -84,6 +90,7 @@ const responseDone = (self) => {
                 let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[1]});
                 self.resourceManager.add(resource); // 注册所需TTS audio 资源
                 self.actionQueue.enqueue({type: "SayAloud", data: splitSplit[1], resources: [resource]}); // 将SayAloud动作加入队列
+                // self.actionQueue.enqueue({type: "SayAloud", data: splitSplit[1], resources: []}); // 将SayAloud动作加入队列, 不使用coze生成resource
             }
         }
     }

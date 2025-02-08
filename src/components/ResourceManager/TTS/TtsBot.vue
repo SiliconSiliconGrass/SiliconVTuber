@@ -1,5 +1,5 @@
 <script>
-import CozeBot from '../BotBrain/CozeBot.vue';
+import CozeBot from "../../BotBrain/CozeBot.vue";
 
 const msgDelta = (self, data) => {
     self.response += data['content'];
@@ -19,8 +19,13 @@ export default class TtsBot extends CozeBot {
         super(pat, botID, userID, eventCallBacks);
     }
 
+    setup() {
+        this.createConv();
+    }
+
     async generateAudio(text) {
         // console.log('generating audio:', text);
+        text += '------'; // add "----" to the end of text, to prevent audio from sharp stops
         let time = Date.now();
         return new Promise((resolve) => {
             this.respondTo(text)

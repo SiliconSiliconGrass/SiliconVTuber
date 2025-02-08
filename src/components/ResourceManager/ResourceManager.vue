@@ -1,5 +1,6 @@
 <script>
-import TtsBot from './TtsBot.vue';
+// import TtsHelper from './TTS/TtsBot.vue';
+import TtsHelper from './TTS/GptSovits.vue';
 
 function delay(ms) {
     if (ms <= 0) {
@@ -41,8 +42,9 @@ export default class ResourceManager {
         this.timeoutId = null;
         this.mainLoop();
 
-        this.ttsBot = new TtsBot(this.parent.ttsPat, this.parent.ttsBotID, 'tts_user_id');
-        this.ttsBot.createConv(); // 初始化时自动创建ConvID, 以提高首句TTS生成速度
+        // this.ttsHelper = new TtsHelper(this.parent.ttsPat, this.parent.ttsBotID, 'tts_user_id'); // coze
+        this.ttsHelper = new TtsHelper(); // gptsovits
+        this.ttsHelper.setup(); // 初始化
     }
 
     get(id) {
@@ -96,9 +98,9 @@ export default class ResourceManager {
             await delay(TTS_BREAK_TIME - (Date.now() - this.prevTtsBreakTime)); // prevent too frequent tts requests
 
             let text = resource.data.text;
-            let ttsBot = this.ttsBot;
+            let ttsHelper = this.ttsHelper;
             try {
-                let audioUrl = await ttsBot.generateAudio(text + '------'); // add "----" to the end of text, to prevent audio from sharp stops
+                let audioUrl = await ttsHelper.generateAudio(text);
                 resource.url = audioUrl;
                 if (resource.url) {
                     this.audioBank.add(audioUrl);

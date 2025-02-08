@@ -121,7 +121,7 @@ export default class ActionQueue extends EventTarget {
                 console.warn(`Skipping SayAloud Action (text: ${action.data}), because an error occurred:`, e);
             }
             
-            // 等到一段话结束时再删除所有音频，减小性能开支
+            // 等到一段话结束时再删除所有音频，减小性能开销
         }
 
         if (action.type === 'Expression/Motion') {

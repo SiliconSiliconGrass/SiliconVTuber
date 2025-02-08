@@ -39,15 +39,13 @@
             <div id="l2dResourcesPath">{{ l2dResourcesPath }}</div>
             <div id="l2dModelDirPath">{{ l2dModelDirPath }}</div>
         </div>
-
-        <!-- {{ (audioRecognition) ? Math.round(audioRecognition.volume) : null }} -->
     </div>
 </template>
 
 <script>
 import AudioBank from './ResourceManager/AudioBank.vue';
 import Mao from './BotBrain/MaoCore.vue';
-import ResourceManager, { Resource } from './ResourceManager/ResourceManager.vue';
+import ResourceManager from './ResourceManager/ResourceManager.vue';
 import AudioRecognition from './AudioRecognition.vue';
 import axios from 'axios';
 import MemoryWriter from './MemoryManagement/MemoryWriter.vue';
@@ -112,6 +110,7 @@ export default {
         enableAudioActivities() {
             this.audioEnabled = true;
             this.$refs.mao_audio_bank.handleUserGesture();
+            // this.actionQueue.audioHandler.handleUserGesture();
         },
 
         switchMicrophoneMode() {
@@ -159,9 +158,10 @@ export default {
                     let splitSplit = split.split(']');
                     if (splitSplit.length == 1) {
                         if (splitSplit[0] !== '') {
-                            let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[0]});
-                            self.resourceManager.add(resource); // 注册所需TTS audio 资源
-                            self.actionQueue.enqueue({type: "SayAloud", data: splitList[i], resources: [resource]}); // 将SayAloud动作加入队列
+                            // let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[0]});
+                            // self.resourceManager.add(resource); // 注册所需TTS audio 资源
+                            // self.actionQueue.enqueue({type: "SayAloud", data: splitList[i], resources: [resource]}); // 将SayAloud动作加入队列
+                            self.actionQueue.enqueue({type: "SayAloud", data: splitList[0], resources: []}); // 将SayAloud动作加入队列, 但不使用coze来生成resource
                         }
                     } else {
                         // splitSplit[0]: expression/motion name
@@ -171,9 +171,10 @@ export default {
                         this.actionQueue.enqueue({type: "Expression/Motion", data: splitSplit[0], resources: []}); // Expression/Motion动作入队
                         
                         if (splitSplit[1] !== '') {
-                            let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[1]});
-                            self.resourceManager.add(resource); // 注册所需TTS audio 资源
-                            self.actionQueue.enqueue({type: "SayAloud", data: splitList[i], resources: [resource]}); // 将SayAloud动作加入队列
+                            // let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[1]});
+                            // self.resourceManager.add(resource); // 注册所需TTS audio 资源
+                            // self.actionQueue.enqueue({type: "SayAloud", data: splitList[i], resources: [resource]}); // 将SayAloud动作加入队列
+                            self.actionQueue.enqueue({type: "SayAloud", data: splitList[1], resources: []}); // 将SayAloud动作加入队列, 但不使用coze来生成resource
                         }
                     }
                 }
@@ -263,7 +264,7 @@ export default {
             console.log(`(Get Main Response took ${Date.now() - time}ms)`);
 
             // 写入新的记忆
-            this.memoryWriter.createNewMemories(this.Mao.messages, memoryList);
+            // this.memoryWriter.createNewMemories(this.Mao.messages, memoryList);
 
             console.log("waiting until end of actions");
             await this.waitUntilEndOfActions();
@@ -295,12 +296,13 @@ export default {
             this.memoryFilter = new MemoryFilter(this.PAT, this.MAO_BOT_ID, this.USER_ID);
 
             this.audioRecognition.launch();
-            // this.audioRecognition.pause();
 
             // this.Mao.respondTo("你好呀! 今天过的怎么样? 想我了吗?"); // Test
             // this.broadcast(" ？ ？"); // Test
 
             this.mainLoop();
+
+            // this.broadcast("这是一段非常长的测试文本而且没有任何标点符号阁下又该如何应对这是一段非常长的测试文本而且没有任何标点符号阁下又该如何应对这是一段非常长的测试文本而且没有任何标点符号阁下又该如何应对"); // Test
         });
 
         setInterval(() => {
