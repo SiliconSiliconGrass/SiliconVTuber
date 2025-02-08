@@ -59,7 +59,7 @@ export default {
     },
     data() {
         return {
-            debug: false,
+            debug: true,
             audioEnabled: false, // The user needs to interact with the page (by clicking the button) to enable audio
 
             l2dResourcesPath: '',
@@ -70,13 +70,15 @@ export default {
             PAT: '', // bot brain token
             PAT2: '', // tts bot token
 
-            MAO_BOT_ID: '7444170557848977471', // Mao
+            // MAO_BOT_ID: '7444170557848977471', // Mao
+            MAO_BOT_ID: '7468321833201582131',
             TTS_BOT_ID: '7444603592826159141', // Mao Speaker
             USER_ID: 'some_user_id', // The user ID
 
-            // UI
+            // UI & User Input Buffer
             inputText: '',
-            microphoneOn: true,
+            microphoneOn: false,
+            userInputBuffer: [],
 
             // Mao Core
             Mao: null,
@@ -119,7 +121,19 @@ export default {
             } else {
                 this.audioRecognition.resume();
                 this.microphoneOn = true;
+                this.interrupt();
             }
+        },
+
+        interrupt() {
+            this.actionQueue.queue = [];
+            this.resourceManager.clearResources();
+
+            clearTimeout(this.resourceManager.timeoutId);
+            this.resourceManager.mainLoop();
+            clearTimeout(this.actionQueue.timeoutId);
+            this.actionQueue.mainLoop();
+            this.actionQueue.dispatchEvent(new Event('empty'));
         },
 
         broadcast(text) {
@@ -168,40 +182,94 @@ export default {
             self.actionQueue.enqueue({type: "EndOfResponse", data: {}, resources: []}); // 将EndOfResponse动作加入队列
         },
 
+        waitUntilEndOfActions() {
+            // 等待直到动作列表被清空
+            return new Promise(resolve => {
+                if (this.actionQueue.isEmpty()) {
+                    return resolve();
+                }
+                this.actionQueue.addEventListener('empty', resolve, { once: true });
+            });
+        },
+
         async getMemory() {
             let response = await axios.get('http://127.0.0.1:8082/getAllMemory');
             return response.data;
         },
 
-        async sendChat(message) {
+        async recordChat(message) {
+            /**
+             * 将用户输入记录在userInputBuffer中
+             * @param message String
+             */
+            this.userInputBuffer.push(message);
+        },
+
+        async mainLoop() {
+            /**
+             * 主循环
+             */
+            console.log("MaoDemo mainLoop active!");
+
+            let message = ''; // 从userInputBuffer中获取用户的全部输入
+            for (let userInput of this.userInputBuffer) {
+                message += userInput + '\n';
+            }
+            this.userInputBuffer = [];
+
+            let messageEmpty = (message === "");
+            if (messageEmpty) {
+                // if (Math.random() < 0.9) {
+                //     return setTimeout(this.mainLoop, 3000);
+                // }
+                message = "[系统提示: 用户什么也没输入, 如果你认为没有必须要说的话, 那就回复“。”, 如果你有想说的话或想做的动作，那就直接正常回答, 但不要一直问用户为什么不说话]";
+                // message = "[系统提示] 用户什么也没输入。你可以从以下两个选项中选择一个：A. 什么也不说，什么也不做；B. 有话要说。如果选A，请只输出一个字符‘A’；如果选B，则直接说你想说的，不必输出字符B";
+            }
+
+            console.log("messages in buffer:", message);
+
             // 获取当前全部记忆
+            let time;
+            time = Date.now();
             let memoryList = await this.getMemory();
+            // let memoryList = [];
             console.log('all memories:', memoryList);
+            console.log(`(Get All Memories took ${Date.now() - time}ms)`);
 
             // 通过memoryFilter来获取relatedMemories
+            time = Date.now();
             let relatedMemoryIds = await this.memoryFilter.selectRelatedMemoryIds(this.Mao.messages, message, memoryList);
-
             console.log('relatedMemoryIds', relatedMemoryIds);
-
             let relatedMemories = [];
             for (let memory of memoryList) {
                 if (relatedMemoryIds.includes(memory.id)) {
                     relatedMemories.push(memory);
                 }
             }
-
             console.log('relatedMemories:', relatedMemories);
+            console.log(`(Get Related Memories took ${Date.now() - time}ms)`);
 
-            // 获取智能体的response
-            this.Mao.messages.push({
+            // 获取智能体的回复response
+            let messageObject = {
                 role: "user",
-                content: `你的记忆: ${JSON.stringify(relatedMemories)};\n用户的输入: ${message}`,
+                // content: `你的记忆: ${JSON.stringify(relatedMemories)};\n用户的输入: ${message}`,
+                content: `${message}`,
                 content_type: "text"
-            });
+            }
+            this.Mao.messages.push(messageObject);
+
+            time = Date.now();
             await this.Mao.respondToContext();
+            console.log(`(Get Main Response took ${Date.now() - time}ms)`);
 
             // 写入新的记忆
-            await this.memoryWriter.createNewMemories(this.Mao.messages, memoryList);
+            this.memoryWriter.createNewMemories(this.Mao.messages, memoryList);
+
+            console.log("waiting until end of actions");
+            await this.waitUntilEndOfActions();
+
+            let sleepTime = (this.userInputBuffer.length === 0) ? 1000 : 10;
+            setTimeout(this.mainLoop, sleepTime);
         }
     },
 
@@ -227,9 +295,12 @@ export default {
             this.memoryFilter = new MemoryFilter(this.PAT, this.MAO_BOT_ID, this.USER_ID);
 
             this.audioRecognition.launch();
+            // this.audioRecognition.pause();
 
             // this.Mao.respondTo("你好呀! 今天过的怎么样? 想我了吗?"); // Test
             // this.broadcast(" ？ ？"); // Test
+
+            this.mainLoop();
         });
 
         setInterval(() => {
@@ -251,14 +322,14 @@ export default {
 
         this.$refs.input_area.addEventListener("keydown", (event) => {
             if (event.key === 'Enter') {
-                this.sendChat(this.inputText);
+                this.recordChat(this.inputText);
                 this.inputText = '';
             }
         });
 
         this.audioRecognition = new AudioRecognition((text) => {
             if (text === '') return;
-            this.sendChat(text);
+            this.recordChat(text);
         });
 
         // setTimeout(() => {

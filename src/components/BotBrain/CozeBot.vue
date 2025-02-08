@@ -62,7 +62,7 @@ export default class CozeBot {
         });
     }
 
-    async respondTo(message) {
+    async respondTo(message, auto_save_history=false) {
         /**
          * To send a chat message to coze bot, and return its response
          * @param message [string]
@@ -81,8 +81,7 @@ export default class CozeBot {
             bot_id: this.botID,
             user_id: this.userID,
             stream: true,
-            // auto_save_history: true,
-            auto_save_history: false,
+            auto_save_history: auto_save_history,
             additional_messages: [
                 {
                     role: "user",

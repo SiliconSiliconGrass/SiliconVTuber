@@ -21,11 +21,13 @@ export default class TtsBot extends CozeBot {
 
     async generateAudio(text) {
         // console.log('generating audio:', text);
+        let time = Date.now();
         return new Promise((resolve) => {
             this.respondTo(text)
             .then((response) => {
                 var url = JSON.parse(response).output;
                 // console.log(`[audio gen] text: ${text}, url: ${url}`);
+                console.log(`(TTS took ${Date.now() - time}ms)`);
                 resolve(url);
             })
             .catch(e => {

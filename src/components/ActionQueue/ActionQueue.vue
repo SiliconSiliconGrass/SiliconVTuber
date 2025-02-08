@@ -6,13 +6,22 @@ function delay(ms) {
     });
 }
 
+// const MOTION_DICT = { // MOTION_DICT中存储了每隔动作的持续时间
+//   'shy': 3500,
+//   'comfy': 5000,
+//   'touch_hat': 4600,
+//   'draw_heart_success': 8000,
+//   'draw_heart_failed': 10000,
+//   'rabbit_magic': 9700,
+// };
+
 const MOTION_DICT = { // MOTION_DICT中存储了每隔动作的持续时间
-  'shy': 3500,
-  'comfy': 5000,
-  'touch_hat': 4600,
-  'draw_heart_success': 8000,
-  'draw_heart_failed': 10000,
-  'rabbit_magic': 9700,
+  'shy': 1000,
+  'comfy': 1000,
+  'touch_hat': 2000,
+  'draw_heart_success': 2000,
+  'draw_heart_failed': 3000,
+  'rabbit_magic': 2000,
 };
 
 const EXPRESSION_DICT = {
@@ -37,12 +46,13 @@ export class Action {
     }
 }
 
-export default class ActionQueue {
+export default class ActionQueue extends EventTarget {
     /**
      * A delegate used to manage and carry out actions
      * @param parent [Mao] parent chat bot
      */
     constructor(parent) {
+        super();
         this.queue = [];
         this.busy = false;
         this.parent = parent; // 关联Bot
@@ -65,6 +75,10 @@ export default class ActionQueue {
 
     length() {
         return this.queue.length;
+    }
+
+    isEmpty() {
+        return this.length() === 0;
     }
 
     async mainLoop() {
@@ -136,7 +150,7 @@ export default class ActionQueue {
 
         if (action.type === 'EndOfResponse' && this.queue.length === 1) {
             this.parent.resourceManager.clearResources();
-            // this.queue = [];
+            this.dispatchEvent(new Event('empty'));
         }
     }
 }

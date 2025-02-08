@@ -56,7 +56,7 @@ export default class AudioRecognition {
         this.soundDetected = false;
 
         this.recorder.start(this.stream);
-        this.isRecording = true;
+        this.isRecording = false;
         this.mainLoop();
     }
 
@@ -65,7 +65,9 @@ export default class AudioRecognition {
         
         if (this.isRecording) {
             let text = await this.recognize();
-            this.callback(text);
+            if (text !== "") {
+                this.callback(text);
+            }
             this.soundDetected = false;
         }
 
@@ -130,17 +132,20 @@ export default class AudioRecognition {
         let blob = this.recorder.getRecord({encodeTo: ENCODE_TYPE.WAV}); // wav格式的二进制对象
  
         let response;
+        let text = "";
         try {
             response = await axios.post(this.url, {
                 base64Data: await fileToBase64(blob)
             })
+            text = response.data.transcription;
         } catch(e) {
             console.warn(e);
+            text = "";
         }
 
-        console.log('[AudioRecognition] Recognition result:', response.data.transcription);
+        console.log('[AudioRecognition] Recognition result:', text);
 
-        return response.data.transcription;
+        return text;
     }
 
     getVolume() {
