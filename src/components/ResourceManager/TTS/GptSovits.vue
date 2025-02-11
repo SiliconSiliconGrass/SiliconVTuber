@@ -8,12 +8,19 @@ export default class GptSovits extends AbstractTtsHelper{
         if (!url) url = 'http://127.0.0.1:9880';
         if (!cfg) {
             cfg = {
-                "refer_wav_path": "Intro-Yui2.mov",
-                "prompt_text": "では、無丂のりちゃん、あなたにとって、ほうかごとは、きっちゃった聞いてみよう。はい、入りましたー。はいはい",
+                // "refer_wav_path": "Intro-Yui2.mov",
+                // "prompt_text": "では、無丂のりちゃん、あなたにとって、ほうかごとは、きっちゃった聞いてみよう。はい、入りましたー。はいはい",
+
+                // "refer_wav_path": "misaka-ref1.wav",
+                // "prompt_text": "任務完了よ、お疲れさん。はぁ、厄介事はこれで終わりね。",
+
+                "refer_wav_path": "misaka-ref2.wav",
+                "prompt_text": "何かありそうね。クロコに連絡しておこうかな。なんだか騒がしいわね。",
+
                 "prompt_language": "ja",
-                "text_language": "zh",
+                "text_language": "ja",
                 "temperature": 0.6,
-                "speed": 0.8,
+                "speed": 1.0,
 
                 "text": "",
             };
@@ -43,8 +50,6 @@ export default class GptSovits extends AbstractTtsHelper{
 
         let data = this.cfg; // 这似乎不是deepcopy，请小心可能引发的问题
         data.text = text;
-        
-        console.log('log@sayAloud', data);
 
         let url = this.url;
 

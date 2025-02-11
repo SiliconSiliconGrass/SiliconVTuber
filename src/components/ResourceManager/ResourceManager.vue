@@ -1,6 +1,6 @@
 <script>
-// import TtsHelper from './TTS/TtsBot.vue';
-import TtsHelper from './TTS/GptSovits.vue';
+import CozeTtsBot from './TTS/TtsBot.vue'; // use coze tts bot
+import GptSovits from './TTS/GptSovits.vue'; // use local Gpt-SoVITS
 
 function delay(ms) {
     if (ms <= 0) {
@@ -32,7 +32,7 @@ export class Resource {
 }
 
 export default class ResourceManager {
-    constructor(parent, audioBank) {
+    constructor(parent, audioBank, helperName = 'gptsovits') {
         this.parent = parent; // gain access to Bot Core
         this.audioBank = audioBank;
 
@@ -42,8 +42,12 @@ export default class ResourceManager {
         this.timeoutId = null;
         this.mainLoop();
 
-        // this.ttsHelper = new TtsHelper(this.parent.ttsPat, this.parent.ttsBotID, 'tts_user_id'); // coze
-        this.ttsHelper = new TtsHelper(); // gptsovits
+        if (helperName === 'coze') {
+            this.ttsHelper = new CozeTtsBot(this.parent.ttsPat, this.parent.ttsBotID, 'tts_user_id'); // coze
+        } else {
+            this.ttsHelper = new GptSovits(); // gptsovits
+        }
+
         this.ttsHelper.setup(); // 初始化
     }
 

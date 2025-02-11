@@ -23,6 +23,8 @@
     "core-js": "^3.8.3",
     "electron-squirrel-startup": "^1.0.1",
     "path": "^0.12.7",
+    "pixi-live2d-display": "^0.4.0",
+    "pixi.js": "^6.5.10",
     "recorderx": "^2.0.2",
     "vue": "^3.2.13"
   },
@@ -58,7 +60,10 @@
     "parserOptions": {
       "parser": "@babel/eslint-parser"
     },
-    "rules": {}
+    "rules": {
+      "no-unused-vars": "off",
+      "no-undef": "off"
+    }
   },
   "browserslist": [
     "> 1%",

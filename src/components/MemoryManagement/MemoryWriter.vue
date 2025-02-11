@@ -1,5 +1,6 @@
 <script>
 import CozeBot from '../BotBrain/CozeBot.vue';
+import axios from 'axios';
 
 const msgDelta = (self, data) => {
     self.response += data['content'];
@@ -65,14 +66,29 @@ export default class MemoryWriter extends CozeBot {
         console.log('memory writer got messages:', memoryWriterMessages);
         console.log('new memories:', response);
 
-        if (response === '[]') return; // 没有新记忆，不必写入
+        let newMemories = [];
+        try {
+            newMemories = JSON.parse(response);
+        } catch(e) {
+            console.warn(`Memory Writer didn't respond in JSON format! (Got resposne: "${response}")`);
+        }
 
-        response = await fetch(this.url + 'appendMemory', {
-            method: 'POST',
-            body: response,
-            mode: 'cors', // 跨域请求
+        // if (response === '[]') return; // 没有新记忆，不必写入
+
+        // try {
+        //     response = await fetch(this.url + 'appendMemory', {
+        //         method: 'POST',
+        //         body: response,
+        //         mode: 'cors', // 跨域请求
+        //     });
+        // } catch(e) {
+        //     console.warn('An error occurred when trying to create new memories:', e);
+        // }
+        // console.log(response);
+        axios.post(this.url + 'appendMemory', newMemories)
+        .catch((e) => {
+            console.warn('An error occurred when trying to create new memories:', e);
         });
-        console.log(response);
     }
 }
 

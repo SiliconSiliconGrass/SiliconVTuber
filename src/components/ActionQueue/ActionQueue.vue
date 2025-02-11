@@ -1,21 +1,6 @@
 <script>
 
-function delay(ms) {
-    return new Promise(resolve => {
-        setTimeout(resolve, ms);
-    });
-}
-
-// const MOTION_DICT = { // MOTION_DICT中存储了每隔动作的持续时间
-//   'shy': 3500,
-//   'comfy': 5000,
-//   'touch_hat': 4600,
-//   'draw_heart_success': 8000,
-//   'draw_heart_failed': 10000,
-//   'rabbit_magic': 9700,
-// };
-
-const MOTION_DICT = { // MOTION_DICT中存储了每隔动作的持续时间
+const MAO_MOTIONS = {
   'shy': 1000,
   'comfy': 1000,
   'touch_hat': 2000,
@@ -24,7 +9,7 @@ const MOTION_DICT = { // MOTION_DICT中存储了每隔动作的持续时间
   'rabbit_magic': 2000,
 };
 
-const EXPRESSION_DICT = {
+const MAO_EXPRESSIONS = {
   'smile': 'exp_01',
   'smile_with_eyes_closed': 'exp_02',
   'close_eyes': 'exp_03',
@@ -33,6 +18,30 @@ const EXPRESSION_DICT = {
   'blush': 'exp_06',
   'shocked': 'exp_07',
   'disdainful': 'exp_08'
+};
+
+const MISAKA_MOTIONS = {
+    'akimbo': 1000,
+    'raise_one_hand': 1000
+};
+
+const MISAKA_EXPRESSIONS = {
+    'no_expression': '默认的表情，比较严肃',
+    'smile': '微笑',
+    'frown': '皱眉，有些生气',
+    'doubtful': '疑惑地皱眉',
+    'smile_with_eyes_closed': '眯眼微笑',
+    'shocked': '震惊，瞪大眼睛',
+    'blush': '害羞地脸红'
+};
+
+const MOTION_DICT = MISAKA_MOTIONS;
+const EXPRESSION_DICT = MISAKA_EXPRESSIONS;
+
+function delay(ms) {
+    return new Promise(resolve => {
+        setTimeout(resolve, ms);
+    });
 }
 
 export class Action {
@@ -112,9 +121,29 @@ export default class ActionQueue extends EventTarget {
 
     async doAction(action) {
 
-        // console.log('doing action:', action);
-
         if (action.type === 'SayAloud') {
+            // 添加字幕
+            let subtitle = this.parent.subtitles.main;
+            if (subtitle) {
+                subtitle.add(action.data);
+            }
+
+            // 添加翻译字幕
+            if (this.queue.length >= 2 && this.queue[1].type === 'Translation') {
+                let subtitle = this.parent.subtitles.translation;
+                if (subtitle) {
+                    subtitle.add(this.queue[1].data);
+                }
+            }
+            // // (可选) 把下下个动作也判断一下
+            // if (this.queue.length >= 3 && this.queue[2].type === 'Translation') {
+            //     let subtitle = this.parent.subtitles.translation;
+            //     if (subtitle) {
+            //         subtitle.add(this.queue[2].data);
+            //         this.queue.splice(2, 1); // 避免这条翻译弹幕被添加两边
+            //     }
+            // }
+
             try {
                 await this.parent.resourceManager.playAudio(action.resources[0], false); // 播放音频，播放结束后不会立即删除
             } catch(e) {
@@ -148,9 +177,23 @@ export default class ActionQueue extends EventTarget {
             }
         }
 
+        if (action.type === 'Translation') {
+            // do nothing
+            // 翻译的字幕在SayAloud的时候就加了
+        }
+
+
         if (action.type === 'EndOfResponse' && this.queue.length === 1) {
             this.parent.resourceManager.clearResources();
             this.dispatchEvent(new Event('empty'));
+
+            for (let key in this.parent.subtitles) {
+                let subtitle = this.parent.subtitles[key];
+                console.log();
+                if (subtitle) {
+                    subtitle.clear();
+                }
+            }
         }
     }
 }

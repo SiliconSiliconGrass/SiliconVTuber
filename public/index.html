@@ -7,13 +7,12 @@
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <title><%= htmlWebpackPlugin.options.title %></title>
     <style>
-      canvas {
-        /* live2d canvas style */
+      /* canvas {
         position: fixed;
         top: 0;
         left: 0;
         margin: 0;
-      }
+      } */
     </style>
   </head>
   <body>
@@ -21,7 +20,8 @@
       <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
     <script src="/L2D/live2dcubismcore.min.js" type="text/javascript"></script>
-    <script src="/L2D/lappmain.js" type="text/javascript"></script>
+    <script src="/L2D/live2d.min.js" type="text/javascript"></script>
+    <!-- <script src="/L2D/lappmain.js" type="text/javascript"></script> -->
     <script src="/electronSettings.js" type="text/javascript"></script>
     <div id="app"></div>
     <!-- built files will be auto injected -->

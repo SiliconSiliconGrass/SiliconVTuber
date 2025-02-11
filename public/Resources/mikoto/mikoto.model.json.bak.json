@@ -1,0 +1,37 @@
+{
+	"version":"Sample 1.0.0",
+	"model":"mikoto.moc",
+	"textures":[
+		"mikoto.1024/texture_00.png",
+		"mikoto.1024/texture_01.png"
+	],
+	"expressions":[
+		{"name":"f01.exp.json","file":"expressions/f01.exp.json"},
+		{"name":"f02.exp.json","file":"expressions/f02.exp.json"},
+		{"name":"f03.exp.json","file":"expressions/f03.exp.json"},
+		{"name":"f04.exp.json","file":"expressions/f04.exp.json"},
+		{"name":"f05.exp.json","file":"expressions/f05.exp.json"},
+		{"name":"f06.exp.json","file":"expressions/f06.exp.json"},
+		{"name":"f07.exp.json","file":"expressions/f07.exp.json"},
+		{"name":"f08.exp.json","file":"expressions/f08.exp.json"}
+	],
+	"motions":{
+		"tap":[
+			{"file":"motions/tap/motion1.mtn","sound":"sounds/主人（御坂美琴）.mp3"},
+			{"file":"motions/tap/motion10.mtn","sound":"sounds/soga.mp3"},
+			{"file":"motions/tap/motion11.mtn","sound":"sounds/好痛（御坂美琴）.mp3"},
+			{"file":"motions/tap/motion12.mtn","sound":"sounds/欸，怎么了.mp3"},
+			{"file":"motions/tap/motion13.mtn","sound":"sounds/不无聊.mp3"},
+			{"file":"motions/tap/motion14.mtn","sound":"sounds/御坂美琴.mp3"},
+			{"file":"motions/tap/motion2.mtn","sound":"sounds/非常抱歉（御坂美琴）.mp3"},
+			{"file":"motions/tap/motion3.mtn","sound":"sounds/好痛（御坂美琴）.mp3"},
+			{"file":"motions/tap/motion4.mtn","sound":"sounds/不无聊.mp3"},
+			{"file":"motions/tap/motion5.mtn","sound":"sounds/来了来了.mp3"},
+			{"file":"motions/tap/motion6.mtn","sound":"sounds/吵死了.mp3"},
+			{"file":"motions/tap/motion7.mtn","sound":"sounds/喵（御坂美琴）.mp3"},
+			{"file":"motions/tap/motion8.mtn","sound":"sounds/御坂美琴.mp3"},
+			{"file":"motions/tap/motion9.mtn","sound":"sounds/夹击妹抖（御坂美琴）.mp3"}
+		]
+	},
+	"physics":"physics.json"
+}

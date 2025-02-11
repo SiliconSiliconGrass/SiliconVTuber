@@ -1,13 +1,21 @@
 <template>
     <div>
         <div class="user-interface" id="user-interface">
+            <!-- UI区域 -->
             <button v-if="!audioEnabled" @click="enableAudioActivities">启用音频</button>
             <input ref="input_area" type="text" v-model="inputText" placeholder="请输入...">
             <button @click="switchMicrophoneMode">{{ (microphoneOn) ? '闭麦' : '开麦' }}</button>
         </div>
 
+        <div class="subtitle-area">
+            <!-- 字幕区域 -->
+            <span ref="subtitle1" class="subtitle"></span>
+            <br>
+            <span ref="subtitle2" class="subtitle"></span>
+        </div>
+
         <div v-if="debug" class="visualize-area">
-            <!-- 行为数据可视化区域 -->
+            <!-- 数据可视化区域 -->
             <div v-if="actionQueueWatcher" class="action-queue">
                 <div v-for="(action, i) in actionQueueWatcher" :key="i" class="action-container">
                     <span> 动作类型: {{ action.type }} <br>
@@ -45,11 +53,13 @@
 <script>
 import AudioBank from './ResourceManager/AudioBank.vue';
 import Mao from './BotBrain/MaoCore.vue';
-import ResourceManager from './ResourceManager/ResourceManager.vue';
+import ResourceManager, { Resource } from './ResourceManager/ResourceManager.vue';
 import AudioRecognition from './AudioRecognition.vue';
 import axios from 'axios';
 import MemoryWriter from './MemoryManagement/MemoryWriter.vue';
 import MemoryFilter from './MemoryManagement/MemoryFilter.vue';
+import pixi_l2d_Setup from '@/pixi-l2d/main';
+import SubtitleHandler from './ActionQueue/SubtitleHandler.vue';
 
 export default {
     components: {
@@ -57,7 +67,7 @@ export default {
     },
     data() {
         return {
-            debug: true,
+            debug: false,
             audioEnabled: false, // The user needs to interact with the page (by clicking the button) to enable audio
 
             l2dResourcesPath: '',
@@ -69,7 +79,8 @@ export default {
             PAT2: '', // tts bot token
 
             // MAO_BOT_ID: '7444170557848977471', // Mao
-            MAO_BOT_ID: '7468321833201582131',
+            // MAO_BOT_ID: '7468321833201582131', // TestBot
+            MAO_BOT_ID: '7469284109609844762', // Misaka Mikoto
             TTS_BOT_ID: '7444603592826159141', // Mao Speaker
             USER_ID: 'some_user_id', // The user ID
 
@@ -90,7 +101,9 @@ export default {
 
             // Visualization
             actionQueueWatcher: [],
-            resourcesWatcher: []
+            resourcesWatcher: [],
+
+            timeoutId: null, // main loop time out id
         };
     },
 
@@ -124,19 +137,19 @@ export default {
             }
         },
 
-        interrupt() {
-            this.actionQueue.queue = [];
-            this.resourceManager.clearResources();
-
-            clearTimeout(this.resourceManager.timeoutId);
-            this.resourceManager.mainLoop();
-            clearTimeout(this.actionQueue.timeoutId);
-            this.actionQueue.mainLoop();
-            this.actionQueue.dispatchEvent(new Event('empty'));
+        waitUntilEndOfAllActions() {
+            // 等待直到动作列表被清空
+            return new Promise(resolve => {
+                if (this.actionQueue.isEmpty()) {
+                    return resolve();
+                }
+                this.actionQueue.addEventListener('empty', resolve, { once: true });
+            });
         },
 
         broadcast(text) {
             /* 口播 */
+            /* 测试用的 */
             function multipleSplit(inputString, delimiters) {
                 // 构建一个正则表达式，匹配任一指定的分隔符
                 const delimiterRegex = new RegExp('[' + delimiters.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&') + ']+');
@@ -158,10 +171,10 @@ export default {
                     let splitSplit = split.split(']');
                     if (splitSplit.length == 1) {
                         if (splitSplit[0] !== '') {
-                            // let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[0]});
-                            // self.resourceManager.add(resource); // 注册所需TTS audio 资源
-                            // self.actionQueue.enqueue({type: "SayAloud", data: splitList[i], resources: [resource]}); // 将SayAloud动作加入队列
-                            self.actionQueue.enqueue({type: "SayAloud", data: splitList[0], resources: []}); // 将SayAloud动作加入队列, 但不使用coze来生成resource
+                            let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[0]});
+                            self.resourceManager.add(resource); // 注册所需TTS audio 资源
+                            self.actionQueue.enqueue({type: "SayAloud", data: splitList[i], resources: [resource]}); // 将SayAloud动作加入队列
+                            // self.actionQueue.enqueue({type: "SayAloud", data: splitList[0], resources: []}); // 将SayAloud动作加入队列, 但不使用coze来生成resource
                         }
                     } else {
                         // splitSplit[0]: expression/motion name
@@ -171,10 +184,10 @@ export default {
                         this.actionQueue.enqueue({type: "Expression/Motion", data: splitSplit[0], resources: []}); // Expression/Motion动作入队
                         
                         if (splitSplit[1] !== '') {
-                            // let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[1]});
-                            // self.resourceManager.add(resource); // 注册所需TTS audio 资源
-                            // self.actionQueue.enqueue({type: "SayAloud", data: splitList[i], resources: [resource]}); // 将SayAloud动作加入队列
-                            self.actionQueue.enqueue({type: "SayAloud", data: splitList[1], resources: []}); // 将SayAloud动作加入队列, 但不使用coze来生成resource
+                            let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[1]});
+                            self.resourceManager.add(resource); // 注册所需TTS audio 资源
+                            self.actionQueue.enqueue({type: "SayAloud", data: splitList[i], resources: [resource]}); // 将SayAloud动作加入队列
+                            // self.actionQueue.enqueue({type: "SayAloud", data: splitList[1], resources: []}); // 将SayAloud动作加入队列, 但不使用coze来生成resource
                         }
                     }
                 }
@@ -183,19 +196,43 @@ export default {
             self.actionQueue.enqueue({type: "EndOfResponse", data: {}, resources: []}); // 将EndOfResponse动作加入队列
         },
 
-        waitUntilEndOfActions() {
-            // 等待直到动作列表被清空
-            return new Promise(resolve => {
-                if (this.actionQueue.isEmpty()) {
-                    return resolve();
+        interrupt() {
+            this.actionQueue.queue = [];
+            this.resourceManager.clearResources();
+
+            clearTimeout(this.resourceManager.timeoutId);
+            this.resourceManager.mainLoop();
+            clearTimeout(this.actionQueue.timeoutId);
+            this.actionQueue.mainLoop();
+            this.actionQueue.dispatchEvent(new Event('empty'));
+
+            for (let key in this.Mao.subtitles) {
+                let subtitle = this.Mao.subtitles[key];
+                if (subtitle) {
+                    subtitle.clear();
                 }
-                this.actionQueue.addEventListener('empty', resolve, { once: true });
-            });
+            }
         },
 
         async getMemory() {
+            /**
+             * 向Python后端发起请求，获取记忆
+             */
             let response = await axios.get('http://127.0.0.1:8082/getAllMemory');
             return response.data;
+        },
+
+        async updateMemory(memoryBank, message) {
+            /**
+             * 向Python后端发起请求，更新记忆
+             * @param memoryBank Array<Object> 当前获取的记忆库
+             * @param message String 用户输入(由userInputBuffer拼接而来)
+             */
+            let time = Date.now();
+            let agentOutput = this.Mao.messages[this.Mao.messages.length - 1];
+            await this.memoryFilter.stepMemoryParams(this.Mao.messages, message, agentOutput, memoryBank);
+            await this.memoryWriter.createNewMemories(this.Mao.messages, memoryBank);
+            console.log(`(Update Memory Took ${Date.now() - time} ms)`);
         },
 
         async recordChat(message) {
@@ -208,15 +245,20 @@ export default {
 
         async mainLoop() {
             /**
-             * 主循环
+             * 主循环 (向LLM进行轮询)
              */
-            console.log("MaoDemo mainLoop active!");
+            console.log("MaoDemo mainLoop alive!");
+
+            if (this.audioRecognition.isRecording) { // 录音时不允许轮询
+                this.timeoutId = setTimeout(this.mainLoop, 100);
+                return;
+            }
 
             let message = ''; // 从userInputBuffer中获取用户的全部输入
             for (let userInput of this.userInputBuffer) {
                 message += userInput + '\n';
             }
-            this.userInputBuffer = [];
+            this.userInputBuffer = []; // 清空userInputBffer
 
             let messageEmpty = (message === "");
             if (messageEmpty) {
@@ -224,7 +266,6 @@ export default {
                 //     return setTimeout(this.mainLoop, 3000);
                 // }
                 message = "[系统提示: 用户什么也没输入, 如果你认为没有必须要说的话, 那就回复“。”, 如果你有想说的话或想做的动作，那就直接正常回答, 但不要一直问用户为什么不说话]";
-                // message = "[系统提示] 用户什么也没输入。你可以从以下两个选项中选择一个：A. 什么也不说，什么也不做；B. 有话要说。如果选A，请只输出一个字符‘A’；如果选B，则直接说你想说的，不必输出字符B";
             }
 
             console.log("messages in buffer:", message);
@@ -232,29 +273,14 @@ export default {
             // 获取当前全部记忆
             let time;
             time = Date.now();
-            let memoryList = await this.getMemory();
-            // let memoryList = [];
-            console.log('all memories:', memoryList);
-            console.log(`(Get All Memories took ${Date.now() - time}ms)`);
-
-            // 通过memoryFilter来获取relatedMemories
-            time = Date.now();
-            let relatedMemoryIds = await this.memoryFilter.selectRelatedMemoryIds(this.Mao.messages, message, memoryList);
-            console.log('relatedMemoryIds', relatedMemoryIds);
-            let relatedMemories = [];
-            for (let memory of memoryList) {
-                if (relatedMemoryIds.includes(memory.id)) {
-                    relatedMemories.push(memory);
-                }
-            }
-            console.log('relatedMemories:', relatedMemories);
-            console.log(`(Get Related Memories took ${Date.now() - time}ms)`);
+            let memoryBank = await this.getMemory();
+            console.log('memory bank:', memoryBank);
+            console.log(`(Get Memory Bank took ${Date.now() - time}ms)`);
 
             // 获取智能体的回复response
             let messageObject = {
                 role: "user",
-                // content: `你的记忆: ${JSON.stringify(relatedMemories)};\n用户的输入: ${message}`,
-                content: `${message}`,
+                content: `你的记忆: ${JSON.stringify(memoryBank)};\n用户的输入: ${message}`,
                 content_type: "text"
             }
             this.Mao.messages.push(messageObject);
@@ -263,14 +289,18 @@ export default {
             await this.Mao.respondToContext();
             console.log(`(Get Main Response took ${Date.now() - time}ms)`);
 
-            // 写入新的记忆
-            // this.memoryWriter.createNewMemories(this.Mao.messages, memoryList);
+            if (this.audioRecognition.isRecording) { // 在此检测一次用户是否正在说话，并判断是否打断。但可能在麦克风长时间开启的情况下产生不好的效果。
+                this.interrupt();
+            }
 
-            console.log("waiting until end of actions");
-            await this.waitUntilEndOfActions();
+            // 更新记忆库
+            this.updateMemory(memoryBank, message);
+
+            console.log("waiting until end of all actions");
+            await this.waitUntilEndOfAllActions();
 
             let sleepTime = (this.userInputBuffer.length === 0) ? 1000 : 10;
-            setTimeout(this.mainLoop, sleepTime);
+            this.timeoutId = setTimeout(this.mainLoop, sleepTime);
         }
     },
 
@@ -281,28 +311,34 @@ export default {
 
             // [setup]
 
-            this.Mao = new Mao(
+            this.Mao = new Mao( // Bot Agent Instance
                 this.PAT, this.MAO_BOT_ID, this.USER_ID,
                 this.PAT2, this.TTS_BOT_ID,
             );
 
-            this.actionQueue = this.Mao.actionQueue;
+            this.actionQueue = this.Mao.actionQueue; // action queue instance
 
-            var resourceManager = new ResourceManager(this.Mao, this.$refs.mao_audio_bank);
+            var resourceManager = new ResourceManager(this.Mao, this.$refs.mao_audio_bank); // resource manager instance
             this.Mao.resourceManager = resourceManager;
             this.resourceManager = resourceManager;
 
-            this.memoryWriter = new MemoryWriter(this.PAT, this.MAO_BOT_ID, this.USER_ID);
-            this.memoryFilter = new MemoryFilter(this.PAT, this.MAO_BOT_ID, this.USER_ID);
+            this.memoryWriter = new MemoryWriter(this.PAT, this.MAO_BOT_ID, this.USER_ID); // memory writer instance
+            this.memoryFilter = new MemoryFilter(this.PAT, this.MAO_BOT_ID, this.USER_ID); // memory fileter instance
 
+            this.audioRecognition = new AudioRecognition((text) => { // audio recognition helper
+                if (text === '') return;
+                this.recordChat(text);
+            });
             this.audioRecognition.launch();
 
-            // this.Mao.respondTo("你好呀! 今天过的怎么样? 想我了吗?"); // Test
-            // this.broadcast(" ？ ？"); // Test
+            this.Mao.subtitles.main = new SubtitleHandler(this.$refs.subtitle1); // subtitle DOM element
+            this.Mao.subtitles.translation = new SubtitleHandler(this.$refs.subtitle2); // subtitle DOM element
 
-            this.mainLoop();
+            // this.Mao.respondTo("你好呀，小宝贝儿，今天想我了么？"); // TEST
+            // this.broadcast("こんにちは、御坂美琴です。何でお困りでしょうか？お手伝いできることがありましたら、お知らせください。"); // TEST
+            this.mainLoop(); // start demo main loop
 
-            // this.broadcast("这是一段非常长的测试文本而且没有任何标点符号阁下又该如何应对这是一段非常长的测试文本而且没有任何标点符号阁下又该如何应对这是一段非常长的测试文本而且没有任何标点符号阁下又该如何应对"); // Test
+            setTimeout(pixi_l2d_Setup, 150); // pixi-live2d-display setup
         });
 
         setInterval(() => {
@@ -327,11 +363,6 @@ export default {
                 this.recordChat(this.inputText);
                 this.inputText = '';
             }
-        });
-
-        this.audioRecognition = new AudioRecognition((text) => {
-            if (text === '') return;
-            this.recordChat(text);
         });
 
         // setTimeout(() => {
@@ -363,6 +394,7 @@ export default {
     z-index: 999;
     position: fixed;
     width: 90vw; /* 1vw = 视口宽的的1% */
+    max-width: 600px;
     left: 50vw;
     top: 100vh;
     transform: translate(-50%, -150%);
@@ -380,6 +412,26 @@ export default {
 .user-interface > input {
     width: 80%;
     max-width: 800px;
+}
+
+.subtitle-area {
+    position: absolute;
+    z-index: 998;
+    margin: 0;
+    padding: 0;
+    width: 95vw;
+    left: 50vw;
+    bottom: 30vh;
+    transform: translate(-50%, 0);
+}
+
+.subtitle {
+    font-size: 3em;
+    font-weight: 1000;
+    -webkit-text-stroke: 1px white;
+    text-shadow: 5px 5px rgb(43, 38, 43);
+    user-select: none;
+    color: #d459b9;
 }
 
 .visualize-area {
