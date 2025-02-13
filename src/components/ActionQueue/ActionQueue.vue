@@ -1,5 +1,7 @@
 <script>
 
+import axios from 'axios';
+
 const MAO_MOTIONS = {
   'shy': 1000,
   'comfy': 1000,
@@ -143,6 +145,19 @@ export default class ActionQueue extends EventTarget {
             //         this.queue.splice(2, 1); // 避免这条翻译弹幕被添加两边
             //     }
             // }
+
+
+            // TODO: 将这一部分移动到专门的Translator类中, 以增强可扩展性
+            axios.post('http://127.0.0.1:8083/translate', {
+                from_lang: 'JA',
+                to_lang:   'ZH',
+                text: action.data
+            }).then((response) => {
+                let subtitle = this.parent.subtitles.translation;
+                if (subtitle) {
+                    subtitle.add(response.data.result);
+                }
+            });
 
             try {
                 await this.parent.resourceManager.playAudio(action.resources[0], false); // 播放音频，播放结束后不会立即删除

@@ -19,7 +19,7 @@ export default class GptSovits extends AbstractTtsHelper{
 
                 "prompt_language": "ja",
                 "text_language": "ja",
-                "temperature": 0.6,
+                "temperature": 1.0,
                 "speed": 1.0,
 
                 "text": "",
