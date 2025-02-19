@@ -150,6 +150,14 @@ export default class CozeBot {
         }
     }
 
+    appendContext(text, role = 'user') {
+        this.messages.push({
+            role: role,
+            content: text,
+            content_type: "text"
+        });
+    }
+
     async respondToContext(messages) {
         /**
          * To send recorded history messages to coze bot, and return its response

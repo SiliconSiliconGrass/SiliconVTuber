@@ -61,6 +61,8 @@ import MemoryFilter from './MemoryManagement/MemoryFilter.vue';
 import pixi_l2d_Setup from '@/pixi-l2d/main';
 import SubtitleHandler from './ActionQueue/SubtitleHandler.vue';
 
+import { MinecraftProxy } from '@/plugins/MinecraftPlugin';
+
 export default {
     components: {
         AudioBank
@@ -247,12 +249,12 @@ export default {
             /**
              * 主循环 (向LLM进行轮询)
              */
-            console.log("MaoDemo mainLoop alive!");
+            // console.log("MaoDemo mainLoop alive!");
 
-            if (this.audioRecognition.isRecording) { // 录音时不允许轮询
-                this.timeoutId = setTimeout(this.mainLoop, 100);
-                return;
-            }
+            // if (this.audioRecognition.isRecording) { // 录音时不允许轮询
+            //     this.timeoutId = setTimeout(this.mainLoop, 10);
+            //     return;
+            // }
 
             let message = ''; // 从userInputBuffer中获取用户的全部输入
             for (let userInput of this.userInputBuffer) {
@@ -262,10 +264,14 @@ export default {
 
             let messageEmpty = (message === "");
             if (messageEmpty) {
+
+                /* TODO: 用户没有输入的时候，应该如何表现？ */
+
                 // if (Math.random() < 0.9) {
                 //     return setTimeout(this.mainLoop, 3000);
                 // }
-                message = "[系统提示: 用户什么也没输入, 如果你认为没有必须要说的话, 那就回复“。”, 如果你有想说的话或想做的动作，那就直接正常回答, 但不要一直问用户为什么不说话]";
+                // message = "[系统提示: 用户什么也没输入, 如果你认为没有必须要说的话, 那就回复“。”, 如果你有想说的话或想做的动作，那就直接正常回答, 但不要一直问用户为什么不说话]";
+                return setTimeout(this.mainLoop, 10);
             }
 
             console.log("messages in buffer:", message);
@@ -284,6 +290,9 @@ export default {
                 content_type: "text"
             }
             this.Mao.messages.push(messageObject);
+
+            // // Minecraft Plugin
+            // await this.minecraftProxy.request();
 
             time = Date.now();
             await this.Mao.respondToContext();
@@ -333,6 +342,9 @@ export default {
 
             this.Mao.subtitles.main = new SubtitleHandler(this.$refs.subtitle1); // subtitle DOM element
             this.Mao.subtitles.translation = new SubtitleHandler(this.$refs.subtitle2); // subtitle DOM element
+
+            // Minecraft Plugin
+            this.minecraftProxy = new MinecraftProxy(this.Mao);
 
             // this.Mao.respondTo("你好呀，小宝贝儿，今天想我了么？"); // TEST
             // this.broadcast("こんにちは、御坂美琴です。何でお困りでしょうか？お手伝いできることがありましたら、お知らせください。"); // TEST
