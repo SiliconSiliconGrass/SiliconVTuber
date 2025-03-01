@@ -82,7 +82,8 @@ export default {
 
             // MAO_BOT_ID: '7444170557848977471', // Mao
             // MAO_BOT_ID: '7468321833201582131', // TestBot
-            MAO_BOT_ID: '7469284109609844762', // Misaka Mikoto
+            MAO_BOT_ID: '7469284109609844762', // Misaka Mikoto (JA)
+            // MAO_BOT_ID: '7476679110560366592', // Misaka Mikoto - ZH
             TTS_BOT_ID: '7444603592826159141', // Mao Speaker
             USER_ID: 'some_user_id', // The user ID
 
@@ -299,7 +300,7 @@ export default {
             console.log(`(Get Main Response took ${Date.now() - time}ms)`);
 
             if (this.audioRecognition.isRecording) { // 在此检测一次用户是否正在说话，并判断是否打断。但可能在麦克风长时间开启的情况下产生不好的效果。
-                this.interrupt();
+                // this.interrupt();
             }
 
             // 更新记忆库

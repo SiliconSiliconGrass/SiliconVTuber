@@ -56,7 +56,12 @@ export default {
             this.$nextTick(() => {
                 let index = this.urls.indexOf(url);
                 let audio = this.getAudioElement(index);
-                audio.load();
+
+                try {
+                    audio.load();
+                } catch(e) {
+                    console.warn(e);
+                }
                 this.$nextTick(() => {
                 // let context = this.audioContext; // audio context
                     let sourceNode = this.audioContext.createMediaElementSource(audio);
@@ -88,8 +93,13 @@ export default {
                 this.currAudioUrl = url;
 
                 let audio = this.getAudioElement(index);
-                audio.load();
-                audio.play();
+
+                try {
+                    audio.load();
+                    audio.play();
+                } catch(e) {
+                    console.warn(e);
+                }
                 audio.addEventListener('ended', async () => {
                     if (callback) {
                         callback(this, url);

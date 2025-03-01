@@ -18,7 +18,8 @@ export default class GptSovits extends AbstractTtsHelper{
                 "prompt_text": "何かありそうね。クロコに連絡しておこうかな。なんだか騒がしいわね。",
 
                 "prompt_language": "ja",
-                "text_language": "ja",
+                "text_language": "ja", // 要合成的文本的语言
+                // "text_language": "zh",
                 "temperature": 1.0,
                 "speed": 1.0,
 
@@ -50,10 +51,12 @@ export default class GptSovits extends AbstractTtsHelper{
 
         console.log("GPTSOVITS 1", text);
 
-        text = text.replaceAll('Minecraft', 'マインクラフト');
-        text = text.replaceAll('minecraft', 'マインクラフト');
-        text = text.replaceAll('IndexError', 'インデックスエラー');
-        text = text.replaceAll('indexerror', 'インデックスエラー');
+        if (this.cfg.text_language === 'ja') {
+            text = text.replaceAll('Minecraft', 'マインクラフト');
+            text = text.replaceAll('minecraft', 'マインクラフト');
+            text = text.replaceAll('IndexError', 'インデックスエラー');
+            text = text.replaceAll('indexerror', 'インデックスエラー');
+        }
 
         console.log("GPTSOVITS 2", text);
 
