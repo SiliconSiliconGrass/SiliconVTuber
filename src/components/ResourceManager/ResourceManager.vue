@@ -32,7 +32,7 @@ export class Resource {
 }
 
 export default class ResourceManager {
-    constructor(parent, audioBank, helperName = 'gptsovits') {
+    constructor(parent, audioBank, ttsConfig) {
         this.parent = parent; // gain access to Bot Core
         this.audioBank = audioBank;
 
@@ -42,10 +42,32 @@ export default class ResourceManager {
         this.timeoutId = null;
         this.mainLoop();
 
-        if (helperName === 'coze') {
-            this.ttsHelper = new CozeTtsBot(this.parent.ttsPat, this.parent.ttsBotID, 'tts_user_id'); // coze
-        } else {
-            this.ttsHelper = new GptSovits(); // gptsovits
+        if (ttsConfig.type === 'coze') {
+            this.ttsHelper = new CozeTtsBot(ttsConfig.pat, ttsConfig.botID, 'tts_user_id'); // coze
+        } else if (ttsConfig.type === 'gptsovits') {
+            let cfg;
+            if (ttsConfig.charater === 'misaka-ja') {
+                cfg = {
+                    "refer_wav_path": "misaka-ref2.wav",
+                    "prompt_text": "何かありそうね。クロコに連絡しておこうかな。なんだか騒がしいわね。",
+                    "prompt_language": "ja",
+                    "text_language": "ja",
+                    "temperature": 1.0,
+                    "speed": 1.0,
+                    "text": "",
+                };
+            } else if (ttsConfig.charater === 'misaka-zh') {
+                cfg = {
+                    "refer_wav_path": "misaka-ref2.wav",
+                    "prompt_text": "何かありそうね。クロコに連絡しておこうかな。なんだか騒がしいわね。",
+                    "prompt_language": "ja",
+                    "text_language": "zh",
+                    "temperature": 1.0,
+                    "speed": 1.0,
+                    "text": "",
+                };
+            }
+            this.ttsHelper = new GptSovits(cfg); // gptsovits
         }
 
         this.ttsHelper.setup(); // 初始化

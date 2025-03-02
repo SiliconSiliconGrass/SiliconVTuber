@@ -1,5 +1,5 @@
 <script>
-import CozeBot from '../BotBrain/CozeBot.vue';
+import CozeBot from '../Bot/CozeBot.vue';
 import axios from 'axios';
 
 const msgDelta = (self, data) => {

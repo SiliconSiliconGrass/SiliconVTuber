@@ -1,17 +1,30 @@
-<script>
-import CozeBot from './CozeBot.vue';
+
+import CozeBot from '../Bot/CozeBot.js';
+import OllamaBot from '../Bot/OllamaBot.js';
 import ActionQueue from '../ActionQueue/ActionQueue.vue';
 import { Resource } from '../ResourceManager/ResourceManager.vue';
 
 function multipleSplit(inputString, delimiters) {
-    // 构建一个正则表达式，匹配任一指定的分隔符
-    const delimiterRegex = new RegExp('[' + delimiters.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&') + ']+');
-    // 使用正则表达式分割字符串
-    return inputString.split(delimiterRegex);
+    let result = [];
+    let curr = '';
+    for (let i in inputString) {
+        let char = inputString[i];
+        curr += char;
+        if (delimiters.includes(char)) {
+            result.push(curr);
+            curr = '';
+        }
+    }
+
+    if (curr !== '') {
+        result.push(curr);
+    }
+
+    return result;
 }
 
 function isEmpty(str) {
-    const bannedChars = "「」，。？/：；‘“’”【】、｜,.:;./'\"'=+-_)(*&^%$#@!`` "
+    const bannedChars = "「」，。？/：；‘“’”【】、｜,.:;./'\"'=+-_)(*&^%$#@!`` \n"
     for (let char of bannedChars) str = str.replaceAll(char, '');
     return str === '';
 }
@@ -23,14 +36,14 @@ function areBracketsBalanced(str) {
     return openBracketCount === closeBracketCount;
 }
 
-const msgDelta = (self, data) => {
+const msgDelta = (self, event) => {
     // 定义收到流式请求中的message delta时的处理过程
-    self.response += data['content'];
-    self.buffer += data['content'];
+    self.response += event.detail.content;
+    self.buffer += event.detail.content;
 
     if (!areBracketsBalanced(self.buffer)) return; // 若不匹配，则暂不处理
 
-    const seps = "，。？！；,.?!;、";
+    const seps = "。？！；.?!;";
     let splitList = self.buffer.split('[');
 
     if (splitList.length === 1 && multipleSplit(self.buffer, seps).length === 1) {
@@ -84,7 +97,7 @@ const msgDelta = (self, data) => {
 const responseDone = (self) => {
     // console.log(self.response);
     // 记录智能体输出的信息
-    self.messages.push({
+    self.bot.messages.push({
         role: "assistant",
         content: self.response,
         content_type: "text"
@@ -126,44 +139,49 @@ const responseDone = (self) => {
     self.buffer = '';
 }
 
-export default class Mao extends CozeBot {
+// export default class Mao extends CozeBot {
+export default class Agent {
     /**
      * A common chat bot model, using coze api
-     * @param pat coze token for bot brain
-     * @param botID coze bot id for bot brain
-     * @param userID coze user id (any string, except empty)
-     * @param ttsPat coze token for TTS bot
-     * @param ttsBotID coze bot id for TTS bot
-     * @param resourceManager resourceManager (used for resource management, such as TTS audios)
-     * @param actionQueue actionQueue (used for action management)
+     * @param {Object} botConfig configuration for agent brain
+     * @param {ResourceManager} resourceManager resource management proxy, including TTS
+     * @param {ActionQueue} actionQueue action management proxy
      */
-    constructor(pat, botID, userID, ttsPat, ttsBotID, resourceManager, actionQueue) {
-        var eventCallBacks = {
-            'conversation.message.delta': msgDelta,
-            'done': responseDone
-        }
-        super(pat, botID, userID, eventCallBacks);
+    constructor(botConfig, resourceManager, actionQueue) {
 
-        this.ttsBotID = ttsBotID;
-        this.ttsPat = ttsPat;
+        let bot;
+        let botType = botConfig.type;
+        if (botType === 'Ollama') {
+            bot = new OllamaBot(botConfig.modelName);
+        } else if (botType === 'Coze') {
+            bot = new CozeBot(botConfig.pat, botConfig.botID, botConfig.userID);
+        }
+        this.bot = bot;
 
         if (!actionQueue) actionQueue = new ActionQueue(this);
-
         this.resourceManager = resourceManager;
         this.actionQueue = actionQueue;
-        this.buffer = ''; // 缓冲区
 
         this.subtitles = {'main': null, 'translation': null}; // 字幕DOM元素
 
         this.uuidFacotry = 0;
-        
 
-        this.createConv(); // 初始化时自动创建ConvID, 以提高首句TTS生成速度
+        this.bot.setup(); // 初始化时自动创建ConvID, 以提高首句TTS生成速度
+        this.bot.addEventListener('message_delta', (event) => {
+            msgDelta(this, event);
+        });
+        this.bot.addEventListener('done', () => {
+            responseDone(this);
+        });
+
+        this.buffer = '';
     }
 
     uuid() {
         return this.uuidFacotry++;
     }
-}
 
-</script>
+    async respondToContext(messages) {
+        return await this.bot.respondToContext(messages);
+    }
+}

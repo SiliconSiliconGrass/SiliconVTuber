@@ -1,7 +1,7 @@
 <script>
 // TODO (现在只是copy了一下MemoryWriter, core function 还没写好)
 
-import CozeBot from '../BotBrain/CozeBot.vue';
+import CozeBot from '../Bot/CozeBot.vue';
 import axios from 'axios';
 
 const msgDelta = (self, data) => {

@@ -1,15 +1,16 @@
-<script>
 import axios from 'axios';
+import AbstractBot from './AbstractBot';
 
-export default class CozeBot {
+export default class CozeBot extends AbstractBot {
     /**
      * A delegate used to communicate with coze api
      * @param pat coze token
      * @param botID coze bot id
      * @param userID coze user id (any string, except empty)
-     * @param eventCallBacks {'eventName': function(){}}, defines callbacks for each coze response events
      */
-    constructor(pat, botID, userID, eventCallBacks) {
+    constructor(pat, botID, userID) {
+        super();
+
         this.pat = pat;
         this.botID = botID;
         this.userID = userID;
@@ -18,23 +19,28 @@ export default class CozeBot {
         this.buffer = '';
 
         this.messages = []; // 在本地记录聊天记录
-
-        if (!eventCallBacks) {
-            eventCallBacks = {
-                'conversation.message.delta': (self, data) => { self.response += data['content'] },
-            };
-        }
-        this.eventCallBacks = eventCallBacks;
     }
 
     processEvent(eventType, data) {
-        if (eventType in this.eventCallBacks) {
-            this.eventCallBacks[eventType](this, data);
+        // if (eventType in this.eventCallBacks) {
+        //     this.eventCallBacks[eventType](this, data);
+        // }
+
+        if (eventType === 'conversation.message.delta') {
+            this.dispatchEvent(new CustomEvent('message_delta', {
+                detail: {content: data.content}
+            }));
+        } else if (eventType === 'done') {
+            this.dispatchEvent(new CustomEvent('done'));
         }
 
         if (eventType === 'done') {
             return 'quit';
         }
+    }
+
+    async setup() {
+        await this.createConv();
     }
 
     async createConv() {
@@ -244,4 +250,3 @@ export default class CozeBot {
         }
     }
 }
-</script>

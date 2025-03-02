@@ -52,7 +52,7 @@
 
 <script>
 import AudioBank from './ResourceManager/AudioBank.vue';
-import Mao from './Bot/MaoCore.vue';
+import Mao from './BotBrain/MaoCore.vue';
 import ResourceManager, { Resource } from './ResourceManager/ResourceManager.vue';
 import AudioRecognition from './AudioRecognition.vue';
 import axios from 'axios';
@@ -62,7 +62,6 @@ import pixi_l2d_Setup from '@/pixi-l2d/main';
 import SubtitleHandler from './ActionQueue/SubtitleHandler.vue';
 
 import { MinecraftProxy } from '@/plugins/MinecraftPlugin';
-import Agent from './Agent/Agent';
 
 export default {
     components: {
@@ -81,10 +80,10 @@ export default {
             PAT: '', // bot brain token
             PAT2: '', // tts bot token
 
-            // BOT_ID: '7444170557848977471', // Mao
-            // BOT_ID: '7468321833201582131', // TestBot
-            BOT_ID: '7469284109609844762', // Misaka Mikoto (JA)
-            // BOT_ID: '7476679110560366592', // Misaka Mikoto - ZH
+            // MAO_BOT_ID: '7444170557848977471', // Mao
+            // MAO_BOT_ID: '7468321833201582131', // TestBot
+            MAO_BOT_ID: '7469284109609844762', // Misaka Mikoto (JA)
+            // MAO_BOT_ID: '7476679110560366592', // Misaka Mikoto - ZH
             TTS_BOT_ID: '7444603592826159141', // Mao Speaker
             USER_ID: 'some_user_id', // The user ID
 
@@ -93,8 +92,8 @@ export default {
             microphoneOn: false,
             userInputBuffer: [],
 
-            // Core
-            agent: null,
+            // Mao Core
+            Mao: null,
             actionQueue: null,
             resourceManager: null,
             audioRecognition: null,
@@ -161,9 +160,9 @@ export default {
                 return inputString.split(delimiterRegex);
             }
 
-            const seps = "。？！?! \n";
+            const seps = "。？！?!\n";
             var splitList = multipleSplit(text, seps);
-            var self = this.agent;
+            var self = this.Mao;
             for (var i = 0; i < splitList.length; i++) {
                 // 处理一个短句
                 let sentence = splitList[i];
@@ -210,8 +209,8 @@ export default {
             this.actionQueue.mainLoop();
             this.actionQueue.dispatchEvent(new Event('empty'));
 
-            for (let key in this.agent.subtitles) {
-                let subtitle = this.agent.subtitles[key];
+            for (let key in this.Mao.subtitles) {
+                let subtitle = this.Mao.subtitles[key];
                 if (subtitle) {
                     subtitle.clear();
                 }
@@ -233,9 +232,9 @@ export default {
              * @param message String 用户输入(由userInputBuffer拼接而来)
              */
             let time = Date.now();
-            let agentOutput = this.agent.bot.messages[this.agent.bot.messages.length - 1];
-            await this.memoryFilter.stepMemoryParams(this.agent.bot.messages, message, agentOutput, memoryBank);
-            await this.memoryWriter.createNewMemories(this.agent.bot.messages, memoryBank);
+            let agentOutput = this.Mao.messages[this.Mao.messages.length - 1];
+            await this.memoryFilter.stepMemoryParams(this.Mao.messages, message, agentOutput, memoryBank);
+            await this.memoryWriter.createNewMemories(this.Mao.messages, memoryBank);
             console.log(`(Update Memory Took ${Date.now() - time} ms)`);
         },
 
@@ -291,13 +290,13 @@ export default {
                 content: `你的记忆: ${JSON.stringify(memoryBank)};\n用户的输入: ${message}`,
                 content_type: "text"
             }
-            this.agent.bot.messages.push(messageObject);
+            this.Mao.messages.push(messageObject);
 
             // // Minecraft Plugin
             // await this.minecraftProxy.request();
 
             time = Date.now();
-            await this.agent.respondToContext();
+            await this.Mao.respondToContext();
             console.log(`(Get Main Response took ${Date.now() - time}ms)`);
 
             if (this.audioRecognition.isRecording) { // 在此检测一次用户是否正在说话，并判断是否打断。但可能在麦克风长时间开启的情况下产生不好的效果。
@@ -322,35 +321,19 @@ export default {
 
             // [setup]
 
-            let botConfig;
-            // Ollama
-            botConfig = {
-                type: 'Ollama',
-                modelName: 'misaka'
-            };
+            this.Mao = new Mao( // Bot Agent Instance
+                this.PAT, this.MAO_BOT_ID, this.USER_ID,
+                this.PAT2, this.TTS_BOT_ID,
+            );
 
-            // Coze
-            botConfig = {
-                type: 'Coze',
-                pat: this.PAT,
-                botID: this.BOT_ID,
-                userID: this.USER_ID
-            };
+            this.actionQueue = this.Mao.actionQueue; // action queue instance
 
-            this.agent = new Agent(botConfig) // Agent Instance
-
-            this.actionQueue = this.agent.actionQueue; // action queue instance
-
-            let ttsConfig = {
-                type: 'gptsovits',
-                character: 'misaka-ja'
-            };
-            let resourceManager = new ResourceManager(this.agent, this.$refs.mao_audio_bank, ttsConfig); // resource manager instance
-            this.agent.resourceManager = resourceManager;
+            var resourceManager = new ResourceManager(this.Mao, this.$refs.mao_audio_bank); // resource manager instance
+            this.Mao.resourceManager = resourceManager;
             this.resourceManager = resourceManager;
 
-            this.memoryWriter = new MemoryWriter(this.PAT, this.agent_BOT_ID, this.USER_ID); // memory writer instance
-            this.memoryFilter = new MemoryFilter(this.PAT, this.agent_BOT_ID, this.USER_ID); // memory fileter instance
+            this.memoryWriter = new MemoryWriter(this.PAT, this.MAO_BOT_ID, this.USER_ID); // memory writer instance
+            this.memoryFilter = new MemoryFilter(this.PAT, this.MAO_BOT_ID, this.USER_ID); // memory fileter instance
 
             this.audioRecognition = new AudioRecognition((text) => { // audio recognition helper
                 if (text === '') return;
@@ -358,13 +341,13 @@ export default {
             });
             this.audioRecognition.launch();
 
-            this.agent.subtitles.main = new SubtitleHandler(this.$refs.subtitle1); // subtitle DOM element
-            this.agent.subtitles.translation = new SubtitleHandler(this.$refs.subtitle2); // subtitle DOM element
+            this.Mao.subtitles.main = new SubtitleHandler(this.$refs.subtitle1); // subtitle DOM element
+            this.Mao.subtitles.translation = new SubtitleHandler(this.$refs.subtitle2); // subtitle DOM element
 
             // // Minecraft Plugin
-            // this.minecraftProxy = new MinecraftProxy(this.agent);
+            // this.minecraftProxy = new MinecraftProxy(this.Mao);
 
-            // this.agent.respondTo("你好呀，小宝贝儿，今天想我了么？"); // TEST
+            // this.Mao.respondTo("你好呀，小宝贝儿，今天想我了么？"); // TEST
             // this.broadcast("こんにちは、御坂美琴です。何でお困りでしょうか？お手伝いできることがありましたら、お知らせください。"); // TEST
             this.mainLoop(); // start demo main loop
 

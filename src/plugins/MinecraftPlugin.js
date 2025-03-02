@@ -1,4 +1,4 @@
-import CozeBot from '@/components/BotBrain/CozeBot.vue';
+import CozeBot from '@/components/Bot/CozeBot.vue';
 import axios from 'axios';
 
 const PROMPT = `

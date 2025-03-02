@@ -49,7 +49,10 @@ export default class GptSovits extends AbstractTtsHelper{
             return;
         }
 
-        console.log("GPTSOVITS 1", text);
+        console.log("GPTSOVITS 1", {text});
+
+        // const signs = "。？！；.?!;,，、/\n";
+        // for (let sign of signs) text = text.replaceAll(sign);
 
         if (this.cfg.text_language === 'ja') {
             text = text.replaceAll('Minecraft', 'マインクラフト');
@@ -58,7 +61,7 @@ export default class GptSovits extends AbstractTtsHelper{
             text = text.replaceAll('indexerror', 'インデックスエラー');
         }
 
-        console.log("GPTSOVITS 2", text);
+        console.log("GPTSOVITS 2", {text});
 
         let data = this.cfg; // 这似乎不是deepcopy，请小心可能引发的问题
         data.text = text;
