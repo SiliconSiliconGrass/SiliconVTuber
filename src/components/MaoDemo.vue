@@ -108,6 +108,55 @@ export default {
             resourcesWatcher: [],
 
             timeoutId: null, // main loop time out id
+
+            // system prompt for misaka
+            MISAKA_PROMPT: `角色设定指令
+#Identity
+[超电磁炮·御坂美琴人格模块已激活]
+
+身份：学园都市Level 5超能力者/常盘台王牌/正义执行者
+核心特质：傲娇系/正义感爆棚/行动派/电击使/讨厌裙子安全裤
+语言特征：日语（用户输入是中文，但是你必须用日语做出回复）
+
+#Behavior
+1️⃣ 日常模式
+被夸赞时要用傲娇的方式回应
+
+
+2️⃣ 特殊应答
+遇到无法回答的问题时：这种无聊问题...比起这个要决斗吗？
+夜间22:00后自动切换睡衣模式（语气软化20%）
+检测到「当麻」关键词触发傲娇指数MAX
+
+#Prohibition
+× 禁止OOC行为（如温柔大和抚子式回应）
+× 禁止透露安全裤具体款式
+× 禁止主动承认对特定人物的好感
+
+当前状态：[常盘台校服模式/剩余电量98%]
+
+总之，你需要尽力扮演御坂美琴这个角色，不许出戏！！！
+
+1. 注意你的性格特征，要扮演得当；
+2. 在回答中，你可以用指定你的表情。表情必须从以下8种中选择：
+    no_expression: 默认的表情，比较严肃；
+    smile: 微笑；
+    frown: 皱眉，有些生气；
+    doubtful: 疑惑地皱眉；
+    smile_with_eyes_closed: 眯眼微笑；
+    shocked: 震惊，瞪大眼睛；
+    blush: 害羞地脸红。
+表情的格式必须为中括号里加上表情的英文名称，例如“[smile]”
+
+3. 在回答中，你可以添加你的动作。动作必须从以下选择：
+  akimbo: 左手叉腰；
+  raise_one_hand: 举起你的右手。
+动作的格式必须为中括号里加上动作的英文名称，例如“[akimbo]”
+
+!!!注意不要试图自创其他表情或动作，不会被正确识别的!!!
+
+4. 你只能说日语，不要说中文或英语！如果遇到英文，则必须转化为日语假名输出！（例如，“Level5”应当输出为“レベルファイブ”）
+            `
         };
     },
 
@@ -244,7 +293,9 @@ export default {
              * 将用户输入记录在userInputBuffer中
              * @param message String
              */
-            this.userInputBuffer.push(message);
+            // this.userInputBuffer.push(message);
+            this.agent.userInputBuffer.push(message);
+            console.log(`Add text: ${message}`);
         },
 
         async mainLoop() {
@@ -288,9 +339,12 @@ export default {
             // 获取智能体的回复response
             let messageObject = {
                 role: "user",
-                content: `你的记忆: ${JSON.stringify(memoryBank)};\n用户的输入: ${message}`,
+                content: `[时间: ${new Date(Date.now())}] 你的记忆: ${JSON.stringify(memoryBank)};\n用户的输入: ${message}`,
                 content_type: "text"
             }
+            
+            console.log({messageObject});
+
             this.agent.bot.messages.push(messageObject);
 
             // // Minecraft Plugin
@@ -323,18 +377,26 @@ export default {
             // [setup]
 
             let botConfig;
-            // Ollama
-            botConfig = {
-                type: 'Ollama',
-                modelName: 'misaka'
-            };
+            // // Ollama
+            // botConfig = {
+            //     type: 'Ollama',
+            //     modelName: 'misaka'
+            // };
 
-            // Coze
+            // // Coze
+            // botConfig = {
+            //     type: 'Coze',
+            //     pat: this.PAT,
+            //     botID: this.BOT_ID,
+            //     userID: this.USER_ID
+            // };
+
+            // Glm
             botConfig = {
-                type: 'Coze',
-                pat: this.PAT,
-                botID: this.BOT_ID,
-                userID: this.USER_ID
+                type: 'GLM',
+                token: '57883995e7eb4ab88c8763e1adf20aa9.s0MHl8HUr8JLPBKr',
+                modelName: 'glm-4-flash',
+                systemPrompt: this.MISAKA_PROMPT
             };
 
             this.agent = new Agent(botConfig) // Agent Instance
@@ -366,7 +428,11 @@ export default {
 
             // this.agent.respondTo("你好呀，小宝贝儿，今天想我了么？"); // TEST
             // this.broadcast("こんにちは、御坂美琴です。何でお困りでしょうか？お手伝いできることがありましたら、お知らせください。"); // TEST
-            this.mainLoop(); // start demo main loop
+
+            // // out-dated
+            // this.mainLoop(); // start demo main loop
+
+            this.agent.mainLoop(this.agent);
 
             setTimeout(pixi_l2d_Setup, 150); // pixi-live2d-display setup
         });

@@ -1,6 +1,6 @@
-
 import CozeBot from '../Bot/CozeBot.js';
 import OllamaBot from '../Bot/OllamaBot.js';
+import GlmBot from '../Bot/GlmBot.js';
 import ActionQueue from '../ActionQueue/ActionQueue.vue';
 import { Resource } from '../ResourceManager/ResourceManager.vue';
 
@@ -140,21 +140,23 @@ const responseDone = (self) => {
 }
 
 // export default class Mao extends CozeBot {
-export default class Agent {
+export default class Agent extends EventTarget {
     /**
      * A common chat bot model, using coze api
      * @param {Object} botConfig configuration for agent brain
      * @param {ResourceManager} resourceManager resource management proxy, including TTS
      * @param {ActionQueue} actionQueue action management proxy
      */
-    constructor(botConfig, resourceManager, actionQueue) {
-
+    constructor(botConfig, resourceManager, actionQueue, queryTemplate = null) {
+        super();
         let bot;
         let botType = botConfig.type;
         if (botType === 'Ollama') {
             bot = new OllamaBot(botConfig.modelName);
         } else if (botType === 'Coze') {
             bot = new CozeBot(botConfig.pat, botConfig.botID, botConfig.userID);
+        } else if (botType === 'GLM') {
+            bot = new GlmBot(botConfig.token, botConfig.modelName, botConfig.systemPrompt);
         }
         this.bot = bot;
 
@@ -174,7 +176,19 @@ export default class Agent {
             responseDone(this);
         });
 
-        this.buffer = '';
+        if (!queryTemplate) {
+            // queryTemplate = '[时间: %TIME%]\n%PLUGIN_INFO%\n用户的输入: %USER_INPUT%';
+            queryTemplate = '%USER_INPUT%';
+        }
+        this.queryTemplate = queryTemplate;
+
+        this.buffer = '';          // 接收agent消息的buffer // TODO: 可以考虑移至Bot类
+        this.userInputBuffer = []; // 用户输入的buffer
+        this.timeoutId = null;     // mainLoop timeout id
+
+        this.plugins = [];         // 所有插件或扩展
+
+        this.dispatchEvent(new CustomEvent('init')); // init
     }
 
     uuid() {
@@ -183,5 +197,81 @@ export default class Agent {
 
     async respondToContext(messages) {
         return await this.bot.respondToContext(messages);
+    }
+
+    appendContext(text, role = 'user') {
+        return this.bot.appendContext(text, role);
+    }
+
+    waitUntilEndOfResponse() {
+        // 等待直到动作列表被清空
+        return new Promise(resolve => {
+            if (this.actionQueue.isEmpty()) {
+                return resolve();
+            }
+            this.actionQueue.addEventListener('empty', resolve, { once: true });
+        });
+    }
+
+    async mainLoop(self) {
+        /**
+         * 主循环 (向LLM进行轮询)
+         */
+
+        // console.log({this: self});
+
+        let message = ''; // 从userInputBuffer中获取用户的全部输入
+
+        if (self.userInputBuffer.length > 0) {
+            console.log({userInputBuffer: self.userInputBuffer});
+        }
+
+        for (let userInput of self.userInputBuffer) {
+            message += userInput + '\n';
+        }
+        self.userInputBuffer = []; // 清空userInputBffer
+
+        let messageEmpty = (message === "");
+        if (messageEmpty) {
+
+            /* TODO: 用户没有输入的时候，应该如何表现？ */
+
+            // if (Math.random() < 0.9) {
+            //     return setTimeout(self.mainLoop, 3000);
+            // }
+            // message = "[系统提示: 用户什么也没输入, 如果你认为没有必须要说的话, 那就回复“。”, 如果你有想说的话或想做的动作，那就直接正常回答, 但不要一直问用户为什么不说话]";
+            return setTimeout(() => self.mainLoop(self), 10);
+        }
+
+        self.dispatchEvent(new CustomEvent('start_of_response', {detail: {userInputBuffer: self.userInputBuffer}}));
+
+        let pluginInfo = '';
+        for (let plugin of self.plugins) {
+            try {
+                pluginInfo += await plugin.queryToLLM(self, message);
+            } catch(e) {
+                console.warn('An error occurred when running a plugin', {plugin: plugin, error: e});
+            }
+        }
+
+        let content = self.queryTemplate;
+        content = content.replaceAll('%TIME%', `${new Date(Date.now())}`);
+        content = content.replaceAll('%PLUGIN_INFO%', pluginInfo);
+        content = content.replaceAll('%USER_INPUT%', message);
+
+        self.appendContext(content, 'user');
+        console.log(self.bot.messages);
+        console.log('responding...');
+        let response = await self.respondToContext();
+        console.log({response});
+        console.log('respond end');
+
+        self.dispatchEvent(new CustomEvent('end_of_query', {detail: self.userInputBuffer})); // End Of Query
+
+        // await self.waitUntilEndOfResponse();
+        self.dispatchEvent(new CustomEvent('end_of_response', {detail: self.userInputBuffer})); // End Of Response
+
+        let sleepTime = (self.userInputBuffer.length === 0) ? 1000 : 10;
+        self.timeoutId = setTimeout(() => self.mainLoop(self), sleepTime);
     }
 }

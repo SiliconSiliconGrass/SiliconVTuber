@@ -169,6 +169,7 @@ export default class CozeBot extends AbstractBot {
          * To send recorded history messages to coze bot, and return its response
          * @param messages recorded history messages (Array<Object>)
          */
+
         if (!this.convID) {
             await this.createConv(); // 这是创建会话的方法
         }
