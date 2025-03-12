@@ -3,6 +3,7 @@ import OllamaBot from '../Bot/OllamaBot.js';
 import GlmBot from '../Bot/GlmBot.js';
 import ActionQueue from '../ActionQueue/ActionQueue.vue';
 import { Resource } from '../ResourceManager/ResourceManager.vue';
+import { GetBotFromConfig } from '../Bot/BotUtils.js';
 
 function multipleSplit(inputString, delimiters) {
     let result = [];
@@ -38,8 +39,11 @@ function areBracketsBalanced(str) {
 
 const msgDelta = (self, event) => {
     // 定义收到流式请求中的message delta时的处理过程
-    self.response += event.detail.content;
-    self.buffer += event.detail.content;
+    if (event.detail.content) {
+        console.log(event.detail.content);
+        self.response += event.detail.content;
+        self.buffer += event.detail.content;
+    }
 
     if (!areBracketsBalanced(self.buffer)) return; // 若不匹配，则暂不处理
 
@@ -97,6 +101,7 @@ const msgDelta = (self, event) => {
 const responseDone = (self) => {
     // console.log(self.response);
     // 记录智能体输出的信息
+    console.log(self.response);
     self.bot.messages.push({
         role: "assistant",
         content: self.response,
@@ -149,16 +154,18 @@ export default class Agent extends EventTarget {
      */
     constructor(botConfig, resourceManager, actionQueue, queryTemplate = null) {
         super();
-        let bot;
-        let botType = botConfig.type;
-        if (botType === 'Ollama') {
-            bot = new OllamaBot(botConfig.modelName);
-        } else if (botType === 'Coze') {
-            bot = new CozeBot(botConfig.pat, botConfig.botID, botConfig.userID);
-        } else if (botType === 'GLM') {
-            bot = new GlmBot(botConfig.token, botConfig.modelName, botConfig.systemPrompt);
-        }
-        this.bot = bot;
+        // let bot;
+        // let botType = botConfig.type;
+        // if (botType === 'Ollama') {
+        //     bot = new OllamaBot(botConfig.modelName);
+        // } else if (botType === 'Coze') {
+        //     bot = new CozeBot(botConfig.pat, botConfig.botID, botConfig.userID);
+        // } else if (botType === 'GLM') {
+        //     bot = new GlmBot(botConfig.token, botConfig.modelName, botConfig.systemPrompt);
+        // }
+        // this.bot = bot;
+
+        this.bot = GetBotFromConfig(botConfig);
 
         if (!actionQueue) actionQueue = new ActionQueue(this);
         this.resourceManager = resourceManager;
@@ -177,12 +184,13 @@ export default class Agent extends EventTarget {
         });
 
         if (!queryTemplate) {
-            // queryTemplate = '[时间: %TIME%]\n%PLUGIN_INFO%\n用户的输入: %USER_INPUT%';
-            queryTemplate = '%USER_INPUT%';
+            queryTemplate = '[时间: %TIME%]\n%PLUGIN_INFO%\n用户的输入: %USER_INPUT%';
+            // queryTemplate = '%USER_INPUT%';
         }
         this.queryTemplate = queryTemplate;
 
         this.buffer = '';          // 接收agent消息的buffer // TODO: 可以考虑移至Bot类
+        this.response = '';        // 用于存储一次的回答
         this.userInputBuffer = []; // 用户输入的buffer
         this.timeoutId = null;     // mainLoop timeout id
 

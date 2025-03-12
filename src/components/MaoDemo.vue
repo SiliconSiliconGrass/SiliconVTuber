@@ -56,13 +56,12 @@ import Mao from './Bot/MaoCore.vue';
 import ResourceManager, { Resource } from './ResourceManager/ResourceManager.vue';
 import AudioRecognition from './AudioRecognition.vue';
 import axios from 'axios';
-import MemoryWriter from './MemoryManagement/MemoryWriter.vue';
-import MemoryFilter from './MemoryManagement/MemoryFilter.vue';
 import pixi_l2d_Setup from '@/pixi-l2d/main';
 import SubtitleHandler from './ActionQueue/SubtitleHandler.vue';
 
 import { MinecraftProxy } from '@/plugins/MinecraftPlugin';
 import Agent from './Agent/Agent';
+import LongTermMemory from '@/plugins/LongTermMemory';
 
 export default {
     components: {
@@ -394,7 +393,7 @@ export default {
             // Glm
             botConfig = {
                 type: 'GLM',
-                token: '57883995e7eb4ab88c8763e1adf20aa9.s0MHl8HUr8JLPBKr',
+                token: '57883995e7eb4ab88c8763e1adf20aa9.s0MHl8HUr8JLPBKr', // TODO: token shouldn't be here!
                 modelName: 'glm-4-flash',
                 systemPrompt: this.MISAKA_PROMPT
             };
@@ -410,9 +409,6 @@ export default {
             let resourceManager = new ResourceManager(this.agent, this.$refs.mao_audio_bank, ttsConfig); // resource manager instance
             this.agent.resourceManager = resourceManager;
             this.resourceManager = resourceManager;
-
-            this.memoryWriter = new MemoryWriter(this.PAT, this.agent_BOT_ID, this.USER_ID); // memory writer instance
-            this.memoryFilter = new MemoryFilter(this.PAT, this.agent_BOT_ID, this.USER_ID); // memory fileter instance
 
             this.audioRecognition = new AudioRecognition((text) => { // audio recognition helper
                 if (text === '') return;
@@ -431,6 +427,17 @@ export default {
 
             // // out-dated
             // this.mainLoop(); // start demo main loop
+
+            /* Plugins */
+            let longTermMemory = new LongTermMemory({
+                url: 'http://127.0.0.1:8082',
+                botConfig: {
+                    type: 'GLM',
+                    token: '57883995e7eb4ab88c8763e1adf20aa9.s0MHl8HUr8JLPBKr', // TODO: token shouldn't be here!
+                    modelName: 'glm-4-flash',
+                }
+            });
+            longTermMemory.setup(this.agent);
 
             this.agent.mainLoop(this.agent);
 

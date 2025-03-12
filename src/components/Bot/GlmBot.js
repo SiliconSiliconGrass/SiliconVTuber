@@ -101,7 +101,7 @@ export default class GlmBot extends AbstractBot {
                             let deltaText = data.choices[0].delta.content;
                             if (!deltaText || deltaText == 'undefined') continue;
                             this.response += deltaText;
-                            console.log({deltaText})
+                            // console.log({deltaText})
                             this.dispatchEvent(new CustomEvent('message_delta', {
                                 detail: {content: deltaText}
                             }));
