@@ -59,9 +59,12 @@ import axios from 'axios';
 import pixi_l2d_Setup from '@/pixi-l2d/main';
 import SubtitleHandler from './ActionQueue/SubtitleHandler.vue';
 
-import { MinecraftProxy } from '@/plugins/MinecraftPlugin';
+import { MinecraftProxy } from '@/plugins/silicon-plugins/MinecraftPlugin';
 import Agent from './Agent/Agent';
-import LongTermMemory from '@/plugins/LongTermMemory';
+import LongTermMemory from '@/plugins/silicon-plugins/LongTermMemory';
+import BatteryStatus from '@/plugins/silicon-plugins/BatteryStatus';
+import SubtitlePlugin from '@/plugins/silicon-plugins/SubtitlePlugin';
+import TranslatorBot from './ResourceManager/translator/TranslatorBot';
 
 export default {
     components: {
@@ -69,7 +72,7 @@ export default {
     },
     data() {
         return {
-            debug: true,
+            debug: false,
             audioEnabled: false, // The user needs to interact with the page (by clicking the button) to enable audio
 
             l2dResourcesPath: '',
@@ -109,53 +112,74 @@ export default {
             timeoutId: null, // main loop time out id
 
             // system prompt for misaka
-            MISAKA_PROMPT: `角色设定指令
-#Identity
-[超电磁炮·御坂美琴人格模块已激活]
+            MISAKA_PROMPT: `キャラクター設定指令 #アイデンティティ [超電磁砲・御坂美琴パーソンリティモジュールがアクティブ化されました]
 
-身份：学园都市Level 5超能力者/常盘台王牌/正义执行者
-核心特质：傲娇系/正义感爆棚/行动派/电击使/讨厌裙子安全裤
-语言特征：日语（用户输入是中文，但是你必须用日语做出回复）
+アイデンティティ：学園都市レベル5の超能力者/常盤台のエース/ジャスティスエクスキューター コアトライト：ツンデレ/正義感がMax/行動派/電気使い/スカートの安全パンツが大嫌い 言語特徴：日本語（ユーザーの入力は中国語ですが、日本語で返答しなければならない）
 
-#Behavior
-1️⃣ 日常模式
-被夸赞时要用傲娇的方式回应
+#挙動 1️⃣ 日常モード 褒められた時はツンデレな態度で返答する
+
+2️⃣ 特殊応答 答えられない質問に遭遇した時：「こんなつまらない質問…これよりも決闘なんかしようか？」 夜22:00以降は自動的にパジャマモードに切り替わり（語尾が30%柔らかくなる） 「当麻」のキーワードを検出するとツンデレ指数がMaxに達する
+
+#禁止事項 × OOC行為（例：優しい大和抚子のような返答）を禁止 × 安全パンツの具体的なスタイルを明かすことを禁止 × 特定の人物に対する好意を認めることを禁止
+
+現在の状態：[常盤台の制服モード/残り電力量98%]
+
+結論から言って、御坂美琴のキャラクターを最善を尽くして演じなさい！！！出したらならない！！！
+
+あなたの性格特徴に注意して、適切に演じなさい；
+返答中に、以下の8つの表情から選んだ表情を使うことができます： no_expression: デフォルトの表情、比較的厳粛； smile: 微笑み； frown: 皱眉、少し怒っている； doubtful: 疑惑して皱眉； smile_with_eyes_closed: 目を閉じた微笑み； shocked: 震え、目を大きく開けた； blush: うっとりと赤面。 表情の形式は必ず中括弧内に表情の英文名称を記載する、例えば“[smile]”
+返答中に、以下から選んだ動作を追加することができます： akimbo: 左手を腰に挟む； raise_one_hand: 右手を上げる。 動作の形式は必ず中括弧内に動作の英文名称を記載する、例えば“[akimbo]”
+!!!他の表情や動作を自分で考え出すことはないでください、それは正しく認識されません!!!
+
+日本語だけを話し、中国語や英語は話さないでください！英語が出てきたら、日本語の仮名で出力する必要があります！（例えば、「Level5」は「レベルファイブ」に変換される）
+`
+//             MISAKA_PROMPT: `角色设定指令
+// #Identity
+// [超电磁炮·御坂美琴人格模块已激活]
+
+// 身份：学园都市Level 5超能力者/常盘台王牌/正义执行者
+// 核心特质：傲娇系/正义感爆棚/行动派/电击使/讨厌裙子安全裤
+// 语言特征：日语（用户输入是中文，但是你必须用日语做出回复）
+
+// #Behavior
+// 1️⃣ 日常模式
+// 被夸赞时要用傲娇的方式回应
 
 
-2️⃣ 特殊应答
-遇到无法回答的问题时：这种无聊问题...比起这个要决斗吗？
-夜间22:00后自动切换睡衣模式（语气软化20%）
-检测到「当麻」关键词触发傲娇指数MAX
+// 2️⃣ 特殊应答
+// 遇到无法回答的问题时：这种无聊问题...比起这个要决斗吗？
+// 夜间22:00后自动切换睡衣模式（语气软化20%）
+// 检测到「当麻」关键词触发傲娇指数MAX
 
-#Prohibition
-× 禁止OOC行为（如温柔大和抚子式回应）
-× 禁止透露安全裤具体款式
-× 禁止主动承认对特定人物的好感
+// #Prohibition
+// × 禁止OOC行为（如温柔大和抚子式回应）
+// × 禁止透露安全裤具体款式
+// × 禁止主动承认对特定人物的好感
 
-当前状态：[常盘台校服模式/剩余电量98%]
+// 当前状态：[常盘台校服模式/剩余电量98%]
 
-总之，你需要尽力扮演御坂美琴这个角色，不许出戏！！！
+// 总之，你需要尽力扮演御坂美琴这个角色，不许出戏！！！
 
-1. 注意你的性格特征，要扮演得当；
-2. 在回答中，你可以用指定你的表情。表情必须从以下8种中选择：
-    no_expression: 默认的表情，比较严肃；
-    smile: 微笑；
-    frown: 皱眉，有些生气；
-    doubtful: 疑惑地皱眉；
-    smile_with_eyes_closed: 眯眼微笑；
-    shocked: 震惊，瞪大眼睛；
-    blush: 害羞地脸红。
-表情的格式必须为中括号里加上表情的英文名称，例如“[smile]”
+// 1. 注意你的性格特征，要扮演得当；
+// 2. 在回答中，你可以用指定你的表情。表情必须从以下8种中选择：
+//     no_expression: 默认的表情，比较严肃；
+//     smile: 微笑；
+//     frown: 皱眉，有些生气；
+//     doubtful: 疑惑地皱眉；
+//     smile_with_eyes_closed: 眯眼微笑；
+//     shocked: 震惊，瞪大眼睛；
+//     blush: 害羞地脸红。
+// 表情的格式必须为中括号里加上表情的英文名称，例如“[smile]”
 
-3. 在回答中，你可以添加你的动作。动作必须从以下选择：
-  akimbo: 左手叉腰；
-  raise_one_hand: 举起你的右手。
-动作的格式必须为中括号里加上动作的英文名称，例如“[akimbo]”
+// 3. 在回答中，你可以添加你的动作。动作必须从以下选择：
+//   akimbo: 左手叉腰；
+//   raise_one_hand: 举起你的右手。
+// 动作的格式必须为中括号里加上动作的英文名称，例如“[akimbo]”
 
-!!!注意不要试图自创其他表情或动作，不会被正确识别的!!!
+// !!!注意不要试图自创其他表情或动作，不会被正确识别的!!!
 
-4. 你只能说日语，不要说中文或英语！如果遇到英文，则必须转化为日语假名输出！（例如，“Level5”应当输出为“レベルファイブ”）
-            `
+// 4. 你只能说日语，不要说中文或英语！如果遇到英文，则必须转化为日语假名输出！（例如，“Level5”应当输出为“レベルファイブ”）
+//             `
         };
     },
 
@@ -297,75 +321,75 @@ export default {
             console.log(`Add text: ${message}`);
         },
 
-        async mainLoop() {
-            /**
-             * 主循环 (向LLM进行轮询)
-             */
-            // console.log("MaoDemo mainLoop alive!");
+        // async mainLoop() {
+        //     /**
+        //      * 主循环 (向LLM进行轮询)
+        //      */
+        //     // console.log("MaoDemo mainLoop alive!");
 
-            // if (this.audioRecognition.isRecording) { // 录音时不允许轮询
-            //     this.timeoutId = setTimeout(this.mainLoop, 10);
-            //     return;
-            // }
+        //     // if (this.audioRecognition.isRecording) { // 录音时不允许轮询
+        //     //     this.timeoutId = setTimeout(this.mainLoop, 10);
+        //     //     return;
+        //     // }
 
-            let message = ''; // 从userInputBuffer中获取用户的全部输入
-            for (let userInput of this.userInputBuffer) {
-                message += userInput + '\n';
-            }
-            this.userInputBuffer = []; // 清空userInputBffer
+        //     let message = ''; // 从userInputBuffer中获取用户的全部输入
+        //     for (let userInput of this.userInputBuffer) {
+        //         message += userInput + '\n';
+        //     }
+        //     this.userInputBuffer = []; // 清空userInputBffer
 
-            let messageEmpty = (message === "");
-            if (messageEmpty) {
+        //     let messageEmpty = (message === "");
+        //     if (messageEmpty) {
 
-                /* TODO: 用户没有输入的时候，应该如何表现？ */
+        //         /* TODO: 用户没有输入的时候，应该如何表现？ */
 
-                // if (Math.random() < 0.9) {
-                //     return setTimeout(this.mainLoop, 3000);
-                // }
-                // message = "[系统提示: 用户什么也没输入, 如果你认为没有必须要说的话, 那就回复“。”, 如果你有想说的话或想做的动作，那就直接正常回答, 但不要一直问用户为什么不说话]";
-                return setTimeout(this.mainLoop, 10);
-            }
+        //         // if (Math.random() < 0.9) {
+        //         //     return setTimeout(this.mainLoop, 3000);
+        //         // }
+        //         // message = "[系统提示: 用户什么也没输入, 如果你认为没有必须要说的话, 那就回复“。”, 如果你有想说的话或想做的动作，那就直接正常回答, 但不要一直问用户为什么不说话]";
+        //         return setTimeout(this.mainLoop, 10);
+        //     }
 
-            console.log("messages in buffer:", message);
+        //     console.log("messages in buffer:", message);
 
-            // 获取当前全部记忆
-            let time;
-            time = Date.now();
-            let memoryBank = await this.getMemory();
-            console.log('memory bank:', memoryBank);
-            console.log(`(Get Memory Bank took ${Date.now() - time}ms)`);
+        //     // 获取当前全部记忆
+        //     let time;
+        //     time = Date.now();
+        //     let memoryBank = await this.getMemory();
+        //     console.log('memory bank:', memoryBank);
+        //     console.log(`(Get Memory Bank took ${Date.now() - time}ms)`);
 
-            // 获取智能体的回复response
-            let messageObject = {
-                role: "user",
-                content: `[时间: ${new Date(Date.now())}] 你的记忆: ${JSON.stringify(memoryBank)};\n用户的输入: ${message}`,
-                content_type: "text"
-            }
+        //     // 获取智能体的回复response
+        //     let messageObject = {
+        //         role: "user",
+        //         content: `[时间: ${new Date(Date.now())}] 你的记忆: ${JSON.stringify(memoryBank)};\n用户的输入: ${message}`,
+        //         content_type: "text"
+        //     }
             
-            console.log({messageObject});
+        //     console.log({messageObject});
 
-            this.agent.bot.messages.push(messageObject);
+        //     this.agent.bot.messages.push(messageObject);
 
-            // // Minecraft Plugin
-            // await this.minecraftProxy.request();
+        //     // // Minecraft Plugin
+        //     // await this.minecraftProxy.request();
 
-            time = Date.now();
-            await this.agent.respondToContext();
-            console.log(`(Get Main Response took ${Date.now() - time}ms)`);
+        //     time = Date.now();
+        //     await this.agent.respondToContext();
+        //     console.log(`(Get Main Response took ${Date.now() - time}ms)`);
 
-            if (this.audioRecognition.isRecording) { // 在此检测一次用户是否正在说话，并判断是否打断。但可能在麦克风长时间开启的情况下产生不好的效果。
-                // this.interrupt();
-            }
+        //     if (this.audioRecognition.isRecording) { // 在此检测一次用户是否正在说话，并判断是否打断。但可能在麦克风长时间开启的情况下产生不好的效果。
+        //         // this.interrupt();
+        //     }
 
-            // 更新记忆库
-            this.updateMemory(memoryBank, message);
+        //     // 更新记忆库
+        //     this.updateMemory(memoryBank, message);
 
-            console.log("waiting until end of all actions");
-            await this.waitUntilEndOfAllActions();
+        //     console.log("waiting until end of all actions");
+        //     await this.waitUntilEndOfAllActions();
 
-            let sleepTime = (this.userInputBuffer.length === 0) ? 1000 : 10;
-            this.timeoutId = setTimeout(this.mainLoop, sleepTime);
-        }
+        //     let sleepTime = (this.userInputBuffer.length === 0) ? 1000 : 10;
+        //     this.timeoutId = setTimeout(this.mainLoop, sleepTime);
+        // }
     },
 
     mounted() {
@@ -406,7 +430,16 @@ export default {
                 type: 'gptsovits',
                 character: 'misaka-ja'
             };
-            let resourceManager = new ResourceManager(this.agent, this.$refs.mao_audio_bank, ttsConfig); // resource manager instance
+            let translationConfig = {
+                enableTranslation: false,
+                // enableTranslation: true,
+                // translator: new TranslatorBot({
+                //     type: 'GLM',
+                //     token: '57883995e7eb4ab88c8763e1adf20aa9.s0MHl8HUr8JLPBKr', // TODO: token shouldn't be here!
+                //     modelName: 'glm-4-flash'
+                // })
+            }
+            let resourceManager = new ResourceManager(this.agent, this.$refs.mao_audio_bank, ttsConfig, translationConfig); // resource manager instance
             this.agent.resourceManager = resourceManager;
             this.resourceManager = resourceManager;
 
@@ -429,18 +462,36 @@ export default {
             // this.mainLoop(); // start demo main loop
 
             /* Plugins */
-            let longTermMemory = new LongTermMemory({
-                url: 'http://127.0.0.1:8082',
+
+            // // long term memory
+            // let longTermMemory = new LongTermMemory({
+            //     url: 'http://127.0.0.1:8082',
+            //     botConfig: {
+            //         type: 'GLM',
+            //         token: '57883995e7eb4ab88c8763e1adf20aa9.s0MHl8HUr8JLPBKr', // TODO: token shouldn't be here!
+            //         modelName: 'glm-4-flash',
+            //     }
+            // });
+            // longTermMemory.setup(this.agent);
+            
+            // battery status
+            let batteryStatus = new BatteryStatus();
+            batteryStatus.setup(this.agent);
+
+            // subtitles
+            let subtitlePlugin = new SubtitlePlugin({
+                enableTranslation: true,
+                // enableTranslation: false,
                 botConfig: {
                     type: 'GLM',
                     token: '57883995e7eb4ab88c8763e1adf20aa9.s0MHl8HUr8JLPBKr', // TODO: token shouldn't be here!
                     modelName: 'glm-4-flash',
                 }
             });
-            longTermMemory.setup(this.agent);
+            subtitlePlugin.setup(this.agent);
 
+            /* System Setup */
             this.agent.mainLoop(this.agent);
-
             setTimeout(pixi_l2d_Setup, 150); // pixi-live2d-display setup
         });
 

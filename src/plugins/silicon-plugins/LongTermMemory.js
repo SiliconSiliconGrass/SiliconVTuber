@@ -1,5 +1,5 @@
 import { GetBotFromConfig } from "@/components/Bot/BotUtils";
-import AbstractPlugin from "./AbstractPlugin";
+import AbstractPlugin from "../AbstractPlugin";
 import axios from "axios";
 
 const memoryFilterMessage = `[系统提示]

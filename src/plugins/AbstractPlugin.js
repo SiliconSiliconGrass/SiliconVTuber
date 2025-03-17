@@ -3,18 +3,21 @@ export default class AbstractPlugin {
         // do nothing
     }
 
+    /**
+     * Attach this plugin to an agent (set non-blocking)
+     * @param {Agent} agent parent agent
+     */
     setup(agent) {
-        /**
-         * Attach this plugin to an agent (set non-blocking)
-         */
         throw "Abstract Method Not Overrided! (You need to override this method! )";
     }
 
+    /**
+     * Get extra prompt text for LLM (Blocking)
+     * (returns a string, which will be appended to the end of prompt)
+     * @param {Agent} agent parent agent
+     * @param {String} userInput user's latest input
+     */
     async queryToLLM(agent, userInput) {
-        /**
-         * Get extra prompt text for LLM (Blocking)
-         * (returns a string, which will be appended to the end of prompt)
-         */
         throw "Abstract Method Not Overrided! (You need to override this method! )";
     }
 }

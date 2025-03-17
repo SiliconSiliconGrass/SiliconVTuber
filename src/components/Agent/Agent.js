@@ -37,21 +37,33 @@ function areBracketsBalanced(str) {
     return openBracketCount === closeBracketCount;
 }
 
+const MIN_SENTENCE_LENGTH = 3;
+
 const msgDelta = (self, event) => {
     // 定义收到流式请求中的message delta时的处理过程
     if (event.detail.content) {
-        console.log(event.detail.content);
         self.response += event.detail.content;
         self.buffer += event.detail.content;
     }
 
     if (!areBracketsBalanced(self.buffer)) return; // 若不匹配，则暂不处理
 
-    const seps = "。？！；.?!;";
+    const seps = "。？！；.?!;\n、";
     let splitList = self.buffer.split('[');
 
     if (splitList.length === 1 && multipleSplit(self.buffer, seps).length === 1) {
         return;
+    }
+
+    function addSentence(text) {
+
+        console.log({text});
+
+        let ttsResource = new Resource(self.uuid(), 'TTS', {text: text});
+        let translationResource = new Resource(self.uuid(), 'Translation', {text: text, context: self.response});
+        self.resourceManager.add(ttsResource); // 注册所需TTS audio 资源
+        self.resourceManager.add(translationResource); // 注册所需翻译文本资源
+        self.actionQueue.enqueue({type: "SayAloud", data: text, resources: [ttsResource, translationResource]}); // 将SayAloud动作加入队列
     }
 
     for (let i = 0; i < splitList.length; i++) {
@@ -59,12 +71,14 @@ const msgDelta = (self, event) => {
         if (i == 0) {
             // 第一个chunk需要特殊化处理，因为不包含"]", 直接SayAloud
             let sentences = multipleSplit(chunk, seps);
+            let sentenceBuffer = '';
             for (let sentence of sentences) {
-                if (isEmpty(sentence)) continue;
-                let resource = new Resource(self.uuid(), 'TTS', {text: sentence});
-                self.resourceManager.add(resource); // 注册所需TTS audio 资源
-                self.actionQueue.enqueue({type: "SayAloud", data: sentence, resources: [resource]}); // 将SayAloud动作加入队列
+                sentenceBuffer += sentence;
+                if (sentenceBuffer.length < MIN_SENTENCE_LENGTH) continue;
+                addSentence(sentenceBuffer);
+                sentenceBuffer = '';
             }
+            self.buffer = sentenceBuffer;
         } else {
             // 一般的chunk处理：先按照"]"切分后，再分别处理
             let splitList_ = chunk.split(']');
@@ -83,19 +97,21 @@ const msgDelta = (self, event) => {
                 // 处理"]"后面的text
                 let text = splitList_[1];
                 let sentences = multipleSplit(text, seps);
+                let sentenceBuffer = '';
                 for (let sentence of sentences) {
-                    if (isEmpty(sentence)) continue;
-                    let resource = new Resource(self.uuid(), 'TTS', {text: sentence});
-                    self.resourceManager.add(resource); // 注册所需TTS audio 资源
-                    self.actionQueue.enqueue({type: "SayAloud", data: sentence, resources: [resource]}); // 将SayAloud动作加入队列
+                    sentenceBuffer += sentence;
+                    if (sentenceBuffer.length < MIN_SENTENCE_LENGTH) continue;
+                    addSentence(sentenceBuffer);
+                    sentenceBuffer = '';
                 }
+                self.buffer = sentenceBuffer;
 
             } else {
                 console.warn(`Found unbalanced brackets when parsing message delta! (Current buffer: ${self.buffer})`);
             }
         }
     }
-    self.buffer = '';
+    // self.buffer = '';
 };
 
 const responseDone = (self) => {
@@ -114,14 +130,22 @@ const responseDone = (self) => {
     // 处理方括号[]中的motion/expression信息
     let sentenceSplit = sentence.split('[');
 
+    function addSentence(text) {
+        
+        console.log({text});
+
+        let ttsResource = new Resource(self.uuid(), 'TTS', {text: text});
+        let translationResource = new Resource(self.uuid(), 'Translation', {text: text, context: self.response});
+        self.resourceManager.add(ttsResource); // 注册所需TTS audio 资源
+        self.resourceManager.add(translationResource); // 注册所需翻译文本资源
+        self.actionQueue.enqueue({type: "SayAloud", data: text, resources: [ttsResource, translationResource]}); // 将SayAloud动作加入队列
+    }
+
     for (let split of sentenceSplit) {
         let splitSplit = split.split(']');
         if (splitSplit.length == 1) {
             if (splitSplit[0] !== '') {
-                let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[0]});
-                self.resourceManager.add(resource); // 注册所需TTS audio 资源
-                self.actionQueue.enqueue({type: "SayAloud", data: splitSplit[0], resources: [resource]}); // 将SayAloud动作加入队列
-                // self.actionQueue.enqueue({type: "SayAloud", data: splitSplit[0], resources: []}); // 将SayAloud动作加入队列, 不使用coze生成resource
+                addSentence(splitSplit[0]);
             }
         } else {
             // splitSplit[0]: expression/motion name
@@ -131,10 +155,7 @@ const responseDone = (self) => {
             self.actionQueue.enqueue({type: "Expression/Motion", data: splitSplit[0], resources: []}); // Expression/Motion动作入队
             
             if (splitSplit[1] !== '') {
-                let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[1]});
-                self.resourceManager.add(resource); // 注册所需TTS audio 资源
-                self.actionQueue.enqueue({type: "SayAloud", data: splitSplit[1], resources: [resource]}); // 将SayAloud动作加入队列
-                // self.actionQueue.enqueue({type: "SayAloud", data: splitSplit[1], resources: []}); // 将SayAloud动作加入队列, 不使用coze生成resource
+                addSentence(splitSplit[1]);
             }
         }
     }
@@ -274,10 +295,16 @@ export default class Agent extends EventTarget {
         console.log({response});
         console.log('respond end');
 
-        self.dispatchEvent(new CustomEvent('end_of_query', {detail: self.userInputBuffer})); // End Of Query
+        self.dispatchEvent(new CustomEvent('end_of_query', {detail: {
+            userInputBuffer: self.userInputBuffer,
+            response: response
+        }})); // End Of Query
 
         // await self.waitUntilEndOfResponse();
-        self.dispatchEvent(new CustomEvent('end_of_response', {detail: self.userInputBuffer})); // End Of Response
+        self.dispatchEvent(new CustomEvent('end_of_response', {detail: {
+            userInputBuffer: self.userInputBuffer,
+            response: response
+        }})); // End Of Response
 
         let sleepTime = (self.userInputBuffer.length === 0) ? 1000 : 10;
         self.timeoutId = setTimeout(() => self.mainLoop(self), sleepTime);

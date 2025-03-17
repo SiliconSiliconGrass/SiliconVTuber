@@ -32,7 +32,7 @@ export class Resource {
 }
 
 export default class ResourceManager {
-    constructor(parent, audioBank, ttsConfig) {
+    constructor(parent, audioBank, ttsConfig, translationConfig) {
         this.parent = parent; // gain access to Bot Core
         this.audioBank = audioBank;
 
@@ -68,6 +68,16 @@ export default class ResourceManager {
                 };
             }
             this.ttsHelper = new GptSovits(cfg); // gptsovits
+        }
+
+        if (!translationConfig) return;
+        this.enableTranslation = translationConfig.enableTranslation;
+        if (this.enableTranslation) {
+            this.translator = translationConfig.translator;
+            if (!this.translator) {
+                console.warn("[ResourceManager] To enable translation, you need to assign translationConfig.translator!");
+                this.enableTranslation = false;
+            }
         }
 
         this.ttsHelper.setup(); // 初始化
@@ -117,9 +127,10 @@ export default class ResourceManager {
     async requestFor(resource) {
         resource.requesting = true;
 
-        if (resource.type === 'TTS') {
+        if (resource.type === 'TTS') { // 语音合成
 
-            const TTS_BREAK_TIME = 100; // (ms)
+            // const TTS_BREAK_TIME = 100; // (ms)
+            const TTS_BREAK_TIME = 0; // (ms)
             if (!this.prevTtsBreakTime) this.prevTtsBreakTime = Date.now();
             await delay(TTS_BREAK_TIME - (Date.now() - this.prevTtsBreakTime)); // prevent too frequent tts requests
 
@@ -134,6 +145,10 @@ export default class ResourceManager {
             } catch(e) {
                 console.warn("An error occurred when requesting for a TTS resource.", `TTS text: "${text}"`, e);
                 resource.url = null; // TTS生成失败，直接不再播放这句
+            }
+        } else if (resource.type === 'Translation') { // 字幕翻译
+            if (this.enableTranslation) {
+                resource.data.translation = await this.translator.translate(resource.data.text);
             }
         }
 

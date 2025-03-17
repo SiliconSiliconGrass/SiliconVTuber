@@ -11,10 +11,11 @@ export default class SubtitleHandler {
     }
 
     step(self) {
-        if (this.text.length > 100) {
-            this.element.innerHTML += this.text;
-            this.text = ''
-        } else if (this.text  !== '') {
+        // if (this.text.length > 10000) {
+        //     this.element.innerHTML += this.text;
+        //     this.text = ''
+        // }
+        if (this.text  !== '') {
             this.element.innerHTML += this.text[0];
             this.text = this.text.slice(1);
         }

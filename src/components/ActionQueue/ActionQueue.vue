@@ -60,7 +60,7 @@ export class Action {
 export default class ActionQueue extends EventTarget {
     /**
      * A delegate used to manage and carry out actions
-     * @param parent [Mao] parent chat bot
+     * @param {Agent} parent parent agent
      */
     constructor(parent) {
         super();
@@ -122,21 +122,22 @@ export default class ActionQueue extends EventTarget {
     }
 
     async doAction(action) {
+        this.parent.dispatchEvent(new CustomEvent("action_start", {detail: {action: action}}));
 
         if (action.type === 'SayAloud') {
-            // 添加字幕
-            let subtitle = this.parent.subtitles.main;
-            if (subtitle) {
-                subtitle.add(action.data);
-            }
+            // // 添加字幕
+            // let subtitle = this.parent.subtitles.main;
+            // if (subtitle) {
+            //     subtitle.add(action.data);
+            // }
 
-            // 添加翻译字幕
-            if (this.queue.length >= 2 && this.queue[1].type === 'Translation') {
-                let subtitle = this.parent.subtitles.translation;
-                if (subtitle) {
-                    subtitle.add(this.queue[1].data);
-                }
-            }
+            // // 添加翻译字幕
+            // if (this.queue.length >= 2 && this.queue[1].type === 'Translation') {
+            //     let subtitle = this.parent.subtitles.translation;
+            //     if (subtitle) {
+            //         subtitle.add(this.queue[1].data);
+            //     }
+            // }
             // // (可选) 把下下个动作也判断一下
             // if (this.queue.length >= 3 && this.queue[2].type === 'Translation') {
             //     let subtitle = this.parent.subtitles.translation;
@@ -147,17 +148,17 @@ export default class ActionQueue extends EventTarget {
             // }
 
 
-            // TODO: 将这一部分移动到专门的Translator类中, 以增强可扩展性
-            axios.post('http://127.0.0.1:8083/translate', {
-                from_lang: 'JA',
-                to_lang:   'ZH',
-                text: action.data
-            }).then((response) => {
-                let subtitle = this.parent.subtitles.translation;
-                if (subtitle) {
-                    subtitle.add(response.data.result);
-                }
-            });
+            // // TODO: 将这一部分移动到专门的Translator类中, 以增强可扩展性
+            // axios.post('http://127.0.0.1:8083/translate', {
+            //     from_lang: 'JA',
+            //     to_lang:   'ZH',
+            //     text: action.data
+            // }).then((response) => {
+            //     let subtitle = this.parent.subtitles.translation;
+            //     if (subtitle) {
+            //         subtitle.add(response.data.result);
+            //     }
+            // });
 
             try {
                 await this.parent.resourceManager.playAudio(action.resources[0], false); // 播放音频，播放结束后不会立即删除
