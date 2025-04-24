@@ -46,7 +46,7 @@ export default class ResourceManager {
             this.ttsHelper = new CozeTtsBot(ttsConfig.pat, ttsConfig.botID, 'tts_user_id'); // coze
         } else if (ttsConfig.type === 'gptsovits') {
             let cfg;
-            if (ttsConfig.charater === 'misaka-ja') {
+            if (ttsConfig.character === 'misaka-ja') {
                 cfg = {
                     "refer_wav_path": "misaka-ref2.wav",
                     "prompt_text": "何かありそうね。クロコに連絡しておこうかな。なんだか騒がしいわね。",
@@ -56,7 +56,7 @@ export default class ResourceManager {
                     "speed": 1.0,
                     "text": "",
                 };
-            } else if (ttsConfig.charater === 'misaka-zh') {
+            } else if (ttsConfig.character === 'misaka-zh') {
                 cfg = {
                     "refer_wav_path": "misaka-ref2.wav",
                     "prompt_text": "何かありそうね。クロコに連絡しておこうかな。なんだか騒がしいわね。",
@@ -67,7 +67,9 @@ export default class ResourceManager {
                     "text": "",
                 };
             }
-            this.ttsHelper = new GptSovits(cfg); // gptsovits
+            console.log('RM cfg:', cfg);
+            this.ttsHelper = new GptSovits('http://127.0.0.1:9880', cfg); // gptsovits
+            this.ttsHelper.setup(); // 初始化
         }
 
         if (!translationConfig) return;
@@ -79,8 +81,6 @@ export default class ResourceManager {
                 this.enableTranslation = false;
             }
         }
-
-        this.ttsHelper.setup(); // 初始化
     }
 
     get(id) {

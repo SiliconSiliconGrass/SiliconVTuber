@@ -1,9 +1,7 @@
-import CozeBot from '../Bot/CozeBot.js';
-import OllamaBot from '../Bot/OllamaBot.js';
-import GlmBot from '../Bot/GlmBot.js';
 import ActionQueue from '../ActionQueue/ActionQueue.vue';
 import { Resource } from '../ResourceManager/ResourceManager.vue';
 import { GetBotFromConfig } from '../Bot/BotUtils.js';
+import AbstractAgent from './AbstractAgent';
 
 function multipleSplit(inputString, delimiters) {
     let result = [];
@@ -17,6 +15,9 @@ function multipleSplit(inputString, delimiters) {
         }
     }
 
+    // if (curr !== '') {
+    //     result.push(curr);
+    // }
     if (curr !== '') {
         result.push(curr);
     }
@@ -37,8 +38,6 @@ function areBracketsBalanced(str) {
     return openBracketCount === closeBracketCount;
 }
 
-const MIN_SENTENCE_LENGTH = 3;
-
 const msgDelta = (self, event) => {
     // 定义收到流式请求中的message delta时的处理过程
     if (event.detail.content) {
@@ -46,75 +45,59 @@ const msgDelta = (self, event) => {
         self.buffer += event.detail.content;
     }
 
-    if (!areBracketsBalanced(self.buffer)) return; // 若不匹配，则暂不处理
+    console.log(event.detail.content);
 
-    const seps = "。？！；.?!;\n、";
-    let splitList = self.buffer.split('[');
+    let chunks = self.buffer.split('```');
+    if (chunks.length % 2 == 0) return;
 
-    if (splitList.length === 1 && multipleSplit(self.buffer, seps).length === 1) {
-        return;
-    }
+    const seps = '，。；！？,.:!?';
 
-    function addSentence(text) {
+    for (let i in chunks) {
+        let chunk = chunks[i];
+        // console.log({chunk});
 
-        console.log({text});
-
-        let ttsResource = new Resource(self.uuid(), 'TTS', {text: text});
-        let translationResource = new Resource(self.uuid(), 'Translation', {text: text, context: self.response});
-        self.resourceManager.add(ttsResource); // 注册所需TTS audio 资源
-        self.resourceManager.add(translationResource); // 注册所需翻译文本资源
-        self.actionQueue.enqueue({type: "SayAloud", data: text, resources: [ttsResource, translationResource]}); // 将SayAloud动作加入队列
-    }
-
-    for (let i = 0; i < splitList.length; i++) {
-        let chunk = splitList[i];
-        if (i == 0) {
-            // 第一个chunk需要特殊化处理，因为不包含"]", 直接SayAloud
-            let sentences = multipleSplit(chunk, seps);
-            let sentenceBuffer = '';
-            for (let sentence of sentences) {
-                sentenceBuffer += sentence;
-                if (sentenceBuffer.length < MIN_SENTENCE_LENGTH) continue;
-                addSentence(sentenceBuffer);
-                sentenceBuffer = '';
-            }
-            self.buffer = sentenceBuffer;
+        if (i % 2 == 1) {
+            // LaTeX 代码块
+            let latex = chunk.replace('latex\n', '');
+            self.dispatchEvent(new CustomEvent('latex_update', {detail: {latex: latex}}));
         } else {
-            // 一般的chunk处理：先按照"]"切分后，再分别处理
-            let splitList_ = chunk.split(']');
-            if (splitList_.length === 2) {
+            // 聊天
+            let sentences = multipleSplit(chunk, seps);
+            console.log({sentences});
+            for (let j in sentences) {
+                let sentence = sentences[j];
 
-                // 处理方括号中的tag
-                let tag = splitList_[0];
-                if (tag.startsWith('zh:')) {
-                    // Chinese Translation
-                    self.actionQueue.enqueue({type: "Translation", data: tag.slice(3), resources: []}); // Translation动作入队
-                } else {
-                    // Expression/Motion
-                    self.actionQueue.enqueue({type: "Expression/Motion", data: tag, resources: []}); // Expression/Motion动作入队
+                if (i == chunks.length - 1 && j == sentences.length - 1) {
+                    // 处理可能不完整的句子(还没说完的一句)
+                    if (seps.includes(sentence.slice(-1))) {
+                        self.buffer = '';
+                    } else {
+                        self.buffer = sentence;
+                        return;
+                    }
                 }
 
-                // 处理"]"后面的text
-                let text = splitList_[1];
-                let sentences = multipleSplit(text, seps);
-                let sentenceBuffer = '';
-                for (let sentence of sentences) {
-                    sentenceBuffer += sentence;
-                    if (sentenceBuffer.length < MIN_SENTENCE_LENGTH) continue;
-                    addSentence(sentenceBuffer);
-                    sentenceBuffer = '';
-                }
-                self.buffer = sentenceBuffer;
-
-            } else {
-                console.warn(`Found unbalanced brackets when parsing message delta! (Current buffer: ${self.buffer})`);
+                // 添加朗读的句子
+                if (isEmpty(sentence)) continue;
+                sentence = sentence.replaceAll('$', '美元符号');
+                let ttsResource = new Resource(self.uuid(), 'TTS', {text: sentence});
+                self.resourceManager.add(ttsResource); // 注册所需TTS audio 资源
+                self.actionQueue.enqueue({type: "SayAloud", data: sentence, resources: [ttsResource]}); // 将SayAloud动作加入队列
             }
         }
     }
-    // self.buffer = '';
 };
 
 const responseDone = (self) => {
+
+    if (self.buffer != "") {
+        // 添加朗读的句子
+        let sentence = self.buffer;
+        let ttsResource = new Resource(self.uuid(), 'TTS', {text: sentence});
+        self.resourceManager.add(ttsResource); // 注册所需TTS audio 资源
+        self.actionQueue.enqueue({type: "SayAloud", data: sentence, resources: [ttsResource]}); // 将SayAloud动作加入队列
+    }
+
     // console.log(self.response);
     // 记录智能体输出的信息
     console.log(self.response);
@@ -125,48 +108,12 @@ const responseDone = (self) => {
     });
     // console.log('recorded messgaes:', self.messages);
 
-    let sentence = self.buffer;
-
-    // 处理方括号[]中的motion/expression信息
-    let sentenceSplit = sentence.split('[');
-
-    function addSentence(text) {
-        
-        console.log({text});
-
-        let ttsResource = new Resource(self.uuid(), 'TTS', {text: text});
-        let translationResource = new Resource(self.uuid(), 'Translation', {text: text, context: self.response});
-        self.resourceManager.add(ttsResource); // 注册所需TTS audio 资源
-        self.resourceManager.add(translationResource); // 注册所需翻译文本资源
-        self.actionQueue.enqueue({type: "SayAloud", data: text, resources: [ttsResource, translationResource]}); // 将SayAloud动作加入队列
-    }
-
-    for (let split of sentenceSplit) {
-        let splitSplit = split.split(']');
-        if (splitSplit.length == 1) {
-            if (splitSplit[0] !== '') {
-                addSentence(splitSplit[0]);
-            }
-        } else {
-            // splitSplit[0]: expression/motion name
-            // splitSplit[1]: tts text
-
-            // expression/motion 应该不需要resource
-            self.actionQueue.enqueue({type: "Expression/Motion", data: splitSplit[0], resources: []}); // Expression/Motion动作入队
-            
-            if (splitSplit[1] !== '') {
-                addSentence(splitSplit[1]);
-            }
-        }
-    }
-
     self.actionQueue.enqueue({type: "EndOfResponse", data: {}, resources: []}); // 将EndOfResponse动作加入队列
     // self.response = '';
     self.buffer = '';
 }
 
-// export default class Mao extends CozeBot {
-export default class Agent extends EventTarget {
+export default class Agent extends AbstractAgent {
     /**
      * A common chat bot model, using coze api
      * @param {Object} botConfig configuration for agent brain

@@ -6,6 +6,7 @@ export default class GptSovits extends AbstractTtsHelper{
         super();
 
         if (!url) url = 'http://127.0.0.1:9880';
+        console.log(cfg, !cfg);
         if (!cfg) {
             cfg = {
                 // "refer_wav_path": "Intro-Yui2.mov",
@@ -27,6 +28,8 @@ export default class GptSovits extends AbstractTtsHelper{
             };
         }
         this.url = url;
+
+        console.log(cfg);
         this.cfg = cfg;
     }
 
@@ -60,6 +63,7 @@ export default class GptSovits extends AbstractTtsHelper{
             text = text.replaceAll('IndexError', 'インデックスエラー');
             text = text.replaceAll('indexerror', 'インデックスエラー');
         }
+        text = text.replaceAll('LaTeX', '雷太克斯');
 
         // console.log("GPTSOVITS 2", {text});
 

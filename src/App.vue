@@ -1,15 +1,15 @@
 <template>
   <div class="move-box" id="move-box"></div>
-  <MaoDemo ref="MaoDemo"/>
+  <Demo ref="Demo"/>
 </template>
 
 <script>
-// import CozeBot from './components/CozeBot.vue'
-import MaoDemo from './components/MaoDemo.vue';
+// import Demo from './components/LatexDictation.vue';
+import Demo from './components/MisakaDemo.vue';
 
 export default {
   components: {
-    MaoDemo
+    Demo
   },
 
   data() {
@@ -22,11 +22,11 @@ export default {
 
   mounted() {
     if (this.useElectron) {
-      this.$refs.MaoDemo.l2dResourcesPath = 'http://127.0.0.1:8080/Resources/';
-      this.$refs.MaoDemo.l2dModelDirPath = 'http://127.0.0.1:8080/Resources/model_dir.txt';
+      this.$refs.Demo.l2dResourcesPath = 'http://127.0.0.1:8080/Resources/';
+      this.$refs.Demo.l2dModelDirPath = 'http://127.0.0.1:8080/Resources/model_dir.txt';
     } else {
-      this.$refs.MaoDemo.l2dResourcesPath = '/Resources/';
-      this.$refs.MaoDemo.l2dModelDirPath = '/Resources/model_dir.txt';
+      this.$refs.Demo.l2dResourcesPath = '/Resources/';
+      this.$refs.Demo.l2dModelDirPath = '/Resources/model_dir.txt';
     }
   }
 };

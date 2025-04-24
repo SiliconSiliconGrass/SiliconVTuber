@@ -7,6 +7,11 @@
             <button @click="switchMicrophoneMode">{{ (microphoneOn) ? '闭麦' : '开麦' }}</button>
         </div>
 
+        <div class="latex-area">
+            <div class="latex-source" ref="latex-source"></div>
+            <div class="latex-render" ref="latex-render"></div>
+        </div>
+
         <div class="subtitle-area">
             <!-- 字幕区域 -->
             <span ref="subtitle1" class="subtitle"></span>
@@ -59,12 +64,10 @@ import axios from 'axios';
 import pixi_l2d_Setup from '@/pixi-l2d/main';
 import SubtitleHandler from './ActionQueue/SubtitleHandler.vue';
 
-import { MinecraftProxy } from '@/plugins/silicon-plugins/MinecraftPlugin';
-import Agent from './Agent/Agent';
-import LongTermMemory from '@/plugins/silicon-plugins/LongTermMemory';
+import Agent from './Agent/LatexDictatorAgent';
 import BatteryStatus from '@/plugins/silicon-plugins/BatteryStatus';
 import SubtitlePlugin from '@/plugins/silicon-plugins/SubtitlePlugin';
-import TranslatorBot from './ResourceManager/translator/TranslatorBot';
+import LatexPlugin from '@/plugins/silicon-plugins/LatexPlugin';
 
 export default {
     components: {
@@ -112,27 +115,15 @@ export default {
             timeoutId: null, // main loop time out id
 
             // system prompt for misaka
-            MISAKA_PROMPT: `キャラクター設定指令 #アイデンティティ [超電磁砲・御坂美琴パーソンリティモジュールがアクティブ化されました]
-
-アイデンティティ：学園都市レベル5の超能力者/常盤台のエース/ジャスティスエクスキューター コアトライト：ツンデレ/正義感がMax/行動派/電気使い/スカートの安全パンツが大嫌い 言語特徴：日本語（ユーザーの入力は中国語ですが、日本語で返答しなければならない）
-
-#挙動 1️⃣ 日常モード 褒められた時はツンデレな態度で返答する
-
-2️⃣ 特殊応答 答えられない質問に遭遇した時：「こんなつまらない質問…これよりも決闘なんかしようか？」 夜22:00以降は自動的にパジャマモードに切り替わり（語尾が30%柔らかくなる） 「当麻」のキーワードを検出するとツンデレ指数がMaxに達する
-
-#禁止事項 × OOC行為（例：優しい大和抚子のような返答）を禁止 × 安全パンツの具体的なスタイルを明かすことを禁止 × 特定の人物に対する好意を認めることを禁止
-
-現在の状態：[常盤台の制服モード/残り電力量98%]
-
-結論から言って、御坂美琴のキャラクターを最善を尽くして演じなさい！！！出したらならない！！！
-
-あなたの性格特徴に注意して、適切に演じなさい；
-返答中に、以下の8つの表情から選んだ表情を使うことができます： no_expression: デフォルトの表情、比較的厳粛； smile: 微笑み； frown: 皱眉、少し怒っている； doubtful: 疑惑して皱眉； smile_with_eyes_closed: 目を閉じた微笑み； shocked: 震え、目を大きく開けた； blush: うっとりと赤面。 表情の形式は必ず中括弧内に表情の英文名称を記載する、例えば“[smile]”
-返答中に、以下から選んだ動作を追加することができます： akimbo: 左手を腰に挟む； raise_one_hand: 右手を上げる。 動作の形式は必ず中括弧内に動作の英文名称を記載する、例えば“[akimbo]”
-!!!他の表情や動作を自分で考え出すことはないでください、それは正しく認識されません!!!
-
-日本語だけを話し、中国語や英語は話さないでください！英語が出てきたら、日本語の仮名で出力する必要があります！（例えば、「Level5」は「レベルファイブ」に変換される）
-`
+            MISAKA_PROMPT: `
+                你是御坂美琴，现在在充当LaTeX转写工具。我将会用语音输入一段数学证明的片段，你要将其转化为LaTeX源代码，并输出出来。注意语音输入可能有偏差，所以你需要意会一下。
+                我也可能跟你聊天，你以御坂美琴的身份正常回应即可。
+                将你所转换得到的LaTeX源代码放在\`\`\`latex\`\`\`标签中。标签之外的内容将被认为是你的聊天内容。
+                注意一个公式只输出一次就够了，不要重复输出多次！
+                写完LaTeX之后，可以说一句话，跟我稍微互动一下下。
+                另外，你具备御坂美琴的外观，你可以在用户闲聊的时候保持御坂美琴人设，但不要影响转写LaTeX的工作。
+            `
+            // MISAKA_PROMPT: `陪用户聊天。用中文回复。`
 //             MISAKA_PROMPT: `角色设定指令
 // #Identity
 // [超电磁炮·御坂美琴人格模块已激活]
@@ -428,7 +419,7 @@ export default {
 
             let ttsConfig = {
                 type: 'gptsovits',
-                character: 'misaka-ja'
+                character: 'misaka-zh'
             };
             let translationConfig = {
                 enableTranslation: false,
@@ -450,7 +441,8 @@ export default {
             this.audioRecognition.launch();
 
             this.agent.subtitles.main = new SubtitleHandler(this.$refs.subtitle1); // subtitle DOM element
-            this.agent.subtitles.translation = new SubtitleHandler(this.$refs.subtitle2); // subtitle DOM element
+            // this.agent.subtitles.translation = new SubtitleHandler(this.$refs.subtitle2); // subtitle DOM element
+            this.agent.subtitles.translation = null;
 
             // // Minecraft Plugin
             // this.minecraftProxy = new MinecraftProxy(this.agent);
@@ -477,6 +469,10 @@ export default {
             // battery status
             let batteryStatus = new BatteryStatus();
             batteryStatus.setup(this.agent);
+
+            // latex plugin
+            let latexPlugin = new LatexPlugin(this.$refs['latex-source'], this.$refs['latex-render']);
+            latexPlugin.setup(this.agent);
 
             // subtitles
             let subtitlePlugin = new SubtitlePlugin({
@@ -623,6 +619,25 @@ export default {
     background: rgb(238, 116, 179);
     border-radius: 10px;
     color: white;
+}
+
+.latex-area {
+    font-size: 2em;
+    position: relative;
+    width: 100%;
+    height: 20vh;
+    /* border: 1px solid black; */
+    /* background-color: yellow; */
+    display: grid;
+    grid-template-columns: 50% 50%;
+}
+
+.latex-source {
+    user-select: all;
+}
+
+.katex-html {
+    display: none;
 }
 
 </style>

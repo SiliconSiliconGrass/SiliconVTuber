@@ -15,5 +15,11 @@
       "dom.iterable",
       "scripthost"
     ]
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test",
+    "ai-vtuber-support"
+  ]
 }
