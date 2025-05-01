@@ -1,5 +1,6 @@
 import CozeBot from '@/components/Bot/CozeBot.vue';
 import axios from 'axios';
+import AbstractPlugin from '../AbstractPlugin';
 
 const PROMPT = `
 你现在正在玩儿Minecraft
@@ -121,54 +122,16 @@ Your output: !collectBlocks("diamond_ore",100)
 
 const URL = "http://127.0.0.1:11452/handleMessage";
 
-function copy(messages) {
-    let c = [];
-    for (let message of messages) {
-        c.push(message);
-    }
-    return c;
-}
-
-export class MinecraftProxy extends CozeBot {
-    constructor(bot) {
-        super(bot.pat, bot.botID, bot.userID);
-        this.parent = bot;
-        this.createConv();
+export class MinecraftProxy extends AbstractPlugin {
+    constructor() {
+        super();
     }
 
-    async request() {
-        let messages = copy(this.parent.messages);
-        messages.push({
-            role: 'user',
-            content: PROMPT,
-            content_type: 'text'
-        });
-    
-        let response = await this.respondToContext(messages);
+    setup(agent) {
+        this.parent = agent;
+    }
 
-        if (!response) {
-            console.warn("Minecraft Request Got Unexpected Response!");
-            return;
-        }
-
-        response = response.replaceAll(' ', '');
-        console.log("Minecraft Plugin Response:", response);
-    
-        axios.post(URL, {message: response});
+    async queryToLLM(agent, userInput) {
+        return PROMPT;
     }
 }
-
-// export async function request(bot) {
-//     let messages = copy(bot.messages);
-//     messages.push({
-//         role: 'user',
-//         content: PROMPT,
-//         content_type: 'text'
-//     });
-
-//     let response = await bot.respondToContext(messages);
-//     response = response.replaceAll(' ', '');
-//     console.log("Minecraft Plugin Response:", response);
-
-//     axios.post(URL, {message: response});
-// }

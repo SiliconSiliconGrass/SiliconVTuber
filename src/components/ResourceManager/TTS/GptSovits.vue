@@ -113,6 +113,7 @@ export default class GptSovits extends AbstractTtsHelper{
 
             // 创建一个Blob对象，从ReadableStream中读取数据
             const blob = await new Response(stream).blob();
+            if (blob.size === 0) return;
             // 创建一个指向Blob的URL
             const audioUrl = URL.createObjectURL(blob);
             return audioUrl;

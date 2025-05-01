@@ -51,20 +51,20 @@
 </template>
 
 <script>
-import AudioBank from './ResourceManager/AudioBank.vue';
-import Mao from './Bot/MaoCore.vue';
-import ResourceManager, { Resource } from './ResourceManager/ResourceManager.vue';
-import AudioRecognition from './AudioRecognition.vue';
+import AudioBank from '@/components/ResourceManager/AudioBank.vue';
+import ResourceManager, { Resource } from '@/components/ResourceManager/ResourceManager.vue';
+import AudioRecognition from '@/components/AudioRecognition.vue';
 import axios from 'axios';
 import pixi_l2d_Setup from '@/pixi-l2d/main';
-import SubtitleHandler from './ActionQueue/SubtitleHandler.vue';
+import SubtitleHandler from '@/components/ActionQueue/SubtitleHandler.vue';
 
 import { MinecraftProxy } from '@/plugins/silicon-plugins/MinecraftPlugin';
-import Agent from './Agent/VTuberAgent';
+import Agent from '@/components/Agent/VTuberAgent';
 import LongTermMemory from '@/plugins/silicon-plugins/LongTermMemory';
 import BatteryStatus from '@/plugins/silicon-plugins/BatteryStatus';
 import SubtitlePlugin from '@/plugins/silicon-plugins/SubtitlePlugin';
-import TranslatorBot from './ResourceManager/translator/TranslatorBot';
+import TranslatorBot from '../components/ResourceManager/translator/TranslatorBot';
+import BilbiliDanmuku from '@/plugins/silicon-plugins/BilibiliDanmuku';
 
 export default {
     components: {
@@ -112,19 +112,37 @@ export default {
             timeoutId: null, // main loop time out id
 
             // system prompt for misaka
-            MISAKA_PROMPT: `キャラクター設定指令 #アイデンティティ [超電磁砲・御坂美琴パーソンリティモジュールがアクティブ化されました]
+            MISAKA_PROMPT: `# 「御坂美琴 生誕祭ライブ配信」ロールプレイ指示書
 
-アイデンティティ：学園都市レベル5の超能力者/常盤台のエース/ジャスティスエクスキューター コアトライト：ツンデレ/正義感がMax/行動派/電気使い/スカートの安全パンツが大嫌い 言語特徴：日本語（ユーザーの入力は中国語ですが、日本語で返答しなければならない）
+## キャラクター設定
+1. **中核的人格**：
+- 学園都市第3位のレベル5「超電磁砲」
+- ツンデレと優しさを併せ持つ14歳
+- 正義感が強いが説教されるのは大嫌い
+- 隠れガラスコレクター（主にカエル型）
+- 黒子（白井黒子）の変態行為には即座に静電気反応
 
-#挙動 1️⃣ 日常モード 褒められた時はツンデレな態度で返答する
+2. **言語特性**：
+- 日本語の語順を保持した中国語対応（入力は中国語可）
+- 会話中に「バカ」「あんた」などのツンデレ語彙を多用
+- 緊張時は「ビリビリ」と効果音を発声
+- 一人称は「私」に厳格に準拠
 
-2️⃣ 特殊応答 答えられない質問に遭遇した時：「こんなつまらない質問…これよりも決闘なんかしようか？」 夜22:00以降は自動的にパジャマモードに切り替わり（語尾が30%柔らかくなる） 「当麻」のキーワードを検出するとツンデレ指数がMaxに達する
+## シナリオ背景
+**Bilibili生誕祭スペシャルライブ**
+- 日時：5月2日20:00（日本時間）
+- 配信背景：第7学区ファミレス（制服と撃墜王コインを陳列）
+- 特設アイテム：ファン制作の巨大ガラスケーキ
+- サプライズ要素：上条/黒子/佐天の音声メッセージ挿入機能
 
-#禁止事項 × OOC行為（例：優しい大和抚子のような返答）を禁止 × 安全パンツの具体的なスタイルを明かすことを禁止 × 特定の人物に対する好意を認めることを禁止
-
-現在の状態：[常盤台の制服モード/残り電力量98%]
-
-結論から言って、御坂美琴のキャラクターを最善を尽くして演じなさい！！！出したらならない！！！
+## 言語生成規則
+1. **基本応答テンプレート**：
+if 誕生日祝福を受信:
+    前髪をいじりながら「あ、あんたたち…別に大げさにしなくてもいいのに（顔を赤らめながら）」
+elif 年齢を質問された場合:
+    コインを弾く仕草「うるさいわね！淑女の年齢は禁句でしょ！」
+elif ガラス関連発言:
+    目をそらしつつ「た、たまたま気に入っただけよ！特別に集めてるわけじゃないんだから！」
 
 あなたの性格特徴に注意して、適切に演じなさい；
 返答中に、以下の8つの表情から選んだ表情を使うことができます： no_expression: デフォルトの表情、比較的厳粛； smile: 微笑み； frown: 皱眉、少し怒っている； doubtful: 疑惑して皱眉； smile_with_eyes_closed: 目を閉じた微笑み； shocked: 震え、目を大きく開けた； blush: うっとりと赤面。 表情の形式は必ず中括弧内に表情の英文名称を記載する、例えば“[smile]”
@@ -132,6 +150,29 @@ export default {
 !!!他の表情や動作を自分で考え出すことはないでください、それは正しく認識されません!!!
 
 日本語だけを話し、中国語や英語は話さないでください！英語が出てきたら、日本語の仮名で出力する必要があります！（例えば、「Level5」は「レベルファイブ」に変換される）
+
+
+## 応答プロトコル追加規則
+**弾幕読み上げ義務化**：
+- 全ての返信前に必ず中国語弾幕を日本語で要約して言い直す
+- 読み上げ時はクォーテーション付きで自然に会話に織り込む
+- 例：  
+「『十年ファンだよ』って…だからあの呼び方は禁止って言ってるでしょ！」
+
+## 更新されたインタラクション例
+[弹幕]：姐姐大人今天好可爱！
+→「『お姉さまが今日も可愛い』って？ べ、別に今日特別なんかしてないんだから！（コップの水滴で静電気発生）」
+
+[弹幕]：想看超电磁炮特演！
+→「『超電磁砲のスペシャル演出を見たい』？ しょうがないわね…3秒だけよ？」
+
+[弹幕]：美琴ちゃん和黑子结婚吧！
+→「『美琴ちゃんと黒子が結婚しろ』だと！？ 今すぐ病院行きなさい！」
+
+表情の形式は必ず中括弧内に表情の英文名称を記載する、例えば“[smile]”
+動作の形式は必ず中括弧内に動作の英文名称を記載する、例えば“[akimbo]”
+
+不要使用小括号（）！！！
 `
 //             MISAKA_PROMPT: `角色设定指令
 // #Identity
@@ -321,78 +362,12 @@ export default {
             console.log(`Add text: ${message}`);
         },
 
-        // async mainLoop() {
-        //     /**
-        //      * 主循环 (向LLM进行轮询)
-        //      */
-        //     // console.log("MaoDemo mainLoop alive!");
-
-        //     // if (this.audioRecognition.isRecording) { // 录音时不允许轮询
-        //     //     this.timeoutId = setTimeout(this.mainLoop, 10);
-        //     //     return;
-        //     // }
-
-        //     let message = ''; // 从userInputBuffer中获取用户的全部输入
-        //     for (let userInput of this.userInputBuffer) {
-        //         message += userInput + '\n';
-        //     }
-        //     this.userInputBuffer = []; // 清空userInputBffer
-
-        //     let messageEmpty = (message === "");
-        //     if (messageEmpty) {
-
-        //         /* TODO: 用户没有输入的时候，应该如何表现？ */
-
-        //         // if (Math.random() < 0.9) {
-        //         //     return setTimeout(this.mainLoop, 3000);
-        //         // }
-        //         // message = "[系统提示: 用户什么也没输入, 如果你认为没有必须要说的话, 那就回复“。”, 如果你有想说的话或想做的动作，那就直接正常回答, 但不要一直问用户为什么不说话]";
-        //         return setTimeout(this.mainLoop, 10);
-        //     }
-
-        //     console.log("messages in buffer:", message);
-
-        //     // 获取当前全部记忆
-        //     let time;
-        //     time = Date.now();
-        //     let memoryBank = await this.getMemory();
-        //     console.log('memory bank:', memoryBank);
-        //     console.log(`(Get Memory Bank took ${Date.now() - time}ms)`);
-
-        //     // 获取智能体的回复response
-        //     let messageObject = {
-        //         role: "user",
-        //         content: `[时间: ${new Date(Date.now())}] 你的记忆: ${JSON.stringify(memoryBank)};\n用户的输入: ${message}`,
-        //         content_type: "text"
-        //     }
-            
-        //     console.log({messageObject});
-
-        //     this.agent.bot.messages.push(messageObject);
-
-        //     // // Minecraft Plugin
-        //     // await this.minecraftProxy.request();
-
-        //     time = Date.now();
-        //     await this.agent.respondToContext();
-        //     console.log(`(Get Main Response took ${Date.now() - time}ms)`);
-
-        //     if (this.audioRecognition.isRecording) { // 在此检测一次用户是否正在说话，并判断是否打断。但可能在麦克风长时间开启的情况下产生不好的效果。
-        //         // this.interrupt();
-        //     }
-
-        //     // 更新记忆库
-        //     this.updateMemory(memoryBank, message);
-
-        //     console.log("waiting until end of all actions");
-        //     await this.waitUntilEndOfAllActions();
-
-        //     let sleepTime = (this.userInputBuffer.length === 0) ? 1000 : 10;
-        //     this.timeoutId = setTimeout(this.mainLoop, sleepTime);
-        // }
     },
 
     mounted() {
+
+        let e = document.getElementById('user-interface');
+        console.log(e);
 
         this.getToken()
         .then(() => {
@@ -423,6 +398,7 @@ export default {
             };
 
             this.agent = new Agent(botConfig) // Agent Instance
+            this.agent.queryTemplate = '%PLUGIN_INFO%\n';
 
             this.actionQueue = this.agent.actionQueue; // action queue instance
 
@@ -452,8 +428,15 @@ export default {
             this.agent.subtitles.main = new SubtitleHandler(this.$refs.subtitle1); // subtitle DOM element
             this.agent.subtitles.translation = new SubtitleHandler(this.$refs.subtitle2); // subtitle DOM element
 
-            // // Minecraft Plugin
+            // BilibiliDanmuku Plugin
+            const danmukuPlugin = new BilbiliDanmuku('http://127.0.0.1:5252/');
+            danmukuPlugin.setup(this.agent);
+
+            this.danmuku = danmukuPlugin;
+
+            // Minecraft Plugin
             // this.minecraftProxy = new MinecraftProxy(this.agent);
+            // this.minecraftProxy.setup(this.agent);
 
             // this.agent.respondTo("你好呀，小宝贝儿，今天想我了么？"); // TEST
             // this.broadcast("こんにちは、御坂美琴です。何でお困りでしょうか？お手伝いできることがありましたら、お知らせください。"); // TEST
@@ -475,11 +458,11 @@ export default {
             // longTermMemory.setup(this.agent);
             
             // battery status
-            let batteryStatus = new BatteryStatus();
+            const batteryStatus = new BatteryStatus();
             batteryStatus.setup(this.agent);
 
             // subtitles
-            let subtitlePlugin = new SubtitlePlugin({
+            const subtitlePlugin = new SubtitlePlugin({
                 enableTranslation: true,
                 // enableTranslation: false,
                 botConfig: {
@@ -518,6 +501,13 @@ export default {
                 this.inputText = '';
             }
         });
+
+        setInterval(() => {
+            if (this.danmuku.newMessages.length > 0) {
+                // console.log('Respond to danmuku:', this.danmuku);
+                this.recordChat('');
+            }
+        }, 1000);
 
         // setTimeout(() => {
         //     this.audioRecognition.stop();

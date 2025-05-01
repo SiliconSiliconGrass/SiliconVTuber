@@ -25,3 +25,6 @@ pnpm-debug.log*
 out/
 #Electron-builder output
 /dist_electron
+ai-vtuber-support/whisper-server/temp_files/
+
+__pycache__/

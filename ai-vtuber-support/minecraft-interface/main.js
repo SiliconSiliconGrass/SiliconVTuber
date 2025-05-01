@@ -6,6 +6,10 @@ import { plugin as pvp } from 'mineflayer-pvp';
 import { plugin as collectblock } from 'mineflayer-collectblock';
 import { plugin as autoEat } from 'mineflayer-auto-eat';
 import plugin from 'mineflayer-armor-manager';
+
+import { goToPlayer } from './library/skills.js';
+import { initModes } from './modes.js';
+
 const armorManager = plugin;
 
 // const mineflayer = require('mineflayer');
@@ -18,12 +22,13 @@ const armorManager = plugin;
 // import { plugin as collectblock } from 'mineflayer-collectblock';
 // import { plugin as autoEat } from 'mineflayer-auto-eat';
 
+
 function initBot(username) {
     let bot = createBot({
         username: username,
 
         host: 'localhost',
-        port: 25565,
+        port: 54310,
         auth: 'offline',
 
         version: '1.19.2',
@@ -43,8 +48,13 @@ function initBot(username) {
 
 function main() {
     let bot = initBot("Misaka");
+    initModes(bot);
 
-    console.log(bot.pathfinder);
+    // console.log(bot.pathfinder);
+    console.log('start to go to player');
+    goToPlayer(bot, "IndexError", 3).then(() => {
+        console.log('arrived at player');
+    });
 }
 
 main();
