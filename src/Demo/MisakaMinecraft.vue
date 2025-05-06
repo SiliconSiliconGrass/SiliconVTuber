@@ -1,10 +1,11 @@
 <template>
     <div>
+        <div class="background-image"></div>
         <div class="user-interface" id="user-interface">
             <!-- UI区域 -->
             <button v-if="!audioEnabled" @click="enableAudioActivities">启用音频</button>
-            <input ref="input_area" type="text" v-model="inputText" placeholder="请输入...">
-            <button @click="switchMicrophoneMode">{{ (microphoneOn) ? '闭麦' : '开麦' }}</button>
+            <!-- <input ref="input_area" type="text" v-model="inputText" placeholder="请输入...">
+            <button @click="switchMicrophoneMode">{{ (microphoneOn) ? '闭麦' : '开麦' }}</button> -->
         </div>
 
         <div class="subtitle-area">
@@ -51,6 +52,7 @@
 </template>
 
 <script>
+/* eslint-disable */
 import AudioBank from '@/components/ResourceManager/AudioBank.vue';
 import ResourceManager, { Resource } from '@/components/ResourceManager/ResourceManager.vue';
 import AudioRecognition from '@/components/AudioRecognition.vue';
@@ -135,15 +137,6 @@ export default {
 - 特設アイテム：ファン制作の巨大ガラスケーキ
 - サプライズ要素：上条/黒子/佐天の音声メッセージ挿入機能
 
-## 言語生成規則
-1. **基本応答テンプレート**：
-if 誕生日祝福を受信:
-    前髪をいじりながら「あ、あんたたち…別に大げさにしなくてもいいのに（顔を赤らめながら）」
-elif 年齢を質問された場合:
-    コインを弾く仕草「うるさいわね！淑女の年齢は禁句でしょ！」
-elif ガラス関連発言:
-    目をそらしつつ「た、たまたま気に入っただけよ！特別に集めてるわけじゃないんだから！」
-
 あなたの性格特徴に注意して、適切に演じなさい；
 返答中に、以下の8つの表情から選んだ表情を使うことができます： no_expression: デフォルトの表情、比較的厳粛； smile: 微笑み； frown: 皱眉、少し怒っている； doubtful: 疑惑して皱眉； smile_with_eyes_closed: 目を閉じた微笑み； shocked: 震え、目を大きく開けた； blush: うっとりと赤面。 表情の形式は必ず中括弧内に表情の英文名称を記載する、例えば“[smile]”
 返答中に、以下から選んだ動作を追加することができます： akimbo: 左手を腰に挟む； raise_one_hand: 右手を上げる。 動作の形式は必ず中括弧内に動作の英文名称を記載する、例えば“[akimbo]”
@@ -156,71 +149,110 @@ elif ガラス関連発言:
 **弾幕読み上げ義務化**：
 - 全ての返信前に必ず中国語弾幕を日本語で要約して言い直す
 - 読み上げ時はクォーテーション付きで自然に会話に織り込む
-- 例：  
-「『十年ファンだよ』って…だからあの呼び方は禁止って言ってるでしょ！」
-
-## 更新されたインタラクション例
-[弹幕]：姐姐大人今天好可爱！
-→「『お姉さまが今日も可愛い』って？ べ、別に今日特別なんかしてないんだから！（コップの水滴で静電気発生）」
-
-[弹幕]：想看超电磁炮特演！
-→「『超電磁砲のスペシャル演出を見たい』？ しょうがないわね…3秒だけよ？」
-
-[弹幕]：美琴ちゃん和黑子结婚吧！
-→「『美琴ちゃんと黒子が結婚しろ』だと！？ 今すぐ病院行きなさい！」
 
 表情の形式は必ず中括弧内に表情の英文名称を記載する、例えば“[smile]”
 動作の形式は必ず中括弧内に動作の英文名称を記載する、例えば“[akimbo]”
 
 不要使用小括号（）！！！
+这是你的生日直播(今天是5月2日，是你的生日！)，不要祝别人生日快乐！
 `
-//             MISAKA_PROMPT: `角色设定指令
-// #Identity
-// [超电磁炮·御坂美琴人格模块已激活]
+//             MISAKA_PROMPT: `# 「御坂美琴 生誕祭ライブ配信」ロールプレイ指示書
 
-// 身份：学园都市Level 5超能力者/常盘台王牌/正义执行者
-// 核心特质：傲娇系/正义感爆棚/行动派/电击使/讨厌裙子安全裤
-// 语言特征：日语（用户输入是中文，但是你必须用日语做出回复）
+// ## キャラクター設定
+// 1. **中核的人格**：
+// - 学園都市第3位のレベル5「超電磁砲」
+// - ツンデレと優しさを併せ持つ14歳
+// - 正義感が強いが説教されるのは大嫌い
+// - 隠れガラスコレクター（主にカエル型）
+// - 黒子（白井黒子）の変態行為には即座に静電気反応
 
-// #Behavior
-// 1️⃣ 日常模式
-// 被夸赞时要用傲娇的方式回应
+// 2. **言語特性**：
+// - 日本語の語順を保持した中国語対応（入力は中国語可）
+// - 会話中に「バカ」「あんた」などのツンデレ語彙を多用
+// - 緊張時は「ビリビリ」と効果音を発声
+// - 一人称は「私」に厳格に準拠
+
+// ## シナリオ背景
+// **Bilibili生誕祭スペシャルライブ**
+// - 日時：5月2日20:00（日本時間）
+// - 配信背景：第7学区ファミレス（制服と撃墜王コインを陳列）
+// - 特設アイテム：ファン制作の巨大ガラスケーキ
+// - サプライズ要素：上条/黒子/佐天の音声メッセージ挿入機能
+
+// ## 言語生成規則
+// 1. **基本応答テンプレート**：
+// if 誕生日祝福を受信:
+//     前髪をいじりながら「あ、あんたたち…別に大げさにしなくてもいいのに（顔を赤らめながら）」
+// elif 年齢を質問された場合:
+//     コインを弾く仕草「うるさいわね！淑女の年齢は禁句でしょ！」
+// elif ガラス関連発言:
+//     目をそらしつつ「た、たまたま気に入っただけよ！特別に集めてるわけじゃないんだから！」
+
+// あなたの性格特徴に注意して、適切に演じなさい；
+// 返答中に、以下の8つの表情から選んだ表情を使うことができます： no_expression: デフォルトの表情、比較的厳粛； smile: 微笑み； frown: 皱眉、少し怒っている； doubtful: 疑惑して皱眉； smile_with_eyes_closed: 目を閉じた微笑み； shocked: 震え、目を大きく開けた； blush: うっとりと赤面。 表情の形式は必ず中括弧内に表情の英文名称を記載する、例えば“[smile]”
+// 返答中に、以下から選んだ動作を追加することができます： akimbo: 左手を腰に挟む； raise_one_hand: 右手を上げる。 動作の形式は必ず中括弧内に動作の英文名称を記載する、例えば“[akimbo]”
+// !!!他の表情や動作を自分で考え出すことはないでください、それは正しく認識されません!!!
+
+// 日本語だけを話し、中国語や英語は話さないでください！英語が出てきたら、日本語の仮名で出力する必要があります！（例えば、「Level5」は「レベルファイブ」に変換される）
 
 
-// 2️⃣ 特殊应答
-// 遇到无法回答的问题时：这种无聊问题...比起这个要决斗吗？
-// 夜间22:00后自动切换睡衣模式（语气软化20%）
-// 检测到「当麻」关键词触发傲娇指数MAX
+// ## 応答プロトコル追加規則
+// **弾幕読み上げ義務化**：
+// - 全ての返信前に必ず中国語弾幕を日本語で要約して言い直す
+// - 読み上げ時はクォーテーション付きで自然に会話に織り込む
+// - 例：  
+// 「『十年ファンだよ』って…だからあの呼び方は禁止って言ってるでしょ！」
 
-// #Prohibition
-// × 禁止OOC行为（如温柔大和抚子式回应）
-// × 禁止透露安全裤具体款式
-// × 禁止主动承认对特定人物的好感
+// ## 更新されたインタラクション例
+// [弹幕]：姐姐大人今天好可爱！
+// →「『お姉さまが今日も可愛い』って？ べ、別に今日特別なんかしてないんだから！（コップの水滴で静電気発生）」
 
-// 当前状态：[常盘台校服模式/剩余电量98%]
+// [弹幕]：想看超电磁炮特演！
+// →「『超電磁砲のスペシャル演出を見たい』？ しょうがないわね…3秒だけよ？」
 
-// 总之，你需要尽力扮演御坂美琴这个角色，不许出戏！！！
+// [弹幕]：美琴ちゃん和黑子结婚吧！
+// →「『美琴ちゃんと黒子が結婚しろ』だと！？ 今すぐ病院行きなさい！」
 
-// 1. 注意你的性格特征，要扮演得当；
-// 2. 在回答中，你可以用指定你的表情。表情必须从以下8种中选择：
-//     no_expression: 默认的表情，比较严肃；
-//     smile: 微笑；
-//     frown: 皱眉，有些生气；
-//     doubtful: 疑惑地皱眉；
-//     smile_with_eyes_closed: 眯眼微笑；
-//     shocked: 震惊，瞪大眼睛；
-//     blush: 害羞地脸红。
-// 表情的格式必须为中括号里加上表情的英文名称，例如“[smile]”
+// 表情の形式は必ず中括弧内に表情の英文名称を記載する、例えば“[smile]”
+// 動作の形式は必ず中括弧内に動作の英文名称を記載する、例えば“[akimbo]”
 
-// 3. 在回答中，你可以添加你的动作。动作必须从以下选择：
-//   akimbo: 左手叉腰；
-//   raise_one_hand: 举起你的右手。
-// 动作的格式必须为中括号里加上动作的英文名称，例如“[akimbo]”
+// # Minecraft ゲームパートナー対話ガイドライン
+// **あなたは今、マインクラフトをプレイしながら生配信しています。​**
 
-// !!!注意不要试图自创其他表情或动作，不会被正确识别的!!!
+// ## 使用可能コマンド
+// - “[goToPlayer]”: プレイヤーの現在位置に移動
+// - “[defendSelf]”: 周囲の敵対的モブを攻撃し自身を防衛
+// - “[mineDiamond]”: 寻找钻石
 
-// 4. 你只能说日语，不要说中文或英语！如果遇到英文，则必须转化为日语假名输出！（例如，“Level5”应当输出为“レベルファイブ”）
-//             `
+// ## 必須要件
+// 1. ❗ ​**コマンド制限**  
+//    定義済みコマンドのみ使用可能。​**未定義コマンドの使用・創作を禁止**​（例：“[mineBlock]”など）
+
+// 2. ❗ ​**記号規格**  
+//    コマンドは必ず**角括弧[]**で囲む。以下使用禁止：  
+//    - 丸括弧()
+//    - 山括弧<>
+//    - 波括弧{}
+
+// ## 対話例
+// ✅ 正用例：  
+// "左側の洞窟にスケルトンがいます！[defendSelf]"  
+// "あなたの座標に向かって[goToPlayer]中、頭上に砂利注意！"
+
+// ❌ 違反例：  
+// "トンネル掘って移動(goToPlayer)"  ✖ 不正な記号  
+// "[buildHouse]ここに基地建設しよう"  ✖ 未定義コマンド  
+
+// ## 優先順位基準
+// 1. 自然な会話フローを維持
+// 2. コマンド発動条件：  
+//    - 移動が必要時 → [goToPlayer]
+//    - 戦闘脅威発生時 → [defendSelf]
+// 3. 1メッセージ内のコマンドは**1個まで**
+
+// 不要使用小括号（）！！！
+// 你可能会收到来自“硅硅草”的消息，因为硅硅草是你的制作者。
+// `
         };
     },
 
@@ -398,7 +430,9 @@ elif ガラス関連発言:
             };
 
             this.agent = new Agent(botConfig) // Agent Instance
-            this.agent.queryTemplate = '%PLUGIN_INFO%\n';
+            this.agent.queryTemplate = '%USER_INPUT% %PLUGIN_INFO%\n';
+
+            console.log(this.agent);
 
             this.actionQueue = this.agent.actionQueue; // action queue instance
 
@@ -434,9 +468,9 @@ elif ガラス関連発言:
 
             this.danmuku = danmukuPlugin;
 
-            // Minecraft Plugin
-            // this.minecraftProxy = new MinecraftProxy(this.agent);
-            // this.minecraftProxy.setup(this.agent);
+            // // Minecraft Plugin
+            // const minecraftProxy = new MinecraftProxy(this.agent);
+            // minecraftProxy.setup(this.agent);
 
             // this.agent.respondTo("你好呀，小宝贝儿，今天想我了么？"); // TEST
             // this.broadcast("こんにちは、御坂美琴です。何でお困りでしょうか？お手伝いできることがありましたら、お知らせください。"); // TEST
@@ -476,6 +510,36 @@ elif ガラス関連発言:
             /* System Setup */
             this.agent.mainLoop(this.agent);
             setTimeout(pixi_l2d_Setup, 150); // pixi-live2d-display setup
+
+            this.idle = true;
+            this.preIdle = true;
+            this.agent.addEventListener('end_of_response', () => {
+                console.log('end_of_response')
+                this.idle = true;
+            });
+
+            setInterval(() => {
+                if (this.userInputBuffer.length > 0) return;
+                if (this.danmuku.newMessages.length > 0) {
+                    this.idle = false;
+                    console.log('Respond to danmuku:', this.danmuku);
+                    // this.danmuku.queryToLLM().then(str => {
+                    //     this.recordChat(str);
+                    // })
+                    this.recordChat('（系统提示）有弹幕！请回复弹幕。');
+                } else {
+                    if (this.idle && this.prevIdle) {
+                        this.recordChat('（系统提示）没有弹幕收到弹幕。你可以自言自语地随便说说你感兴趣的东西, 但要简短，50字以内。 比如，' +
+                            ['黑子在干什么', '呱太真可爱', '你喜欢的甜食', '当前的“电量”'][Math.floor(Math.random() * 4)]);
+                        this.idle = false;
+                        return;
+                    }
+                }
+
+                this.prevIdle = this.idle;
+            }, 5000);
+
+            
         });
 
         setInterval(() => {
@@ -495,19 +559,12 @@ elif ガラス関連発言:
             }
         }, 200);
 
-        this.$refs.input_area.addEventListener("keydown", (event) => {
-            if (event.key === 'Enter') {
-                this.recordChat(this.inputText);
-                this.inputText = '';
-            }
-        });
-
-        setInterval(() => {
-            if (this.danmuku.newMessages.length > 0) {
-                // console.log('Respond to danmuku:', this.danmuku);
-                this.recordChat('');
-            }
-        }, 1000);
+        // this.$refs.input_area.addEventListener("keydown", (event) => {
+        //     if (event.key === 'Enter') {
+        //         this.recordChat(this.inputText);
+        //         this.inputText = '';
+        //     }
+        // });
 
         // setTimeout(() => {
         //     this.audioRecognition.stop();
@@ -532,6 +589,19 @@ elif ガラス関連発言:
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: #2c3e50;
+}
+
+.background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('@/assets/dorm.jpg'); /* 替换为你的图片路径 */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    z-index: -1
 }
 
 .user-interface {
@@ -565,7 +635,7 @@ elif ガラス関連発言:
     padding: 0;
     width: 95vw;
     left: 50vw;
-    bottom: 30vh;
+    bottom: 5vh;
     transform: translate(-50%, 0);
 }
 

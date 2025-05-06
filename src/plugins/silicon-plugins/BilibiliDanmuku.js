@@ -10,9 +10,13 @@ export default class BilbiliDanmuku extends AbstractPlugin {
         this.newMessages = [];
     }
 
+    showDanmuku(danmuku) {
+        // TODO
+        console.log(danmuku);
+    }
+
     setup(agent) {
         this.parent = agent;
-
         agent.plugins.push(this);
 
         axios.get(this.url + 'getMessages')
@@ -51,13 +55,18 @@ export default class BilbiliDanmuku extends AbstractPlugin {
 
     async queryToLLM(agent, userInput) {
         console.log('BilbiliDanmuku.queryToLLM', this.newMessages)
+
+        for (let danmuku of this.newMessages) {
+            this.showDanmuku(danmuku);
+        }
+
         if (this.newMessages.length === 0) {
             return '';
         }
 
         let danmukuPrompt = '收到了以下新弹幕:\n';
         for (let danmuku of this.newMessages) {
-            danmukuPrompt += `用户: ${danmuku.username} 弹幕: ${danmuku.content}\n`;
+            danmukuPrompt += `弹幕内容: ${danmuku.content} （来自用户“${danmuku.username}”）\n`;
         }
         this.newMessages = [];
         return danmukuPrompt;

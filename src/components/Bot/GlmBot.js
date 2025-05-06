@@ -18,9 +18,11 @@ export default class GlmBot extends AbstractBot {
 
         this.messages = []; // 在本地记录聊天记录
 
-        if (systemPrompt) {
-            this.appendContext(systemPrompt, 'system')
-        }
+        this.systemPrompt = systemPrompt;
+
+        // if (systemPrompt) {
+        //     this.appendContext(systemPrompt, 'system')
+        // }
     }
 
     async setup() {
@@ -44,6 +46,14 @@ export default class GlmBot extends AbstractBot {
             messages = this.messages;
         }
 
+        let filteredMessages = messages.slice(-1);
+        if (this.systemPrompt) {
+            filteredMessages.unshift({
+                role: 'system',
+                content: this.systemPrompt,
+            })
+        }
+
         const url = `https://open.bigmodel.cn/api/paas/v4/chat/completions`;
         const headers = {
             'Content-Type': 'application/json',
@@ -52,7 +62,7 @@ export default class GlmBot extends AbstractBot {
 
         const data = {
             'model': this.modelName,
-            'messages': messages.slice(-50),
+            'messages': filteredMessages, // TODO: 保留的历史记录长度
             'stream': true
         }
 

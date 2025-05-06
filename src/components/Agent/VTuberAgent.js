@@ -46,7 +46,8 @@ const msgDelta = (self, event) => {
 
     if (!areBracketsBalanced(self.buffer)) return; // 若不匹配，则暂不处理
 
-    const seps = "。？！；.?!;\n、";
+    // const seps = "。？！；.?!;\n、";
+    const seps = "。？！；.?!;\n";
     let splitList = self.buffer.split('[');
 
     if (splitList.length === 1 && multipleSplit(self.buffer, seps).length === 1) {
@@ -183,6 +184,8 @@ export default class Agent extends AbstractAgent {
         // }
         // this.bot = bot;
 
+        this.busy = false;
+
         this.bot = GetBotFromConfig(botConfig);
 
         if (!actionQueue) actionQueue = new ActionQueue(this);
@@ -222,6 +225,14 @@ export default class Agent extends AbstractAgent {
     }
 
     async respondToContext(messages) {
+        if (this.busy) {
+            console.warn('VTuberAgent: I\'m busy!')
+            return;
+        }
+        this.bot.resposne = '';
+        this.bot.buffer = '';
+        this.buffer = '';
+        this.busy = true;
         return await this.bot.respondToContext(messages);
     }
 
@@ -257,7 +268,10 @@ export default class Agent extends AbstractAgent {
         }
         self.userInputBuffer = []; // 清空userInputBffer
 
+        // if (message !== '') message = '硅硅草的输入:' + message; // TODO
+
         let messageEmpty = (message === "");
+        // let messageEmpty = false; // TODO
         if (messageEmpty) {
 
             /* TODO: 用户没有输入的时候，应该如何表现？ */
@@ -280,6 +294,8 @@ export default class Agent extends AbstractAgent {
             }
         }
 
+        console.log({pluginInfo});
+
         let content = self.queryTemplate;
         content = content.replaceAll('%TIME%', `${new Date(Date.now())}`);
         content = content.replaceAll('%PLUGIN_INFO%', pluginInfo);
@@ -298,12 +314,15 @@ export default class Agent extends AbstractAgent {
         }})); // End Of Query
 
         // await self.waitUntilEndOfResponse();
-        self.dispatchEvent(new CustomEvent('end_of_response', {detail: {
-            userInputBuffer: self.userInputBuffer,
-            response: response
-        }})); // End Of Response
+        self.waitUntilEndOfResponse().then(() => {
+            self.busy = false;
+            self.dispatchEvent(new CustomEvent('end_of_response', {detail: {
+                userInputBuffer: self.userInputBuffer,
+                response: response
+            }})); // End Of Response
+        });
 
-        let sleepTime = (self.userInputBuffer.length === 0) ? 1000 : 10;
+        let sleepTime = (self.userInputBuffer.length === 0) ? 1000 : 1000;
         self.timeoutId = setTimeout(() => self.mainLoop(self), sleepTime);
     }
 }

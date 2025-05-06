@@ -1,8 +1,8 @@
 export default 
 {
     "minecraft_version": "1.19.2", // supports up to 1.21.1
-    "host": "127.0.0.1", // or "localhost", "your.ip.address.here"
-    "port": 25565,
+    "host": "8.142.124.11", // or "localhost", "your.ip.address.here"
+    "port": 51401,
     "auth": "offline", // or "microsoft"
 
     // the mindserver manages all agents and hosts the UI

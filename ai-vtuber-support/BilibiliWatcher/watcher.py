@@ -18,7 +18,8 @@ TEST_ROOM_IDS = [
 ]
 
 # 这里填一个已登录账号的cookie的SESSDATA字段的值。不填也可以连接，但是收到弹幕的用户名会打码，UID会变成0
-SESSDATA = ''
+SESSDATA = '3bc1a5e5%2C1761577750%2Ce8052%2A41CjCjwDPnJsIdqzokti8Ye59ibm8yFleRqvnfF-wJeoRci4xjZWByNSkDmyNnTP3gN38SVk1wMmlnMnJxaFlpajBwUjhzNTRSY1REM2Y3YlRER2RTbGIxb296cGtjXzVhdVdvWTZkdUd3bjV1V3FSRjA2X3RQSDVLWEJmU0pzaVRRalI5czdCMlVRIIEC'
+# cookie = "buvid4=3D36C389-E82C-4AC9-6492-CF28485D652647227-023030219-lQfvM0VLADs1mKIFWQ72DQ%3D%3D; buvid_fp_plain=undefined; enable_web_push=DISABLE; DedeUserID=593453826; DedeUserID__ckMd5=943d432092a7c152; LIVE_BUVID=AUTO3817212775213870; header_theme_version=CLOSE; hit-dyn-v2=1; rpdid=|(k|kmkmklYm0J'u~kuk~mYJm; is-2022-channel=1; buvid3=1EDBDEFB-F460-BD09-DCBD-409294D25F2F56356infoc; b_nut=1740911456; _uuid=995DCC41-25BA-91D4-3E106-FC35B6C1955955023infoc; enable_feed_channel=ENABLE; CURRENT_QUALITY=80; fingerprint=a74d5236d797383369c6da2bc960c595; buvid_fp=a74d5236d797383369c6da2bc960c595; bili_jct=eb0f877815da6daa4505dc17a7e8bda4; sid=4o387plx; LIVE_ROOM_ADMIN_POP_TIP=1; bili_ticket=eyJhbGciOiJIUzI1NiIsImtpZCI6InMwMyIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDYzNjE0NzEsImlhdCI6MTc0NjEwMjIxMSwicGx0IjotMX0.0yjGLafYVNbFkLBBwqmzl2LGA8wuK-mEFul6hEhXnRc; bili_ticket_expires=1746361411; CURRENT_FNVAL=4048; home_feed_column=5; browser_resolution=1920-958; b_lsid=C510A10F78_1968E2B67F8; bp_t_offset_593453826=1062162111133646848; GIFT_BLOCK_COOKIE=GIFT_BLOCK_COOKIE; PVID=3; Hm_lvt_8a6e55dbd2870f0f5bc9194cddf32a02=1745415925,1745755448,1746102567,1746142317; Hm_lpvt_8a6e55dbd2870f0f5bc9194cddf32a02=1746142317; HMACCOUNT=24F308C5B23DE245"
 
 session: Optional[aiohttp.ClientSession] = None
 
@@ -34,6 +35,7 @@ async def main():
 
 def init_session():
     cookies = http.cookies.SimpleCookie()
+    # cookies.load(cookie)
     cookies['SESSDATA'] = SESSDATA
     cookies['SESSDATA']['domain'] = 'bilibili.com'
 

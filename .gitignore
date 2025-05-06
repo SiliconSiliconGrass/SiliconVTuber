@@ -28,3 +28,4 @@ out/
 ai-vtuber-support/whisper-server/temp_files/
 
 __pycache__/
+*.bak

@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "mineflayer": "^4.23.0",
     "mineflayer-armor-manager": "^2.0.1",
     "mineflayer-auto-eat": "^3.3.6",
