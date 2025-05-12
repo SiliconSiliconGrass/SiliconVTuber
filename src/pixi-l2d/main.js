@@ -73,9 +73,23 @@ export default async function pixi_l2d_Setup() {
     model.internalModel.focusController = focusController;
 
     window.addEventListener('resize', () => {
-        app.view.width = app.view.offsetWidth;
-        app.view.height = app.view.offsetHeight;
-        app.renderer.resize(app.view.offsetWidth, app.view.offsetHeight);
+
+        // resize canvas
+        app.view.style.position = 'absolute';
+        app.view.width = app.view.clientWidth;
+        app.view.height = app.view.clientHeight;
+        app.renderer.resize(app.view.clientWidth, app.view.clientHeight);
+
+        // reset position and scale of model
+        const scale = app.view.height / model.height;
+        model.anchor.set(0.5, 0.5);
+        model.scale.set(scale, scale);
+
+        console.log('resize', app.view.width, app.view.height);
+        model.anchor.set(0.5, 0.5);
+        model.x = app.view.width / 2;
+        model.y = app.view.height / 2;
+        console.log('model pos', model.x, model.y)
     });
 
     let trigger = document.getElementById('l2dEventTrigger');

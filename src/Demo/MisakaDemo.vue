@@ -14,6 +14,8 @@
             <span ref="subtitle2" class="subtitle"></span>
         </div>
 
+        <!-- {{ (this.agent) ? this.agent.userInputBuffer : ''}} -->
+
         <div v-if="debug" class="visualize-area">
             <!-- 数据可视化区域 -->
             <div v-if="actionQueueWatcher" class="action-queue">
@@ -51,20 +53,20 @@
 </template>
 
 <script>
-import AudioBank from './ResourceManager/AudioBank.vue';
-import Mao from './Bot/MaoCore.vue';
-import ResourceManager, { Resource } from './ResourceManager/ResourceManager.vue';
-import AudioRecognition from './AudioRecognition.vue';
+import AudioBank from '@/components/ResourceManager/AudioBank.vue';
+import Mao from '@/components/Bot/MaoCore.vue';
+import ResourceManager, { Resource } from '@/components/ResourceManager/ResourceManager.vue';
+import AudioRecognition from '@/components/AudioRecognition.vue';
 import axios from 'axios';
 import pixi_l2d_Setup from '@/pixi-l2d/main';
-import SubtitleHandler from './ActionQueue/SubtitleHandler.vue';
+import SubtitleHandler from '@/components/ActionQueue/SubtitleHandler.vue';
 
 import { MinecraftProxy } from '@/plugins/silicon-plugins/MinecraftPlugin';
-import Agent from '../components/Agent/VTuberAgent';
+import Agent from '@/components/Agent/VTuberAgent';
 import LongTermMemory from '@/plugins/silicon-plugins/LongTermMemory';
 import BatteryStatus from '@/plugins/silicon-plugins/BatteryStatus';
 import SubtitlePlugin from '@/plugins/silicon-plugins/SubtitlePlugin';
-import TranslatorBot from '../components/ResourceManager/translator/TranslatorBot';
+import TranslatorBot from '@/components/ResourceManager/translator/TranslatorBot';
 
 export default {
     components: {

@@ -5,8 +5,8 @@
 
 <script>
 // import Demo from './components/LatexDictation.vue';
-// import Demo from './Demo/MisakaDemo.vue';
-import Demo from './Demo/MisakaMinecraft.vue';
+import Demo from './Demo/MisakaDemo.vue';
+// import Demo from './Demo/MisakaMinecraft.vue';
 
 export default {
   components: {
