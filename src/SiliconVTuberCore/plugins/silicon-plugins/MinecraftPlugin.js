@@ -3,6 +3,9 @@ import AbstractPlugin from '../AbstractPlugin';
 
 const URL = "http://127.0.0.1:7211/";
 
+/**
+ * Minecraft 插件
+ */
 export class MinecraftProxy extends AbstractPlugin {
     constructor() {
         super();
@@ -41,8 +44,6 @@ export class MinecraftProxy extends AbstractPlugin {
 
     setup(agent) {
         this.parent = agent;
-
-        agent.plugins.push(this);
 
         agent.addEventListener('end_of_query', (e) => {
             console.log('end_of_query', e);

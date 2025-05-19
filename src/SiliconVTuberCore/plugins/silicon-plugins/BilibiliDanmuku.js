@@ -1,8 +1,13 @@
 import axios from "axios";
 import AbstractPlugin from "../AbstractPlugin";
 
+/**
+ * Bilibili 直播弹幕插件
+ * 与后端服务器沟通，间接监听直播间的弹幕，并引导AI VTuber做出回应
+ * @param {string} url 后端服务器url
+ */
 export default class BilbiliDanmuku extends AbstractPlugin {
-    constructor(url) {
+    constructor({url}) {
         super();
         this.url = url || 'http:/127.0.0.1:5252/'
         this.messages = [];
@@ -17,7 +22,6 @@ export default class BilbiliDanmuku extends AbstractPlugin {
 
     setup(agent) {
         this.parent = agent;
-        agent.plugins.push(this);
 
         axios.get(this.url + 'getMessages')
         .then((response) => {

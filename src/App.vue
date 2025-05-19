@@ -5,8 +5,12 @@
 
 <script>
 // import Demo from './components/LatexDictation.vue';
-import Demo from './Demo/MisakaDemo.vue';
 // import Demo from './Demo/MisakaMinecraft.vue';
+
+// import Demo from './Demo/MisakaDemo.vue';
+
+// import Demo from './Demo/TempTest.vue'
+import Demo from './Demo/DoubleCharacterTest.vue'
 
 export default {
   components: {

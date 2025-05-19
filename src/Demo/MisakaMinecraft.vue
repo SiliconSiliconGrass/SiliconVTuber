@@ -60,13 +60,13 @@ import axios from 'axios';
 import pixi_l2d_Setup from '@/pixi-l2d/main';
 import SubtitleHandler from '@/components/ActionQueue/SubtitleHandler.vue';
 
-import { MinecraftProxy } from '@/plugins/silicon-plugins/MinecraftPlugin';
+import { MinecraftProxy } from '@/SiliconVTuberCore/plugins/silicon-plugins/MinecraftPlugin';
 import Agent from '@/components/Agent/VTuberAgent';
-import LongTermMemory from '@/plugins/silicon-plugins/LongTermMemory';
-import BatteryStatus from '@/plugins/silicon-plugins/BatteryStatus';
-import SubtitlePlugin from '@/plugins/silicon-plugins/SubtitlePlugin';
+import LongTermMemory from '@/SiliconVTuberCore/plugins/silicon-plugins/LongTermMemory';
+import BatteryStatus from '@/SiliconVTuberCore/plugins/silicon-plugins/BatteryStatus';
+import SubtitlePlugin from '@/SiliconVTuberCore/plugins/silicon-plugins/SubtitlePlugin';
 import TranslatorBot from '../components/ResourceManager/translator/TranslatorBot';
-import BilbiliDanmuku from '@/plugins/silicon-plugins/BilibiliDanmuku';
+import BilbiliDanmuku from '@/SiliconVTuberCore/plugins/silicon-plugins/BilibiliDanmuku';
 
 export default {
     components: {

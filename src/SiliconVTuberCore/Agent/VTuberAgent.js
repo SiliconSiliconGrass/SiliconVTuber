@@ -1,7 +1,6 @@
-import ActionQueue from '../ActionQueue/ActionQueue.vue';
-import { Resource } from '../ResourceManager/ResourceManager.vue';
+import { Resource } from '@/components/ResourceManager/ResourceManager.vue';
 import { GetBotFromConfig } from '../Bot/BotUtils.js';
-import AbstractAgent from './AbstractAgent';
+import AbstractAgent from './AbstractAgent.js';
 
 function multipleSplit(inputString, delimiters) {
     let result = [];
@@ -165,32 +164,20 @@ const responseDone = (self) => {
 }
 
 /**
- * A common chat bot model, using coze api
- * @param {Object} botConfig configuration for agent brain
- * @param {ResourceManager} resourceManager resource management proxy, including TTS
- * @param {ActionQueue} actionQueue action management proxy
+ * A common chat bot model
  */
 export default class Agent extends AbstractAgent {
-    constructor(botConfig, resourceManager, actionQueue, queryTemplate = null) {
+    /**
+     * 
+     * @param {Object} botConfig configuration for agent brain
+     * @param {string | null} queryTemplate template of query prompt
+     */
+    constructor(botConfig, queryTemplate = null) {
         super();
-        // let bot;
-        // let botType = botConfig.type;
-        // if (botType === 'Ollama') {
-        //     bot = new OllamaBot(botConfig.modelName);
-        // } else if (botType === 'Coze') {
-        //     bot = new CozeBot(botConfig.pat, botConfig.botID, botConfig.userID);
-        // } else if (botType === 'GLM') {
-        //     bot = new GlmBot(botConfig.token, botConfig.modelName, botConfig.systemPrompt);
-        // }
-        // this.bot = bot;
 
         this.busy = false;
 
         this.bot = GetBotFromConfig(botConfig);
-
-        if (!actionQueue) actionQueue = new ActionQueue(this);
-        this.resourceManager = resourceManager;
-        this.actionQueue = actionQueue;
 
         this.subtitles = {'main': null, 'translation': null}; // 字幕DOM元素
 
@@ -243,6 +230,10 @@ export default class Agent extends AbstractAgent {
     waitUntilEndOfResponse() {
         // 等待直到动作列表被清空
         return new Promise(resolve => {
+            if (!this.actionQueue) {
+                console.warn('VTuberAgent.waitUntilEndOfResponse: actionQueue plugin is not loaded!');
+                resolve();
+            }
             if (this.actionQueue.isEmpty()) {
                 return resolve();
             }

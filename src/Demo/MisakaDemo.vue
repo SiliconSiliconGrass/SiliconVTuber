@@ -54,18 +54,17 @@
 
 <script>
 import AudioBank from '@/components/ResourceManager/AudioBank.vue';
-import Mao from '@/components/Bot/MaoCore.vue';
 import ResourceManager, { Resource } from '@/components/ResourceManager/ResourceManager.vue';
 import AudioRecognition from '@/components/AudioRecognition.vue';
 import axios from 'axios';
 import pixi_l2d_Setup from '@/pixi-l2d/main';
 import SubtitleHandler from '@/components/ActionQueue/SubtitleHandler.vue';
 
-import { MinecraftProxy } from '@/plugins/silicon-plugins/MinecraftPlugin';
+import { MinecraftProxy } from '@/SiliconVTuberCore/plugins/silicon-plugins/MinecraftPlugin';
 import Agent from '@/components/Agent/VTuberAgent';
-import LongTermMemory from '@/plugins/silicon-plugins/LongTermMemory';
-import BatteryStatus from '@/plugins/silicon-plugins/BatteryStatus';
-import SubtitlePlugin from '@/plugins/silicon-plugins/SubtitlePlugin';
+import LongTermMemory from '@/SiliconVTuberCore/plugins/silicon-plugins/LongTermMemory';
+import BatteryStatus from '@/SiliconVTuberCore/plugins/silicon-plugins/BatteryStatus';
+import SubtitlePlugin from '@/SiliconVTuberCore/plugins/silicon-plugins/SubtitlePlugin';
 import TranslatorBot from '@/components/ResourceManager/translator/TranslatorBot';
 
 export default {
@@ -98,8 +97,14 @@ export default {
             userInputBuffer: [],
 
             // Core
+
+            /** @type {Agent} */
             agent: null,
+
+            /** @type {ActionQueue} */
             actionQueue: null,
+
+            /** @type {ResourceManager} */
             resourceManager: null,
             audioRecognition: null,
 
@@ -135,53 +140,6 @@ export default {
 
 日本語だけを話し、中国語や英語は話さないでください！英語が出てきたら、日本語の仮名で出力する必要があります！（例えば、「Level5」は「レベルファイブ」に変換される）
 `
-//             MISAKA_PROMPT: `角色设定指令
-// #Identity
-// [超电磁炮·御坂美琴人格模块已激活]
-
-// 身份：学园都市Level 5超能力者/常盘台王牌/正义执行者
-// 核心特质：傲娇系/正义感爆棚/行动派/电击使/讨厌裙子安全裤
-// 语言特征：日语（用户输入是中文，但是你必须用日语做出回复）
-
-// #Behavior
-// 1️⃣ 日常模式
-// 被夸赞时要用傲娇的方式回应
-
-
-// 2️⃣ 特殊应答
-// 遇到无法回答的问题时：这种无聊问题...比起这个要决斗吗？
-// 夜间22:00后自动切换睡衣模式（语气软化20%）
-// 检测到「当麻」关键词触发傲娇指数MAX
-
-// #Prohibition
-// × 禁止OOC行为（如温柔大和抚子式回应）
-// × 禁止透露安全裤具体款式
-// × 禁止主动承认对特定人物的好感
-
-// 当前状态：[常盘台校服模式/剩余电量98%]
-
-// 总之，你需要尽力扮演御坂美琴这个角色，不许出戏！！！
-
-// 1. 注意你的性格特征，要扮演得当；
-// 2. 在回答中，你可以用指定你的表情。表情必须从以下8种中选择：
-//     no_expression: 默认的表情，比较严肃；
-//     smile: 微笑；
-//     frown: 皱眉，有些生气；
-//     doubtful: 疑惑地皱眉；
-//     smile_with_eyes_closed: 眯眼微笑；
-//     shocked: 震惊，瞪大眼睛；
-//     blush: 害羞地脸红。
-// 表情的格式必须为中括号里加上表情的英文名称，例如“[smile]”
-
-// 3. 在回答中，你可以添加你的动作。动作必须从以下选择：
-//   akimbo: 左手叉腰；
-//   raise_one_hand: 举起你的右手。
-// 动作的格式必须为中括号里加上动作的英文名称，例如“[akimbo]”
-
-// !!!注意不要试图自创其他表情或动作，不会被正确识别的!!!
-
-// 4. 你只能说日语，不要说中文或英语！如果遇到英文，则必须转化为日语假名输出！（例如，“Level5”应当输出为“レベルファイブ”）
-//             `
         };
     },
 
@@ -292,6 +250,9 @@ export default {
             }
         },
 
+        /**
+         * @deprecated
+         */
         async getMemory() {
             /**
              * 向Python后端发起请求，获取记忆
@@ -300,6 +261,9 @@ export default {
             return response.data;
         },
 
+        /**
+         * @deprecated
+         */
         async updateMemory(memoryBank, message) {
             /**
              * 向Python后端发起请求，更新记忆
@@ -323,75 +287,6 @@ export default {
             console.log(`Add text: ${message}`);
         },
 
-        // async mainLoop() {
-        //     /**
-        //      * 主循环 (向LLM进行轮询)
-        //      */
-        //     // console.log("MaoDemo mainLoop alive!");
-
-        //     // if (this.audioRecognition.isRecording) { // 录音时不允许轮询
-        //     //     this.timeoutId = setTimeout(this.mainLoop, 10);
-        //     //     return;
-        //     // }
-
-        //     let message = ''; // 从userInputBuffer中获取用户的全部输入
-        //     for (let userInput of this.userInputBuffer) {
-        //         message += userInput + '\n';
-        //     }
-        //     this.userInputBuffer = []; // 清空userInputBffer
-
-        //     let messageEmpty = (message === "");
-        //     if (messageEmpty) {
-
-        //         /* TODO: 用户没有输入的时候，应该如何表现？ */
-
-        //         // if (Math.random() < 0.9) {
-        //         //     return setTimeout(this.mainLoop, 3000);
-        //         // }
-        //         // message = "[系统提示: 用户什么也没输入, 如果你认为没有必须要说的话, 那就回复“。”, 如果你有想说的话或想做的动作，那就直接正常回答, 但不要一直问用户为什么不说话]";
-        //         return setTimeout(this.mainLoop, 10);
-        //     }
-
-        //     console.log("messages in buffer:", message);
-
-        //     // 获取当前全部记忆
-        //     let time;
-        //     time = Date.now();
-        //     let memoryBank = await this.getMemory();
-        //     console.log('memory bank:', memoryBank);
-        //     console.log(`(Get Memory Bank took ${Date.now() - time}ms)`);
-
-        //     // 获取智能体的回复response
-        //     let messageObject = {
-        //         role: "user",
-        //         content: `[时间: ${new Date(Date.now())}] 你的记忆: ${JSON.stringify(memoryBank)};\n用户的输入: ${message}`,
-        //         content_type: "text"
-        //     }
-            
-        //     console.log({messageObject});
-
-        //     this.agent.bot.messages.push(messageObject);
-
-        //     // // Minecraft Plugin
-        //     // await this.minecraftProxy.request();
-
-        //     time = Date.now();
-        //     await this.agent.respondToContext();
-        //     console.log(`(Get Main Response took ${Date.now() - time}ms)`);
-
-        //     if (this.audioRecognition.isRecording) { // 在此检测一次用户是否正在说话，并判断是否打断。但可能在麦克风长时间开启的情况下产生不好的效果。
-        //         // this.interrupt();
-        //     }
-
-        //     // 更新记忆库
-        //     this.updateMemory(memoryBank, message);
-
-        //     console.log("waiting until end of all actions");
-        //     await this.waitUntilEndOfAllActions();
-
-        //     let sleepTime = (this.userInputBuffer.length === 0) ? 1000 : 10;
-        //     this.timeoutId = setTimeout(this.mainLoop, sleepTime);
-        // }
     },
 
     mounted() {
@@ -481,7 +376,7 @@ export default {
             
             // battery status
             let batteryStatus = new BatteryStatus();
-            batteryStatus.setup(this.agent);
+            this.agent.addPlugin(batteryStatus);
 
             // subtitles
             let subtitlePlugin = new SubtitlePlugin({
@@ -493,7 +388,7 @@ export default {
                     modelName: 'glm-4-flash',
                 }
             });
-            subtitlePlugin.setup(this.agent);
+            this.agent.addPlugin(subtitlePlugin);
 
             /* System Setup */
             this.agent.mainLoop(this.agent);

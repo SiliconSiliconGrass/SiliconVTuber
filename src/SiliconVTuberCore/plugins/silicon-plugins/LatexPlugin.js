@@ -1,11 +1,17 @@
 import AbstractPlugin from "../AbstractPlugin";
 import { render } from "katex";
 
+/**
+ * LaTeX 插件
+ * 显示LaTeX
+ * @param {HTMLDivElement} latexSourceArea
+ * @param {HTMLDivElement} latexRenderArea
+ */
 export default class LatexPlugin extends AbstractPlugin {
-    constructor(latexSourceArea, latexRenderArea) {
+    constructor({latexSourceArea, latexRenderArea}) {
         super();
         this.latexSource = latexSourceArea;
-        this.latexRender = latexRenderArea;
+        this.latexRender = latexRenderArea
     }
 
     setup(agent) {

@@ -1,5 +1,9 @@
 import AbstractPlugin from "../AbstractPlugin";
 
+/**
+ * 电源插件
+ * 监测电源插拔、提供当前电量信息
+ */
 export default class BatteryStatus extends AbstractPlugin {
     constructor() {
         super();

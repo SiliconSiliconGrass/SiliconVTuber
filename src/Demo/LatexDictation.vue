@@ -65,9 +65,9 @@ import pixi_l2d_Setup from '@/pixi-l2d/main';
 import SubtitleHandler from './ActionQueue/SubtitleHandler.vue';
 
 import Agent from '../components/Agent/LatexDictatorAgent';
-import BatteryStatus from '@/plugins/silicon-plugins/BatteryStatus';
-import SubtitlePlugin from '@/plugins/silicon-plugins/SubtitlePlugin';
-import LatexPlugin from '@/plugins/silicon-plugins/LatexPlugin';
+import BatteryStatus from '@/SiliconVTuberCore/plugins/silicon-plugins/BatteryStatus';
+import SubtitlePlugin from '@/SiliconVTuberCore/plugins/silicon-plugins/SubtitlePlugin';
+import LatexPlugin from '@/SiliconVTuberCore/plugins/silicon-plugins/LatexPlugin';
 
 export default {
     components: {

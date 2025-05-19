@@ -34,7 +34,8 @@ window.onload = () => {
 
     setTimeout(() => {
         let canvas = document.getElementsByTagName('canvas')[0];
-        canvas.setAttribute('style', 'width: 80vw; height: 100vh; left: 10vw');
+        // TODO
+        // canvas.setAttribute('style', 'width: 80vw; height: 100vh; left: 10vw');
     }, 200);
 
     document.addEventListener('mousemove',  (event) => {

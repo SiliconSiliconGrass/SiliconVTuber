@@ -50,6 +50,12 @@ function copy(messages) {
     return c;
 }
 
+
+/**
+ * @deprecated
+ * 长期记忆插件
+ * 测试效果不佳，暂时不启用
+ */
 export default class LongTermMemory extends AbstractPlugin {
     constructor(config) {
         super();
@@ -82,8 +88,6 @@ export default class LongTermMemory extends AbstractPlugin {
             this._reinforceMemories(recalledMemoriesIds);
             this._createNewMemories(agent.bot.messages);
         });
-
-        agent.plugins.push(this);
 
         this._getAllMemories().then((memories) => {this.memoryBank = memories}); // 初始化memoryBank
     }
