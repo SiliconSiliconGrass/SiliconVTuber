@@ -1,4 +1,4 @@
-import { Resource } from '@/components/ResourceManager/ResourceManager.vue';
+import { Resource } from '../plugins/silicon-plugins/ActionQueue/ResourceManager.js';
 import { GetBotFromConfig } from '../Bot/BotUtils.js';
 import AbstractAgent from './AbstractAgent.js';
 

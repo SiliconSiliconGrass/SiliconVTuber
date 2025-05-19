@@ -322,7 +322,6 @@ export default {
     display: flex;      /* 使用flex布局 */
     width: 100%;       /* 充满屏幕宽度 */
     height: 100vh;     /* 充满屏幕高度 */
-    border: 1px solid red;
 }
 
 .left-section, .right-section {
