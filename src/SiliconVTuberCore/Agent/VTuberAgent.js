@@ -213,14 +213,19 @@ export default class Agent extends AbstractAgent {
 
     async respondToContext(messages) {
         if (this.busy) {
-            console.warn('VTuberAgent: I\'m busy!')
+            console.warn('VTuberAgent: I\'m busy!');
             return;
         }
         this.bot.response = '';
         this.bot.buffer = '';
         this.buffer = '';
         this.busy = true;
-        return await this.bot.respondToContext(messages);
+        try {
+            return await this.bot.respondToContext(messages);
+        } catch (e) {
+            console.warn('VTuberAgent: An error occurred when sending request to LLM bot.', e);
+            this.busy = false;
+        }
     }
 
     appendContext(text, role = 'user') {

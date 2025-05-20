@@ -64,6 +64,7 @@ import L2dDisplay from '@/SiliconVTuberCore/plugins/silicon-plugins/L2dDisplay/L
 import VTuber from '@/SiliconVTuberCore/Agent/VTuberAgent.js';
 import { getToken } from '@/SiliconVTuberCore/utils/tokenGatewary.js';
 import { createAgent } from '@/SiliconVTuberCore/utils/createAgent.js';
+import { getPrompt } from '@/SiliconVTuberCore/utils/promptBank';
 
 export default {
     components: {
@@ -95,82 +96,23 @@ export default {
             }
         },
 
-        // waitUntilEndOfAllActions() {
-        //     // 等待直到动作列表被清空
-        //     return new Promise(resolve => {
-        //         if (this.actionQueue.isEmpty()) {
-        //             return resolve();
-        //         }
-        //         this.actionQueue.addEventListener('empty', resolve, { once: true });
-        //     });
-        // },
+        // interrupt() {
+        //     this.actionQueue.queue = [];
+        //     this.resourceManager.clearResources();
 
-        // broadcast(text) {
-        //     /* 口播 */
-        //     /* 测试用的 */
-        //     function multipleSplit(inputString, delimiters) {
-        //         // 构建一个正则表达式，匹配任一指定的分隔符
-        //         const delimiterRegex = new RegExp('[' + delimiters.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&') + ']+');
-        //         // 使用正则表达式分割字符串
-        //         return inputString.split(delimiterRegex);
-        //     }
+        //     clearTimeout(this.resourceManager.timeoutId);
+        //     this.resourceManager.mainLoop();
+        //     clearTimeout(this.actionQueue.timeoutId);
+        //     this.actionQueue.mainLoop();
+        //     this.actionQueue.dispatchEvent(new Event('empty'));
 
-        //     const seps = "。？！?! \n";
-        //     var splitList = multipleSplit(text, seps);
-        //     var self = this.agent;
-        //     for (var i = 0; i < splitList.length; i++) {
-        //         // 处理一个短句
-        //         let sentence = splitList[i];
-
-        //         // 处理方括号[]中的motion/expression信息
-        //         let sentenceSplit = sentence.split('[');
-
-        //         for (let split of sentenceSplit) {
-        //             let splitSplit = split.split(']');
-        //             if (splitSplit.length == 1) {
-        //                 if (splitSplit[0] !== '') {
-        //                     let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[0]});
-        //                     self.resourceManager.add(resource); // 注册所需TTS audio 资源
-        //                     self.actionQueue.enqueue({type: "SayAloud", data: splitList[i], resources: [resource]}); // 将SayAloud动作加入队列
-        //                     // self.actionQueue.enqueue({type: "SayAloud", data: splitList[0], resources: []}); // 将SayAloud动作加入队列, 但不使用coze来生成resource
-        //                 }
-        //             } else {
-        //                 // splitSplit[0]: expression/motion name
-        //                 // splitSplit[1]: tts text
-
-        //                 // expression/motion 应该不需要resource
-        //                 this.actionQueue.enqueue({type: "Expression/Motion", data: splitSplit[0], resources: []}); // Expression/Motion动作入队
-                        
-        //                 if (splitSplit[1] !== '') {
-        //                     let resource = new Resource(self.uuid(), 'TTS', {text: splitSplit[1]});
-        //                     self.resourceManager.add(resource); // 注册所需TTS audio 资源
-        //                     self.actionQueue.enqueue({type: "SayAloud", data: splitList[i], resources: [resource]}); // 将SayAloud动作加入队列
-        //                     // self.actionQueue.enqueue({type: "SayAloud", data: splitList[1], resources: []}); // 将SayAloud动作加入队列, 但不使用coze来生成resource
-        //                 }
-        //             }
+        //     for (let key in this.agent.subtitles) {
+        //         let subtitle = this.agent.subtitles[key];
+        //         if (subtitle) {
+        //             subtitle.clear();
         //         }
         //     }
-
-        //     self.actionQueue.enqueue({type: "EndOfResponse", data: {}, resources: []}); // 将EndOfResponse动作加入队列
         // },
-
-        interrupt() {
-            this.actionQueue.queue = [];
-            this.resourceManager.clearResources();
-
-            clearTimeout(this.resourceManager.timeoutId);
-            this.resourceManager.mainLoop();
-            clearTimeout(this.actionQueue.timeoutId);
-            this.actionQueue.mainLoop();
-            this.actionQueue.dispatchEvent(new Event('empty'));
-
-            for (let key in this.agent.subtitles) {
-                let subtitle = this.agent.subtitles[key];
-                if (subtitle) {
-                    subtitle.clear();
-                }
-            }
-        },
 
         async recordChat(message) {
             /**
@@ -188,9 +130,6 @@ export default {
 
         let e = document.getElementById('user-interface');
         console.log(e);
-        
-        // return;
-        /* eslint-disable */
 
         const testAgentConfig1 = {
             Agent: VTuber,
@@ -198,12 +137,13 @@ export default {
                 type: 'GLM',
                 token: getToken('glm'),
                 modelName: 'glm-4-flash',
+                systemPrompt: getPrompt('soyo')
             },
             queryTemplate: null,
 
             plugins: [
                 [ActionQueue, { ttsConfig: { type: 'gptsovits', character: 'misaka-zh' }, translationConfig: null }],
-                [L2dDisplay, { modelURL: '/Resources/mikoto/mikoto.model.json', canvas: this.$refs.testCanvas1,
+                [L2dDisplay, { modelURL: '/Resources/mygo_mujica/figure/mygo/soyo/casual/model.json', canvas: this.$refs.testCanvas1,
                     motionDict: {
                         'akimbo': {group: 'tap', order: 0, duration: 1000},
                         'raise_one_hand': {group: 'tap', order: 1, duration: 1000}
@@ -221,18 +161,19 @@ export default {
             ]
         };
 
-        const testAgentConfig2 = {
+        const testAgentConfig2 = { // Anon
             Agent: VTuber,
             botConfig: {
                 type: 'GLM',
                 token: getToken('glm'),
                 modelName: 'glm-4-flash',
+                sytemPrompt: getPrompt('anon')
             },
             queryTemplate: null,
 
             plugins: [
                 [ActionQueue, { ttsConfig: { type: 'gptsovits', character: 'misaka-zh' }, translationConfig: null }],
-                [L2dDisplay, { modelURL: '/Resources/mikoto/mikoto.model.json', canvas: this.$refs.testCanvas2,
+                [L2dDisplay, { modelURL: '/Resources/mygo_mujica/figure/mygo/anon/casual/model.json', canvas: this.$refs.testCanvas2,
                     motionDict: {
                         'akimbo': {group: 'tap', order: 0, duration: 1000},
                         'raise_one_hand': {group: 'tap', order: 1, duration: 1000}
@@ -262,10 +203,8 @@ export default {
         // console.log(agent2.messages);
         // agent2.respondToContext()
 
-        console.log('audioBank', agent1.resourceManager.audioBank);
-
-        this.agent1 = agent1;
-        this.agent2 = agent2;
+        this.agent1 = agent1; // soyo
+        this.agent2 = agent2; // anon
 
         setInterval(() => {
             // 可视化
@@ -291,13 +230,37 @@ export default {
             }
         });
 
-        // setTimeout(() => {
-        //     this.audioRecognition.stop();
-        // }, 800);
+        // Main Loop
 
-        // setTimeout(() => {
-        //     this.audioRecognition.launch();
-        // }, 1600);
+        /** @type {string} */
+        let topic = '【初始话题】给大家打招呼。';
+
+        /** @type {string} */
+        let prevAnswer = '';
+
+        async function mainLoop() {
+            agent1.appendContext(prevAnswer + `（当前话题：${topic}）`);
+            prevAnswer = await agent1.respondToContext();
+            console.log('Soyo:', prevAnswer);
+
+            await agent1.waitUntilEndOfResponse();
+
+            agent2.appendContext(prevAnswer + `（当前话题：${topic}）`);
+            prevAnswer = await agent2.respondToContext();
+            console.log('Anon:', prevAnswer);
+
+            await agent2.waitUntilEndOfResponse();
+
+            agent1.appendContext(`(旁白)当前话题为“${topic}”, 输出你想更换的话题。如果当前话题还没讨论完，请输出当前话题。`);
+            topic = await agent1.respondToContext();
+
+            console.log('Current topic:', topic);
+
+            // requestAnimationFrame(mainLoop());
+            setTimeout(mainLoop, 100);
+        }
+
+        mainLoop(); // start main loop
     },
 };
 </script>
