@@ -89,5 +89,5 @@ const exampleAgentConfig = {
     ]
 }
 
-const agent = createAgent();
+const agent = createAgent(exampleAgentConfig);
 ```
