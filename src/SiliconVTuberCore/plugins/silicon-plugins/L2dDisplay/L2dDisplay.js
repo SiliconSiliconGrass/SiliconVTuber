@@ -81,6 +81,9 @@ export default class L2dDisplay extends AbstractPlugin {
         app.renderer.backgroundAlpha = 0;
 
         const model = await Live2DModel.from(this.modelURL);
+
+        console.log({model}); // debug
+
         this.model = model;
         const scale = app.view.height / model.height;
         model.anchor.set(0.5, 0.5);

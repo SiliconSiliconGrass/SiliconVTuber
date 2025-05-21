@@ -7,10 +7,19 @@ export default class AbstractAgent extends EventTarget {
         this.plugins = [];
     }
 
+    /**
+     * 将聊天上下文传递给Agent
+     * @param {[{role: 'user' | 'agent' | 'system', content: string}] | null} messages 聊天历史 （可选，为空时默认使用Agent的历史）
+     */
     async respondToContext(messages) {
         throw "Abstract Method Not Overrided! (You need to override this method! )";
     }
-
+    
+    /**
+     * 向Agent记录的聊天历史中添加一条消息
+     * @param {string} text 消息内容
+     * @param {'user' | 'agent' | 'system'} role 消息角色
+     */
     appendContext(text, role = 'user') {
         throw "Abstract Method Not Overrided! (You need to override this method! )";
     }

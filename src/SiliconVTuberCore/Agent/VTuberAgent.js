@@ -212,10 +212,10 @@ export default class Agent extends AbstractAgent {
     }
 
     async respondToContext(messages) {
-        if (this.busy) {
-            console.warn('VTuberAgent: I\'m busy!');
-            return;
-        }
+        // if (this.busy) {
+        //     console.warn('VTuberAgent: I\'m busy!');
+        //     return;
+        // }
         this.bot.response = '';
         this.bot.buffer = '';
         this.buffer = '';
