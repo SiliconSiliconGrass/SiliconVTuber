@@ -142,7 +142,18 @@ export default {
             queryTemplate: null,
 
             plugins: [
-                [ActionQueue, { ttsConfig: { type: 'gptsovits', character: 'misaka-zh' }, translationConfig: null }],
+                [ActionQueue, { ttsConfig: {
+                        type: 'gptsovits',
+                        "refer_wav_path": "misaka-ref2.wav",
+                        "prompt_text": "何かありそうね。クロコに連絡しておこうかな。なんだか騒がしいわね。",
+                        "prompt_language": "ja",
+                        "text_language": "zh", // 要合成的文本的语言
+                        // "text_language": "zh",
+                        "temperature": 1.0,
+                        "speed": 1.0,
+
+                        "text": "",
+                    }, translationConfig: null }],
                 [L2dDisplay, { modelURL: '/Resources/mygo_mujica/figure/mygo/soyo/casual/model.json', canvas: this.$refs.testCanvas1,
                     motionDict: {
                         'akimbo': {group: 'tap', order: 0, duration: 1000},
@@ -172,7 +183,10 @@ export default {
             queryTemplate: null,
 
             plugins: [
-                [ActionQueue, { ttsConfig: { type: 'gptsovits', character: 'misaka-zh' }, translationConfig: null }],
+                [ActionQueue, {
+                    ttsConfig: { type: 'gptsovits', character: 'misaka-zh' },
+                    translationConfig: null }],
+
                 [L2dDisplay, { modelURL: '/Resources/mygo_mujica/figure/mygo/anon/casual/model.json', canvas: this.$refs.testCanvas2,
                     motionDict: {
                         'akimbo': {group: 'tap', order: 0, duration: 1000},

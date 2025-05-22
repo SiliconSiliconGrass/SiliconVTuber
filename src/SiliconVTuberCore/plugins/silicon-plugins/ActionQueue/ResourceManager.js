@@ -74,6 +74,8 @@ export default class ResourceManager {
                     "text": "",
                 };
             }
+
+            if (!cfg) cfg = ttsConfig;
             console.log('RM cfg:', cfg);
             this.ttsHelper = new GptSovits('http://127.0.0.1:9880', cfg); // gptsovits
             this.ttsHelper.setup(); // 初始化
