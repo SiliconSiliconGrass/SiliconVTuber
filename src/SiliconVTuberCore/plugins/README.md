@@ -4,10 +4,9 @@ plugin 是指 Agent 对象的插件。令 Agent 下属的各项事务由其挂�
 ## 1. 抽象基类
 plugin 的抽象基类在 ./AbstractPlugin.js 中。
 
-AbstractPlugin 继承了 EventTarget，这意味着其子类的示例可以 addEventListener 和 dispatchEvent。
+AbstractPlugin 继承了 EventTarget，这意味着其子类的实例可以 addEventListener 和 dispatchEvent。
 AbstractPlugin 的子类需要实现两个方法：setup 和 queryToLLM
 ```javascript
-
 
 /** @typedef {AbstractAgent} Agent */
 
@@ -39,7 +38,7 @@ export default class AbstractPlugin extends EventTarget {
 
 如何挂载插件？
 使用 Agent 的 ```addPlugin(plugin)``` 方法，将 plugin 实例挂载到 Agent 实例上。
-开发者也可以使用 ../utils/createAgent.js 中的 ```createAgent```  方法，在 ```plugins``` 配置项中设置插件基类与插件配置参数，这样的到的 Agent 会自动按 ```plugins``` 中的参数和顺序来挂载各插件。
+开发者也可以使用 ../utils/createAgent.js 中的 ```createAgent```  函数，在 ```plugins``` 配置项中设置插件基类与插件配置参数，这样得到的 Agent 会自动按 ```plugins``` 中的参数和顺序来挂载各插件。
 
 ## 2. 插件编写建议
 (1) 非阻塞式功能，建议在 setup 函数中，通过向 agent 添加 EventListener 来实现；
