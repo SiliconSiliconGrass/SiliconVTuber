@@ -82,14 +82,18 @@ export default class L2dDisplay extends AbstractPlugin {
 
         const model = await Live2DModel.from(this.modelURL);
 
-        console.log({model}); // debug
-
         this.model = model;
+
+        model.initHeight = model.height;
+        model.initWidth = model.width;
+
         const scale = app.view.height / model.height;
         model.anchor.set(0.5, 0.5);
         model.scale.set(scale, scale);
         model.x = app.view.width / 2;
         model.y = app.view.height / 2;
+
+        console.log('init scale', app.view.clientWidth, model.height, scale);
 
         app.stage.addChild(model); // add model to stage
 
@@ -101,21 +105,17 @@ export default class L2dDisplay extends AbstractPlugin {
         // 响应窗口尺寸变化
         window.addEventListener('resize', () => {
             // resize canvas
-            // app.view.style.position = 'absolute';
-            // app.view.width = app.view.clientWidth;
-            // app.view.height = app.view.clientHeight;
             app.renderer.resize(app.view.clientWidth, app.view.clientHeight);
 
             // reset position and scale of model
-            const scale = app.view.height / model.height;
+            const scale = app.view.clientHeight / model.initHeight;
+
             model.anchor.set(0.5, 0.5);
             model.scale.set(scale, scale);
 
-            console.log('resize', app.view.width, app.view.height);
             model.anchor.set(0.5, 0.5);
             model.x = app.view.width / 2;
             model.y = app.view.height / 2;
-            console.log('model pos', model.x, model.y)
         });
 
         // lip sync
