@@ -231,7 +231,7 @@ export default {
                 type: 'GLM',
                 token: getToken('glm'),
                 modelName: 'glm-4-flash',
-                systemPrompt: live2dPrompter(getPrompt('soyo'), l2dconfig1)
+                systemPrompt: live2dPrompter(getPrompt('soyo'), l2dconfig1, 'jp')
             },
             queryTemplate: null,
 
@@ -256,7 +256,12 @@ export default {
                 }],
                 [L2dDisplay, l2dconfig1],
                 [BatteryStatus, {}],
-                [SubtitlePlugin, {element: this.$refs.subtitle1, enableTranslation: false}],
+                [SubtitlePlugin, {
+                    element: this.$refs.subtitle1, 
+                    enableTranslation: true, 
+                    botConfig: {type: 'GLM', token: getToken('glm'), modelName: 'glm-4-flash'}, 
+                    translationElement: this.$refs.subtitle2
+                }],
             ]
         };
 
@@ -347,7 +352,7 @@ export default {
                 type: 'GLM',
                 token: getToken('glm'),
                 modelName: 'glm-4-flash',
-                sytemPrompt: live2dPrompter(getPrompt('anon'), l2dconfig2)
+                sytemPrompt: live2dPrompter(getPrompt('anon'), l2dconfig2, 'jp')
             },
             queryTemplate: null,
 
@@ -372,7 +377,12 @@ export default {
 
                 [L2dDisplay, l2dconfig2],
                 [BatteryStatus, {}],
-                [SubtitlePlugin, {element: this.$refs.subtitle2, enableTranslation: false}],
+                [SubtitlePlugin, {
+                    element: this.$refs.subtitle3, 
+                    enableTranslation: true, 
+                    botConfig: {type: 'GLM', token: getToken('glm'), modelName: 'glm-4-flash'}, 
+                    translationElement: this.$refs.subtitle4
+                }],
             ]
         };
 
