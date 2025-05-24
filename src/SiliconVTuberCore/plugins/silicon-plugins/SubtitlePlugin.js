@@ -9,10 +9,10 @@ const DEFAULT_TRANSLATION_PROMPT = `
 `;
 
 export default class SubtitlePlugin extends AbstractPlugin {
-    constructor(config) {
+    constructor({enableTranslation = false, botConfig = null}) {
         super();
 
-        this.enableTranslation = config.enableTranslation;
+        this.enableTranslation = enableTranslation;
 
         if (this.enableTranslation) {
             let botConfig = config.botConfig;

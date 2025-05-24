@@ -16,12 +16,8 @@
 
         <!-- {{ (this.agent) ? this.agent.userInputBuffer : ''}} -->
         <div class="canvas-container">
-            <div class="left-section">
-                <canvas ref="testCanvas1" id="leftCanvas" class="canvas"></canvas>
-            </div>
-            <div class="right-section">
-                <canvas ref="testCanvas2" id="rightCanvas" class="canvas"></canvas>
-            </div>
+            <canvas ref="testCanvas1" id="leftCanvas" :class="(turn === 0) ? 'canvas' : 'canvas canvas_hidden'"></canvas>
+            <canvas ref="testCanvas2" id="rightCanvas" :class="(turn === 1) ? 'canvas' : 'canvas canvas_hidden'"></canvas>
         </div>
 
         <div v-if="debug" class="visualize-area">
@@ -76,6 +72,7 @@ export default {
             debug: false,
             audioEnabled: false, // The user needs to interact with the page (by clicking the button) to enable audio
 
+            turn: 0, // 表示当前是哪个角色在说话 (0表示soyo, 1表示anon)
         };
     },
 
@@ -145,18 +142,19 @@ export default {
             plugins: [
                 [ActionQueue, {
                     ttsConfig: {
-                        type: 'gptsovits',
-                        "refer_wav_path": "参考音频\\Soyo干声素材\\正常参考\\うちはとても裕福になった綺麗な家に引っ越して.wav",
-                        "prompt_text": "うちはとても裕福になった綺麗な家に引っ越して。",
-                        "prompt_language": "ja",
-                        "text_language": "zh", // 要合成的文本的语言
-                        // "text_language": "zh",
-                        "temperature": 1.0,
-                        "speed": 1.0,
+                        // type: 'gptsovits',
+                        // "refer_wav_path": "参考音频\\Soyo干声素材\\正常参考\\うちはとても裕福になった綺麗な家に引っ越して.wav",
+                        // "prompt_text": "うちはとても裕福になった綺麗な家に引っ越して。",
+                        // "prompt_language": "ja",
+                        // "text_language": "zh", // 要合成的文本的语言
+                        // // "text_language": "zh",
+                        // "temperature": 1.0,
+                        // "speed": 1.0,
 
 
-                        "text": "",
-                        "speaker": "soyo0"
+                        // "text": "",
+                        // "speaker": "soyo0"
+                        type: 'gptsovits', character: 'misaka-zh'
 
                     }, translationConfig: null
                 }],
@@ -263,12 +261,19 @@ export default {
         /** @type {string} */
         let prevAnswer = '';
 
+        const self = this;
+
         async function mainLoop() {
+
+            self.turn = 0;
+
             agent1.appendContext(prevAnswer + `（当前话题：${topic}）`);
             prevAnswer = await agent1.respondToContext();
             console.log('Soyo:', prevAnswer);
 
             await agent1.waitUntilEndOfResponse();
+
+            self.turn = 1;
 
             agent2.appendContext(prevAnswer + `（当前话题：${topic}）`);
             prevAnswer = await agent2.respondToContext();
@@ -307,7 +312,7 @@ export default {
 .canvas-container {
     margin: 0;
     padding: 0;
-    display: flex;
+    /* display: flex; */
     /* 使用flex布局 */
     width: 100%;
     /* 充满屏幕宽度 */
@@ -325,6 +330,7 @@ export default {
 }
 
 .canvas {
+    position: absolute;
     margin: 0;
     padding: 0;
     display: block;
@@ -333,6 +339,15 @@ export default {
     /* 充满父容器 */
     height: 100%;
     /* 充满父容器 */
+
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.canvas_hidden {
+    transform: translateX(-50px);
+    opacity: 0;
 }
 
 
