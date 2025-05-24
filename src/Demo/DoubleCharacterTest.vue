@@ -1,5 +1,6 @@
 <template>
     <div>
+        <div class="background-image"></div>
         <div class="user-interface" id="user-interface">
             <!-- UI区域 -->
             <button v-if="!audioEnabled" @click="enableAudioActivities">启用音频</button>
@@ -28,7 +29,7 @@
             <div v-if="actionQueueWatcher" class="action-queue">
                 <div v-for="(action, i) in actionQueueWatcher" :key="i" class="action-container">
                     <span> 动作类型: {{ action.type }} <br>
-                        内容: {{action.data}}
+                        内容: {{ action.data }}
                     </span>
                 </div>
             </div>
@@ -142,32 +143,39 @@ export default {
             queryTemplate: null,
 
             plugins: [
-                [ActionQueue, { ttsConfig: {
+                [ActionQueue, {
+                    ttsConfig: {
                         type: 'gptsovits',
-                        "refer_wav_path": "misaka-ref2.wav",
-                        "prompt_text": "何かありそうね。クロコに連絡しておこうかな。なんだか騒がしいわね。",
+                        "refer_wav_path": "参考音频\\Soyo干声素材\\正常参考\\うちはとても裕福になった綺麗な家に引っ越して.wav",
+                        "prompt_text": "うちはとても裕福になった綺麗な家に引っ越して。",
                         "prompt_language": "ja",
                         "text_language": "zh", // 要合成的文本的语言
                         // "text_language": "zh",
                         "temperature": 1.0,
                         "speed": 1.0,
 
+
                         "text": "",
-                    }, translationConfig: null }],
-                [L2dDisplay, { modelURL: '/Resources/mygo_mujica/figure/mygo/soyo/casual/model.json', canvas: this.$refs.testCanvas1,
+                        "speaker": "soyo0"
+
+                    }, translationConfig: null
+                }],
+                [L2dDisplay, {
+                    modelURL: '/Resources/mygo_mujica/figure/mygo/soyo/casual/model.json', canvas: this.$refs.testCanvas1,
                     motionDict: {
-                        'akimbo': {group: 'tap', order: 0, duration: 1000},
-                        'raise_one_hand': {group: 'tap', order: 1, duration: 1000}
+                        'akimbo': { group: 'tap', order: 0, duration: 1000 },
+                        'raise_one_hand': { group: 'tap', order: 1, duration: 1000 }
                     },
                     expressionDict: {
-                        'no_expression': {order: 0},
-                        'smile': {order: 1},
-                        'frown': {order: 2},
-                        'doubtful': {order: 3},
-                        'smile_with_eyes_closed': {order: 4},
-                        'shocked': {order: 5},
-                        'blush': {order: 6},
-                    } }],
+                        'no_expression': { order: 0 },
+                        'smile': { order: 1 },
+                        'frown': { order: 2 },
+                        'doubtful': { order: 3 },
+                        'smile_with_eyes_closed': { order: 4 },
+                        'shocked': { order: 5 },
+                        'blush': { order: 6 },
+                    }
+                }],
                 [BatteryStatus, {}],
             ]
         };
@@ -185,22 +193,25 @@ export default {
             plugins: [
                 [ActionQueue, {
                     ttsConfig: { type: 'gptsovits', character: 'misaka-zh' },
-                    translationConfig: null }],
+                    translationConfig: null
+                }],
 
-                [L2dDisplay, { modelURL: '/Resources/mygo_mujica/figure/mygo/anon/casual/model.json', canvas: this.$refs.testCanvas2,
+                [L2dDisplay, {
+                    modelURL: '/Resources/mygo_mujica/figure/mygo/anon/casual/model.json', canvas: this.$refs.testCanvas2,
                     motionDict: {
-                        'akimbo': {group: 'tap', order: 0, duration: 1000},
-                        'raise_one_hand': {group: 'tap', order: 1, duration: 1000}
+                        'akimbo': { group: 'tap', order: 0, duration: 1000 },
+                        'raise_one_hand': { group: 'tap', order: 1, duration: 1000 }
                     },
                     expressionDict: {
-                        'no_expression': {order: 0},
-                        'smile': {order: 1},
-                        'frown': {order: 2},
-                        'doubtful': {order: 3},
-                        'smile_with_eyes_closed': {order: 4},
-                        'shocked': {order: 5},
-                        'blush': {order: 6},
-                    } }],
+                        'no_expression': { order: 0 },
+                        'smile': { order: 1 },
+                        'frown': { order: 2 },
+                        'doubtful': { order: 3 },
+                        'smile_with_eyes_closed': { order: 4 },
+                        'shocked': { order: 5 },
+                        'blush': { order: 6 },
+                    }
+                }],
                 [BatteryStatus, {}],
             ]
         };
@@ -296,23 +307,32 @@ export default {
 .canvas-container {
     margin: 0;
     padding: 0;
-    display: flex;      /* 使用flex布局 */
-    width: 100%;       /* 充满屏幕宽度 */
-    height: 100vh;     /* 充满屏幕高度 */
+    display: flex;
+    /* 使用flex布局 */
+    width: 100%;
+    /* 充满屏幕宽度 */
+    height: 100vh;
+    /* 充满屏幕高度 */
 }
 
-.left-section, .right-section {
-    flex: 1;           /* 均等分配空间 */
-    height: 100%;      /* 继承容器高度 */
+.left-section,
+.right-section {
+    flex: 1;
+    /* 均等分配空间 */
+    height: 100%;
+    /* 继承容器高度 */
     position: relative;
 }
 
 .canvas {
     margin: 0;
     padding: 0;
-    display: block;    /* 避免canvas默认inline带来的空白间隙 */
-    width: 100%;       /* 充满父容器 */
-    height: 100%;      /* 充满父容器 */
+    display: block;
+    /* 避免canvas默认inline带来的空白间隙 */
+    width: 100%;
+    /* 充满父容器 */
+    height: 100%;
+    /* 充满父容器 */
 }
 
 
@@ -320,7 +340,8 @@ export default {
 .user-interface {
     z-index: 999;
     position: fixed;
-    width: 90vw; /* 1vw = 视口宽的的1% */
+    width: 90vw;
+    /* 1vw = 视口宽的的1% */
     max-width: 600px;
     left: 50vw;
     top: 100vh;
@@ -330,13 +351,14 @@ export default {
     /* -webkit-app-region: drag; */
 }
 
-.user-interface > * {
+.user-interface>* {
     border-radius: 10px;
     margin: 10px;
     font-family: Avenir, Helvetica, Arial, sans-serif;
     font-size: 2em;
 }
-.user-interface > input {
+
+.user-interface>input {
     width: 80%;
     max-width: 800px;
 }
@@ -398,4 +420,17 @@ export default {
     color: white;
 }
 
+.background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('@/assets/bg01020.png');
+    /* 替换为你的图片路径 */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    z-index: -1
+}
 </style>
