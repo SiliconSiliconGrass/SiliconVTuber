@@ -101,6 +101,10 @@ export default class SubtitlePlugin extends AbstractPlugin {
             if (subtitle) {
                 if (action.type === 'EndOfResponse') {
                     subtitle.clear();
+
+                    if (this.translationSubtitle) {
+                        this.translationSubtitle.clear();
+                    }
                     return;
                 }
                 if (action.type !== 'SayAloud') return;
