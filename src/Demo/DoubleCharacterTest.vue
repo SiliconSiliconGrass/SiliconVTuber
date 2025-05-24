@@ -239,7 +239,7 @@ export default {
                 [ActionQueue, {
                     ttsConfig: {
                         type: 'gptsovits',
-                        character: 'misaka-zh',
+                        // character: 'misaka-zh', // debug
                         "refer_wav_path": "参考音频/Soyo干声素材/正常参考/うちはとても裕福になった綺麗な家に引っ越して.wav",
                         "prompt_text": "うちはとても裕福になった綺麗な家に引っ越して。",
                         "prompt_language": "ja",
@@ -251,7 +251,6 @@ export default {
 
                         "text": "",
                         "speaker": "soyo0"
-                        // type: 'gptsovits', character: 'misaka-zh'
 
                     }, translationConfig: null
                 }],
@@ -356,7 +355,7 @@ export default {
                 [ActionQueue, {
                     ttsConfig: {
                         type: 'gptsovits',
-                        character: 'misaka-zh',
+                        // character: 'misaka-zh', // debug
                         "refer_wav_path": "参考音频/Anon干声素材/参考音频/うちの学校本当にバンドやってる子が多いんだなぁ登下校の時も.wav",
                         "prompt_text": "うちの学校本当にバンドやってる子が多いんだなぁ登下校の時も",
                         "prompt_language": "ja",
