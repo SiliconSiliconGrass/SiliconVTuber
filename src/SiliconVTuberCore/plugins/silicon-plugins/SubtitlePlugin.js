@@ -1,5 +1,5 @@
 import AbstractPlugin from "../AbstractPlugin";
-import { GetBotFromConfig } from "@/components/Bot/BotUtils";
+import { GetBotFromConfig } from "@/SiliconVTuberCore/Bot/BotUtils.js";
 
 const DEFAULT_TRANSLATION_PROMPT = `
 你是一个翻译机器人，将输入的内容全部翻译成中文
@@ -8,10 +8,74 @@ const DEFAULT_TRANSLATION_PROMPT = `
 再次强调：输出中文翻译结果，不要输出其他信息！
 `;
 
+/**
+ * SubtitleHandler
+ * @description 该类用于处理字幕的显示
+ */
+class SubtitleHandler {
+    /**
+     * @param {HTMLElement} element 字幕元素
+     */
+    constructor(element) {
+        /** @type {HTMLElement} */
+        this.element = element;
+        /** @type {string} */
+        this.targetContent = '';
+        /** @type {string} */
+        this.currentContent = '';
+
+        this.mainLoop(this);
+    }
+
+    /**
+     * 主循环
+     */
+    mainLoop(self) {
+        if (self.targetContent.length > self.currentContent.length) {
+            // 逐渐显示字幕
+            self.currentContent += self.targetContent[self.currentContent.length];
+        }
+        self.element.innerHTML = self.currentContent;
+        this.intervalId = setTimeout(() => self.mainLoop(self), 100);
+    }
+
+    /**
+     * 更新字幕内容
+     * @param {string} content 更新后的字幕内容
+     */
+    setContent(content) {
+        this.currentContent = '';
+        this.targetContent = content;
+    }
+
+    /**
+     * 增量更新字幕内容
+     * @param {string} delta 增量字幕内容
+     */
+    add(delta) {
+        console.log('add subtitle:', delta)
+        this.targetContent += delta;
+    }
+
+    /**
+     * 清空字幕内容
+     */
+    clear() {
+        this.element.innerHTML = '';
+        this.targetContent = '';
+        this.currentContent = '';
+    }
+}
+
+/**
+ * SubtitlePlugin
+ * @description 该插件用于处理字幕的显示和翻译
+ */
 export default class SubtitlePlugin extends AbstractPlugin {
-    constructor({enableTranslation = false, botConfig = null}) {
+    constructor({element, enableTranslation = false, botConfig = null, translationElement = null}) {
         super();
 
+        this.subtitle = new SubtitleHandler(element);
         this.enableTranslation = enableTranslation;
 
         if (this.enableTranslation) {
@@ -22,6 +86,7 @@ export default class SubtitlePlugin extends AbstractPlugin {
                 throw `ValueError: Unsupported bot config! ${botConfig}`;
             }
             this.bot = bot;
+            this.translationSubtitle = new SubtitleHandler(translationElement);
         }
     }
 
@@ -33,7 +98,7 @@ export default class SubtitlePlugin extends AbstractPlugin {
         this.agent = agent;
 
         agent.addEventListener('action_start', (e) => {
-            let subtitle = agent.subtitles.main;
+            let subtitle = this.subtitle;
             let action = e.detail.action;
             if (subtitle) {
                 if (action.type !== 'SayAloud') return;
@@ -51,7 +116,7 @@ export default class SubtitlePlugin extends AbstractPlugin {
 
         if (this.enableTranslation) {
             agent.addEventListener('end_of_query', (e) => {
-                let subtitle = agent.subtitles.translation;
+                let subtitle = this.translationSubtitle;
                 if (subtitle) {
                     let agentResponse = e.detail.response;
                     this.bot.appendContext(agentResponse, 'user');
@@ -59,6 +124,11 @@ export default class SubtitlePlugin extends AbstractPlugin {
                         subtitle.add(translation);
                     });
                 }
+            });
+
+            agent.addEventListener('end_of_response', (e) => {
+                this.subtitle.clear();
+                this.translationSubtitle.clear();
             });
 
             // agent.addEventListener('action_start', (e) => {

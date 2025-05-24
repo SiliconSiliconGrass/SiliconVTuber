@@ -9,9 +9,16 @@
         </div>
 
         <div class="subtitle-area">
-            <span ref="subtitle1" class="subtitle"></span>
-            <br>
-            <span ref="subtitle2" class="subtitle"></span>
+            <div style="position: absolute; width: 100%; height: 100%;">
+                <span ref="subtitle1" class="subtitle"></span>
+                <br>
+                <span ref="subtitle2" class="subtitle"></span>
+            </div>
+            <div style="position: absolute; width: 100%; height: 100%;">
+                <span ref="subtitle3" class="subtitle"></span>
+                <br>
+                <span ref="subtitle4" class="subtitle"></span>
+            </div>
         </div>
 
         <!-- {{ (this.agent) ? this.agent.userInputBuffer : ''}} -->
@@ -65,6 +72,7 @@ import { getToken } from '@/SiliconVTuberCore/utils/tokenGatewary.js';
 import { createAgent } from '@/SiliconVTuberCore/utils/createAgent.js';
 import { getPrompt } from '@/SiliconVTuberCore/utils/promptBank';
 import { live2dPrompter } from '@/SiliconVTuberCore/utils/live2dPrompter.js';
+import SubtitlePlugin from '@/SiliconVTuberCore/plugins/silicon-plugins/SubtitlePlugin.js';
 
 export default {
     components: {
@@ -248,6 +256,7 @@ export default {
                 }],
                 [L2dDisplay, l2dconfig1],
                 [BatteryStatus, {}],
+                [SubtitlePlugin, {element: this.$refs.subtitle1, enableTranslation: false}],
             ]
         };
 
@@ -362,6 +371,7 @@ export default {
 
                 [L2dDisplay, l2dconfig2],
                 [BatteryStatus, {}],
+                [SubtitlePlugin, {element: this.$refs.subtitle1, enableTranslation: false}],
             ]
         };
 

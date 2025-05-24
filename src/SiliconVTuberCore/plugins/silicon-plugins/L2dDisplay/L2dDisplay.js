@@ -2,6 +2,12 @@ import AbstractPlugin from "../../AbstractPlugin";
 import { Application, Ticker, Color } from "pixi.js";
 import { FocusController, Live2DModel, MotionPriority } from "pixi-live2d-display";
 
+function delay(ms) {
+    return new Promise(resolve => {
+        setTimeout(resolve, ms);
+    });
+}
+
 const modelURL = "/Resources/mikoto/mikoto.model.json";
 // const modelURL = "/Resources/Mao/Mao.model3.json";
 
