@@ -16,8 +16,10 @@
 
         <!-- {{ (this.agent) ? this.agent.userInputBuffer : ''}} -->
         <div class="canvas-container">
-            <canvas ref="testCanvas1" id="leftCanvas" :class="(turn === 0) ? 'canvas' : 'canvas canvas_hidden'"></canvas>
-            <canvas ref="testCanvas2" id="rightCanvas" :class="(turn === 1) ? 'canvas' : 'canvas canvas_hidden'"></canvas>
+            <canvas ref="testCanvas1" id="leftCanvas"
+                :class="(turn === 0) ? 'canvas' : 'canvas canvas_hidden'"></canvas>
+            <canvas ref="testCanvas2" id="rightCanvas"
+                :class="(turn === 1) ? 'canvas' : 'canvas canvas_hidden'"></canvas>
         </div>
 
         <div v-if="debug" class="visualize-area">
@@ -62,6 +64,7 @@ import VTuber from '@/SiliconVTuberCore/Agent/VTuberAgent.js';
 import { getToken } from '@/SiliconVTuberCore/utils/tokenGatewary.js';
 import { createAgent } from '@/SiliconVTuberCore/utils/createAgent.js';
 import { getPrompt } from '@/SiliconVTuberCore/utils/promptBank';
+import { live2dPrompter } from '@/SiliconVTuberCore/utils/live2dPrompter.js';
 
 export default {
     components: {
@@ -129,54 +132,205 @@ export default {
         let e = document.getElementById('user-interface');
         console.log(e);
 
+        const l2dconfig1 = {
+            modelURL: '/Resources/mygo_mujica/figure/mygo/soyo/casual/model.json', canvas: this.$refs.testCanvas1,
+            motionDict: {
+                'soyo_serious02': { group: 'soyo_serious02', order: 0, duration: 1000 },
+                'soyo_nnf02': { group: 'soyo_nnf02', order: 0, duration: 1000 },
+                'soyo_bye02': { group: 'soyo_bye02', order: 0, duration: 1000 },
+                'soyo_bye01': { group: 'soyo_bye01', order: 0, duration: 1000 },
+                'soyo_nf02': { group: 'soyo_nf02', order: 0, duration: 1000 },
+                'soyo_nnf04': { group: 'soyo_nnf04', order: 0, duration: 1000 },
+                'soyo_kime01': { group: 'soyo_kime01', order: 0, duration: 1000 },
+                'soyo_nnf_left01': { group: 'soyo_nnf_left01', order: 0, duration: 1000 },
+                'soyo_nnf03': { group: 'soyo_nnf03', order: 0, duration: 1000 },
+                'soyo_serious04': { group: 'soyo_serious04', order: 0, duration: 1000 },
+                'soyo_cry02': { group: 'soyo_cry02', order: 0, duration: 1000 },
+                'soyo_shame01': { group: 'soyo_shame01', order: 0, duration: 1000 },
+                'soyo_nnf01': { group: 'soyo_nnf01', order: 0, duration: 1000 },
+                'soyo_nf04': { group: 'soyo_nf04', order: 0, duration: 1000 },
+                'soyo_angry01': { group: 'soyo_angry01', order: 0, duration: 1000 },
+                'soyo_thinking02': { group: 'soyo_thinking02', order: 0, duration: 1000 },
+                'soyo_odoodo01': { group: 'soyo_odoodo01', order: 0, duration: 1000 },
+                'soyo_nnf05': { group: 'soyo_nnf05', order: 0, duration: 1000 },
+                'soyo_nnf_right01': { group: 'soyo_nnf_right01', order: 0, duration: 1000 },
+                'soyo_ando01': { group: 'soyo_ando01', order: 0, duration: 1000 },
+                'soyo_nf_left01': { group: 'soyo_nf_left01', order: 0, duration: 1000 },
+                'soyo_idle01': { group: 'soyo_idle01', order: 0, duration: 1000 },
+                'soyo_sad01': { group: 'soyo_sad01', order: 0, duration: 1000 },
+                'soyo_nf05': { group: 'soyo_nf05', order: 0, duration: 1000 },
+                'soyo_nf01': { group: 'soyo_nf01', order: 0, duration: 1000 },
+                'soyo_sad02': { group: 'soyo_sad02', order: 0, duration: 1000 },
+                'soyo_smile03': { group: 'soyo_smile03', order: 0, duration: 1000 },
+                'soyo_smile01': { group: 'soyo_smile01', order: 0, duration: 1000 },
+                'soyo_angry02': { group: 'soyo_angry02', order: 0, duration: 1000 },
+                'soyo_nf_right01': { group: 'soyo_nf_right01', order: 0, duration: 1000 },
+                'soyo_smile02': { group: 'soyo_smile02', order: 0, duration: 1000 },
+                'soyo_serious01': { group: 'soyo_serious01', order: 0, duration: 1000 },
+                'soyo_smile04': { group: 'soyo_smile04', order: 0, duration: 1000 },
+                'soyo_smile05': { group: 'soyo_smile05', order: 0, duration: 1000 },
+                'soyo_thinking01': { group: 'soyo_thinking01', order: 0, duration: 1000 },
+                'soyo_serious03': { group: 'soyo_serious03', order: 0, duration: 1000 },
+                'soyo_sad03': { group: 'soyo_sad03', order: 0, duration: 1000 },
+                'soyo_shame02': { group: 'soyo_shame02', order: 0, duration: 1000 },
+                'soyo_nf03': { group: 'soyo_nf03', order: 0, duration: 1000 },
+                'soyo_angry03': { group: 'soyo_angry03', order: 0, duration: 1000 },
+                'soyo_cry01': { group: 'soyo_cry01', order: 0, duration: 1000 },
+                'soyo_wink01': { group: 'soyo_wink01', order: 0, duration: 1000 },
+                'soyo_kandou01': { group: 'soyo_kandou01', order: 0, duration: 1000 },
+                'soyo_surprised01': { group: 'soyo_surprised01', order: 0, duration: 1000 },
+                'soyo_e235_gacha01': { group: 'soyo_e235_gacha01', order: 0, duration: 1000 },
+                'soyo_e250_gacha01': { group: 'soyo_e250_gacha01', order: 0, duration: 1000 },
+            },
+            expressionDict: {
+                'soyo_angry01': {order: 103},
+                'soyo_ando01': {order: 104},
+                'soyo_thinking01': {order: 105},
+                'soyo_odoodo01': {order: 106},
+                'soyo_serious04': {order: 107},
+                'soyo_sad03': {order: 108},
+                'soyo_cry01': {order: 109},
+                'soyo_surprised01': {order: 110},
+                'soyo_wink01': {order: 111},
+                'soyo_kandou01': {order: 112},
+                'soyo_smile03': {order: 113},
+                'soyo_sad02': {order: 114},
+                'soyo_angry03': {order: 115},
+                'soyo_cry02': {order: 116},
+                'soyo_smile02': {order: 117},
+                'soyo_smile05': {order: 118},
+                'soyo_smile04': {order: 119},
+                'soyo_shame02': {order: 120},
+                'soyo_thinking02': {order: 121},
+                'soyo_idle01': {order: 122},
+                'soyo_smile01': {order: 123},
+                'soyo_bye01': {order: 124},
+                'soyo_kime01': {order: 125},
+                'soyo_sad01': {order: 126},
+                'soyo_serious01': {order: 127},
+                'soyo_default': {order: 128},
+                'soyo_shame01': {order: 129},
+                'soyo_serious02': {order: 130},
+                'soyo_serious03': {order: 131},
+                'soyo_bye02': {order: 132},
+                'soyo_angry02': {order: 133},
+            }
+        }
+
         const testAgentConfig1 = {
             Agent: VTuber,
             botConfig: {
                 type: 'GLM',
                 token: getToken('glm'),
                 modelName: 'glm-4-flash',
-                systemPrompt: getPrompt('soyo')
+                systemPrompt: live2dPrompter(getPrompt('soyo'), l2dconfig1)
             },
             queryTemplate: null,
 
             plugins: [
                 [ActionQueue, {
                     ttsConfig: {
-                        // type: 'gptsovits',
-                        // "refer_wav_path": "参考音频\\Soyo干声素材\\正常参考\\うちはとても裕福になった綺麗な家に引っ越して.wav",
-                        // "prompt_text": "うちはとても裕福になった綺麗な家に引っ越して。",
-                        // "prompt_language": "ja",
-                        // "text_language": "zh", // 要合成的文本的语言
-                        // // "text_language": "zh",
-                        // "temperature": 1.0,
-                        // "speed": 1.0,
+                        type: 'gptsovits',
+                        "refer_wav_path": "参考音频/Soyo干声素材/正常参考/うちはとても裕福になった綺麗な家に引っ越して.wav",
+                        "prompt_text": "うちはとても裕福になった綺麗な家に引っ越して。",
+                        "prompt_language": "ja",
+                        "text_language": "zh", // 要合成的文本的语言
+                        // "text_language": "zh",
+                        "temperature": 1.0,
+                        "speed": 1.0,
 
 
-                        // "text": "",
-                        // "speaker": "soyo0"
-                        type: 'gptsovits', character: 'misaka-zh'
+                        "text": "",
+                        "speaker": "soyo0"
+                        // type: 'gptsovits', character: 'misaka-zh'
 
                     }, translationConfig: null
                 }],
-                [L2dDisplay, {
-                    modelURL: '/Resources/mygo_mujica/figure/mygo/soyo/casual/model.json', canvas: this.$refs.testCanvas1,
-                    motionDict: {
-                        'akimbo': { group: 'tap', order: 0, duration: 1000 },
-                        'raise_one_hand': { group: 'tap', order: 1, duration: 1000 }
-                    },
-                    expressionDict: {
-                        'no_expression': { order: 0 },
-                        'smile': { order: 1 },
-                        'frown': { order: 2 },
-                        'doubtful': { order: 3 },
-                        'smile_with_eyes_closed': { order: 4 },
-                        'shocked': { order: 5 },
-                        'blush': { order: 6 },
-                    }
-                }],
+                [L2dDisplay, l2dconfig1],
                 [BatteryStatus, {}],
             ]
         };
+
+        const l2dconfig2 = {
+            modelURL: '/Resources/mygo_mujica/figure/mygo/anon/casual/model.json', canvas: this.$refs.testCanvas2,
+            motionDict: {
+                'anon_angry01': { group: 'anon_angry01', order: 0, duration: 1000 },
+                'anon_smile01': { group: 'anon_smile01', order: 0, duration: 1000 },
+                'anon_thinking01': { group: 'anon_thinking01', order: 0, duration: 1000 },
+                'anon_nnf02': { group: 'anon_nnf02', order: 0, duration: 1000 },
+                'anon_smile04': { group: 'anon_smile04', order: 0, duration: 1000 },
+                'anon_serious02': { group: 'anon_serious02', order: 0, duration: 1000 },
+                'anon_smile02': { group: 'anon_smile02', order: 0, duration: 1000 },
+                'anon_angry04': { group: 'anon_angry04', order: 0, duration: 1000 },
+                'anon_nnf_right01': { group: 'anon_nnf_right01', order: 0, duration: 1000 },
+                'anon_nf05': { group: 'anon_nf05', order: 0, duration: 1000 },
+                'anon_nnf05': { group: 'anon_nnf05', order: 0, duration: 1000 },
+                'anon_angry02': { group: 'anon_angry02', order: 0, duration: 1000 },
+                'anon_nnf04': { group: 'anon_nnf04', order: 0, duration: 1000 },
+                'anon_thinking03': { group: 'anon_thinking03', order: 0, duration: 1000 },
+                'anon_angry03': { group: 'anon_angry03', order: 0, duration: 1000 },
+                'anon_nf_right01': { group: 'anon_nf_right01', order: 0, duration: 1000 },
+                'anon_sad01': { group: 'anon_sad01', order: 0, duration: 1000 },
+                'anon_nf_left01': { group: 'anon_nf_left01', order: 0, duration: 1000 },
+                'anon_kandou02': { group: 'anon_kandou02', order: 0, duration: 1000 },
+                'anon_shame01': { group: 'anon_shame01', order: 0, duration: 1000 },
+                'anon_cry01': { group: 'anon_cry01', order: 0, duration: 1000 },
+                'anon_nf03': { group: 'anon_nf03', order: 0, duration: 1000 },
+                'anon_cry02': { group: 'anon_cry02', order: 0, duration: 1000 },
+                'anon_nnf03': { group: 'anon_nnf03', order: 0, duration: 1000 },
+                'anon_nf02': { group: 'anon_nf02', order: 0, duration: 1000 },
+                'anon_bye01': { group: 'anon_bye01', order: 0, duration: 1000 },
+                'anon_shame02': { group: 'anon_shame02', order: 0, duration: 1000 },
+                'anon_smile03': { group: 'anon_smile03', order: 0, duration: 1000 },
+                'anon_sad02': { group: 'anon_sad02', order: 0, duration: 1000 },
+                'anon_wink01': { group: 'anon_wink01', order: 0, duration: 1000 },
+                'anon_thinking02': { group: 'anon_thinking02', order: 0, duration: 1000 },
+                'anon_kime02': { group: 'anon_kime02', order: 0, duration: 1000 },
+                'anon_nnf01': { group: 'anon_nnf01', order: 0, duration: 1000 },
+                'anon_nf01': { group: 'anon_nf01', order: 0, duration: 1000 },
+                'anon_nnf_left01': { group: 'anon_nnf_left01', order: 0, duration: 1000 },
+                'anon_kandou01': { group: 'anon_kandou01', order: 0, duration: 1000 },
+                'anon_nf04': { group: 'anon_nf04', order: 0, duration: 1000 },
+                'anon_surprised01': { group: 'anon_surprised01', order: 0, duration: 1000 },
+                'anon_serious01': { group: 'anon_serious01', order: 0, duration: 1000 },
+                'anon_idle01': { group: 'anon_idle01', order: 0, duration: 1000 },
+                'anon_kime01': { group: 'anon_kime01', order: 0, duration: 1000 },
+                'anon_e235_gacha01': { group: 'anon_e235_gacha01', order: 0, duration: 1000 },
+                'anon_e253_gacha01': { group: 'anon_e253_gacha01', order: 0, duration: 1000 },
+                'anon_e253_smile01': { group: 'anon_e253_smile01', order: 0, duration: 1000 },
+            },
+            expressionDict: {
+                'anon_default': {order: 0},
+                'anon_angry02': {order: 1},
+                'anon_kandou02': {order: 2},
+                'anon_thinking01': {order: 3},
+                'anon_idle01': {order: 4},
+                'anon_shame02': {order: 5},
+                'anon_surprised01': {order: 6},
+                'anon_kime01': {order: 7},
+                'anon_shame01': {order: 8},
+                'anon_bye01': {order: 9},
+                'anon_cry01': {order: 10},
+                'anon_cry02': {order: 11},
+                'anon_serious02': {order: 12},
+                'anon_angry04': {order: 13},
+                'anon_thinking03': {order: 14},
+                'anon_kandou01': {order: 15},
+                'anon_smile03': {order: 16},
+                'anon_kime02': {order: 17},
+                'anon_smile01': {order: 18},
+                'anon_wink01': {order: 19},
+                'anon_thinking02': {order: 20},
+                'anon_sad01': {order: 21},
+                'anon_angry01': {order: 22},
+                'anon_angry03': {order: 23},
+                'anon_smile02': {order: 24},
+                'anon_serious01': {order: 25},
+                'anon_smile04': {order: 26},
+                'anon_sad02': {order: 27},
+            }
+            
+        }
 
         const testAgentConfig2 = { // Anon
             Agent: VTuber,
@@ -184,32 +338,29 @@ export default {
                 type: 'GLM',
                 token: getToken('glm'),
                 modelName: 'glm-4-flash',
-                sytemPrompt: getPrompt('anon')
+                sytemPrompt: live2dPrompter(getPrompt('anon'), l2dconfig2)
             },
             queryTemplate: null,
 
             plugins: [
                 [ActionQueue, {
-                    ttsConfig: { type: 'gptsovits', character: 'misaka-zh' },
-                    translationConfig: null
+                    ttsConfig: {
+                        type: 'gptsovits',
+                        "refer_wav_path": "参考音频/Anon干声素材/参考音频/うちの学校本当にバンドやってる子が多いんだなぁ登下校の時も.wav",
+                        "prompt_text": "うちの学校本当にバンドやってる子が多いんだなぁ登下校の時も",
+                        "prompt_language": "ja",
+                        "text_language": "zh", // 要合成的文本的语言
+                        // "text_language": "zh",
+                        "temperature": 1.0,
+                        "speed": 1.0,
+
+
+                        "text": "",
+                        "speaker": "anon"
+                    }, translationConfig: null
                 }],
 
-                [L2dDisplay, {
-                    modelURL: '/Resources/mygo_mujica/figure/mygo/anon/casual/model.json', canvas: this.$refs.testCanvas2,
-                    motionDict: {
-                        'akimbo': { group: 'tap', order: 0, duration: 1000 },
-                        'raise_one_hand': { group: 'tap', order: 1, duration: 1000 }
-                    },
-                    expressionDict: {
-                        'no_expression': { order: 0 },
-                        'smile': { order: 1 },
-                        'frown': { order: 2 },
-                        'doubtful': { order: 3 },
-                        'smile_with_eyes_closed': { order: 4 },
-                        'shocked': { order: 5 },
-                        'blush': { order: 6 },
-                    }
-                }],
+                [L2dDisplay, l2dconfig2],
                 [BatteryStatus, {}],
             ]
         };
