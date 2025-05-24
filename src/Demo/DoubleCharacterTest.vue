@@ -230,7 +230,7 @@ export default {
             botConfig: {
                 type: 'GLM',
                 token: getToken('glm'),
-                modelName: 'glm-4-flash',
+                modelName: 'glm-4-flash-250414',
                 systemPrompt: live2dPrompter(getPrompt('soyo'), l2dconfig1, 'jp')
             },
             queryTemplate: null,
@@ -239,11 +239,11 @@ export default {
                 [ActionQueue, {
                     ttsConfig: {
                         type: 'gptsovits',
-                        // character: 'misaka-zh', // debug
+                        character: 'misaka-ja', // debug
                         "refer_wav_path": "参考音频/Soyo干声素材/正常参考/うちはとても裕福になった綺麗な家に引っ越して.wav",
                         "prompt_text": "うちはとても裕福になった綺麗な家に引っ越して。",
                         "prompt_language": "ja",
-                        "text_language": "zh", // 要合成的文本的语言
+                        "text_language": "ja", // 要合成的文本的语言
                         // "text_language": "zh",
                         "temperature": 1.0,
                         "speed": 1.0,
@@ -353,6 +353,7 @@ export default {
                 token: getToken('glm'),
                 modelName: 'glm-4-flash',
                 sytemPrompt: live2dPrompter(getPrompt('anon'), l2dconfig2, 'jp')
+                // sytemPrompt: live2dPrompter(getPrompt('misaka'), l2dconfig2, 'jp')
             },
             queryTemplate: null,
 
@@ -387,6 +388,9 @@ export default {
         };
 
         const agent1 = createAgent(testAgentConfig1);
+
+        console.log('agent1', agent1);
+
         const agent2 = createAgent(testAgentConfig2);
         console.log(agent1);
         console.log(agent2);
@@ -443,6 +447,7 @@ export default {
             prevAnswer = await agent1.respondToContext();
             console.log('Soyo:', prevAnswer);
 
+            agent1.dispatchEvent(new CustomEvent('end_of_query', { detail: { userInputBuffer: [], response: prevAnswer} }));
             await agent1.waitUntilEndOfResponse();
 
             self.turn = 1;
@@ -451,6 +456,7 @@ export default {
             prevAnswer = await agent2.respondToContext();
             console.log('Anon:', prevAnswer);
 
+            agent2.dispatchEvent(new CustomEvent('end_of_query', { detail: { userInputBuffer: [], response: prevAnswer} }));
             await agent2.waitUntilEndOfResponse();
 
             agent1.appendContext(`(旁白)当前话题为“${topic}”, 输出你想更换的话题。如果当前话题还没讨论完，请输出当前话题。`);

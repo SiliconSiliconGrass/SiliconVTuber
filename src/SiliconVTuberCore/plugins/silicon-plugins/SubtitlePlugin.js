@@ -78,7 +78,6 @@ export default class SubtitlePlugin extends AbstractPlugin {
         this.enableTranslation = enableTranslation;
 
         if (this.enableTranslation) {
-            let botConfig = config.botConfig;
             if (!botConfig.systemPrompt) botConfig.systemPrompt = DEFAULT_TRANSLATION_PROMPT;
             let bot = GetBotFromConfig(botConfig);
             if (!bot) {
@@ -108,13 +107,13 @@ export default class SubtitlePlugin extends AbstractPlugin {
                 subtitle.add(action.data);
             }
 
-            if (action.resources.length > 1) { // 使用在ResourceManager中实现的翻译功能，但这一方案延迟较高，应当考虑弃用！
-                if (action.resources[1].type === 'Translation') {
-                    let subtitle = agent.subtitles.translation;
-                    let text = action.resources[1].data.translation;
-                    if (text) subtitle.add(action.resources[1].data.translation);
-                }
-            }
+            // if (action.resources.length > 1) { // 使用在ResourceManager中实现的翻译功能，但这一方案延迟较高，应当考虑弃用！
+            //     if (action.resources[1].type === 'Translation') {
+            //         let subtitle = agent.subtitles.translation;
+            //         let text = action.resources[1].data.translation;
+            //         if (text) subtitle.add(action.resources[1].data.translation);
+            //     }
+            // }
         });
 
         if (this.enableTranslation) {

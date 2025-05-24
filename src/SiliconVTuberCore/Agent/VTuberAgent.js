@@ -39,8 +39,9 @@ const MIN_SENTENCE_LENGTH = 3;
 const msgDelta = (self, event) => {
     // 定义收到流式请求中的message delta时的处理过程
     if (event.detail.content) {
-        self.response += event.detail.content;
-        self.buffer += event.detail.content;
+        const delta = event.detail.content.replaceAll('（', '[').replaceAll('）', ']');
+        self.response += delta;
+        self.buffer += delta;
     }
 
     if (!areBracketsBalanced(self.buffer)) return; // 若不匹配，则暂不处理
