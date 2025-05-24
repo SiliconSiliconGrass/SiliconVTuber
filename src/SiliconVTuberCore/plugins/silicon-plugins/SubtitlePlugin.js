@@ -36,7 +36,7 @@ class SubtitleHandler {
             self.currentContent += self.targetContent[self.currentContent.length];
         }
         self.element.innerHTML = self.currentContent;
-        this.intervalId = setTimeout(() => self.mainLoop(self), 100);
+        self.intervalId = setTimeout(() => self.mainLoop(self), 100);
     }
 
     /**
@@ -53,7 +53,6 @@ class SubtitleHandler {
      * @param {string} delta 增量字幕内容
      */
     add(delta) {
-        console.log('add subtitle:', delta)
         this.targetContent += delta;
     }
 
@@ -101,6 +100,10 @@ export default class SubtitlePlugin extends AbstractPlugin {
             let subtitle = this.subtitle;
             let action = e.detail.action;
             if (subtitle) {
+                if (action.type === 'EndOfResponse') {
+                    subtitle.clear();
+                    return;
+                }
                 if (action.type !== 'SayAloud') return;
                 subtitle.add(action.data);
             }

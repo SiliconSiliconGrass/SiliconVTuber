@@ -316,6 +316,7 @@ export default class Agent extends AbstractAgent {
                 userInputBuffer: self.userInputBuffer,
                 response: response
             }})); // End Of Response
+            console.log('end of response');
         });
 
         let sleepTime = (self.userInputBuffer.length === 0) ? 1000 : 1000;

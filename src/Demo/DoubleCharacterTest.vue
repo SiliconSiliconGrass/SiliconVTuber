@@ -239,6 +239,7 @@ export default {
                 [ActionQueue, {
                     ttsConfig: {
                         type: 'gptsovits',
+                        character: 'misaka-zh',
                         "refer_wav_path": "参考音频/Soyo干声素材/正常参考/うちはとても裕福になった綺麗な家に引っ越して.wav",
                         "prompt_text": "うちはとても裕福になった綺麗な家に引っ越して。",
                         "prompt_language": "ja",
@@ -355,6 +356,7 @@ export default {
                 [ActionQueue, {
                     ttsConfig: {
                         type: 'gptsovits',
+                        character: 'misaka-zh',
                         "refer_wav_path": "参考音频/Anon干声素材/参考音频/うちの学校本当にバンドやってる子が多いんだなぁ登下校の時も.wav",
                         "prompt_text": "うちの学校本当にバンドやってる子が多いんだなぁ登下校の時も",
                         "prompt_language": "ja",
@@ -371,7 +373,7 @@ export default {
 
                 [L2dDisplay, l2dconfig2],
                 [BatteryStatus, {}],
-                [SubtitlePlugin, {element: this.$refs.subtitle1, enableTranslation: false}],
+                [SubtitlePlugin, {element: this.$refs.subtitle2, enableTranslation: false}],
             ]
         };
 
