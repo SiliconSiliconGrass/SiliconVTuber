@@ -46,13 +46,15 @@ export default class GlmBot extends AbstractBot {
             messages = this.messages;
         }
 
-        let filteredMessages = messages.slice(-1);
+        let filteredMessages = messages.slice(-11); // 保留11条历史
         if (this.systemPrompt) {
             filteredMessages.unshift({
                 role: 'system',
                 content: this.systemPrompt,
             })
         }
+
+        console.log({filteredMessages})
 
         const url = `https://open.bigmodel.cn/api/paas/v4/chat/completions`;
         const headers = {
