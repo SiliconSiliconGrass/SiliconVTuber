@@ -61,7 +61,8 @@ export function Soyo(live2dCanvas, subtitle, transSubtitle, danmukuArea) {
             [BilbiliDanmuku, {
                 url: "http://localhost:5252/",
                 display: true,
-                displayArea: danmukuArea
+                displayArea: danmukuArea,
+                language: "ja"
             }
 
             ]

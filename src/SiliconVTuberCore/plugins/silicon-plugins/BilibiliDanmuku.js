@@ -37,8 +37,9 @@ export default class BilbiliDanmuku extends AbstractPlugin {
      * @param {string} url 后端url
      * @param {boolean} display 是否在页面上显示弹幕列表
      * @param {HTMLDivElement} displayArea 弹幕列表显示区域
+     * @param {string} language 语言，默认为'zh'，支持'zh'和'ja'
      */
-    constructor({url, display=false, displayArea=null}) {
+    constructor({url, display=false, displayArea=null, language='zh'}) {
         super();
         this.url = url || 'http:/127.0.0.1:5252/'
         this.display = display;
@@ -47,6 +48,8 @@ export default class BilbiliDanmuku extends AbstractPlugin {
         this.messages = [];
         this.messageIds = [];
         this.newMessages = [];
+
+        this.language = language;
 
         // this.showDanmuku({content: "testDanmuku1", username: "guiguicao"}) // debug
     }
@@ -117,10 +120,25 @@ export default class BilbiliDanmuku extends AbstractPlugin {
             return '';
         }
 
-        let danmukuPrompt = '收到了以下新弹幕:\n';
-        for (let danmuku of this.newMessages) {
-            danmukuPrompt += `弹幕内容: ${danmuku.content} （来自用户“${danmuku.username}”）\n`;
+        let danmukuPrompt = '';
+
+        if (this.language === 'zh') {
+            danmukuPrompt = '收到了以下新弹幕:\n';
+            for (let danmuku of this.newMessages) {
+                danmukuPrompt += `弹幕内容: ${danmuku.content} （来自用户“${danmuku.username}”）\n`;
+            }
+            danmukuPrompt += '请朗读弹幕，并作出回应。'
+        }else if (this.language === 'ja') {
+            danmukuPrompt = '以下の新しいダンマークを受信しました:\n';
+            for (let danmuku of this.newMessages) {
+                danmukuPrompt += `ダンマーク内容: ${danmuku.content} （ユーザー“${danmuku.username}”からのもの）\n`; 
+            } 
+            danmukuPrompt += 'ダンマークを読み上げ、応答してください。'
+        }else{
+            throw new Error('Language not supported');
         }
+
+        
         this.newMessages = [];
         return danmukuPrompt;
     }
