@@ -247,6 +247,7 @@ export default class Agent extends AbstractAgent {
         // }
         this.bot.response = '';
         this.bot.buffer = '';
+        this.response = '';
         this.buffer = '';
         this.busy = true;
         try {
