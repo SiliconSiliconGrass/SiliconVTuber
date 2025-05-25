@@ -26,7 +26,7 @@ export function Anon(live2dCanvas, subtitle, transSubtitle) {
             type: 'GLM',
             token: getToken('glm'),
             modelName: 'glm-4-flash',
-            systemPrompt: live2dPrompter(PROMPT, LIVE2D_CONFIG, 'jp')
+            systemPrompt: live2dPrompter(PROMPT, LIVE2D_CONFIG, 'ja')
         },
         queryTemplate: '%USER_INPUT%',
 
@@ -34,11 +34,11 @@ export function Anon(live2dCanvas, subtitle, transSubtitle) {
             [ActionQueue, {
                 ttsConfig: {
                     type: 'gptsovits',
-                    character: 'misaka-ja', // debug
+                    // character: 'misaka-ja', // debug
                     "refer_wav_path": "参考音频/Anon干声素材/参考音频/うちの学校本当にバンドやってる子が多いんだなぁ登下校の時も.wav",
                     "prompt_text": "うちの学校本当にバンドやってる子が多いんだなぁ登下校の時も",
                     "prompt_language": "ja",
-                    "text_language": "zh", // 要合成的文本的语言
+                    "text_language": "ja", // 要合成的文本的语言
                     // "text_language": "zh",
                     "temperature": 1.0,
                     "speed": 1.0,

@@ -8,6 +8,7 @@ import { createAgent } from "@/SiliconVTuberCore/utils/createAgent.js";
 
 import LIVE2D_CONFIG from "./live2dConfig.js";
 import PROMPT from "./prompt.js"
+import BilbiliDanmuku from "@/SiliconVTuberCore/plugins/silicon-plugins/BilibiliDanmuku.js";
 
 /**
  * 获取一个 Soyo Agent
@@ -26,15 +27,15 @@ export function Soyo(live2dCanvas, subtitle, transSubtitle) {
             type: 'GLM',
             token: getToken('glm'),
             modelName: 'glm-4-flash-250414',
-            systemPrompt: live2dPrompter(PROMPT, LIVE2D_CONFIG, 'jp')
+            systemPrompt: live2dPrompter(PROMPT, LIVE2D_CONFIG, 'ja')
         },
-        queryTemplate: '%USER_INPUT%',
+        queryTemplate: '%USER_INPUT% %PLUGIN_INFO%',
 
         plugins: [
             [ActionQueue, {
                 ttsConfig: {
                     type: 'gptsovits',
-                    character: 'misaka-ja', // debug
+                    // character: 'misaka-ja', // debug
                     "refer_wav_path": "参考音频/Soyo干声素材/正常参考/うちはとても裕福になった綺麗な家に引っ越して.wav",
                     "prompt_text": "うちはとても裕福になった綺麗な家に引っ越して。",
                     "prompt_language": "ja",
@@ -56,6 +57,11 @@ export function Soyo(live2dCanvas, subtitle, transSubtitle) {
                 botConfig: {type: 'GLM', token: getToken('glm'), modelName: 'glm-4-flash'}, 
                 translationElement: transSubtitle
             }],
+            [BilbiliDanmuku, {
+                url: "http://localhost:5252/"
+            }
+
+            ]
         ]
     };
 
