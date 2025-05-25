@@ -39,7 +39,7 @@ const MIN_SENTENCE_LENGTH = 3;
 const msgDelta = (self, event) => {
     // 定义收到流式请求中的message delta时的处理过程
     if (event.detail.content) {
-        const delta = event.detail.content.replaceAll('（', '[').replaceAll('）', ']');
+        const delta = event.detail.content.replaceAll('（', '[').replaceAll('）', ']').replaceAll('【', '[').replaceAll('】', ']');
         self.response += delta;
         self.buffer += delta;
     }
@@ -67,7 +67,7 @@ const msgDelta = (self, event) => {
 
     for (let i = 0; i < splitList.length; i++) {
         let chunk = splitList[i];
-        if (i == 0) {
+        if (i === 0) {
             // 第一个chunk需要特殊化处理，因为不包含"]", 直接SayAloud
             let sentences = multipleSplit(chunk, seps);
             let sentenceBuffer = '';
@@ -78,7 +78,7 @@ const msgDelta = (self, event) => {
                 sentenceBuffer = '';
             }
             self.buffer = sentenceBuffer;
-        } else {
+        } else if (i < splitList.length - 1) {
             // 一般的chunk处理：先按照"]"切分后，再分别处理
             let splitList_ = chunk.split(']');
             if (splitList_.length === 2) {
@@ -104,6 +104,34 @@ const msgDelta = (self, event) => {
                     sentenceBuffer = '';
                 }
                 self.buffer = sentenceBuffer;
+
+            } else {
+                console.warn(`Found unbalanced brackets when parsing message delta! (Current buffer: ${self.buffer})`);
+            }
+        } else {
+            let splitList_ = chunk.split(']');
+            if (splitList_.length === 2) {
+                // 处理方括号中的tag
+                let tag = splitList_[0];
+                if (tag.startsWith('zh:')) {
+                    // Chinese Translation
+                    self.actionQueue.enqueue({type: "Translation", data: tag.slice(3), resources: []}); // Translation动作入队
+                } else {
+                    // Expression/Motion
+                    self.actionQueue.enqueue({type: "Expression/Motion", data: tag, resources: []}); // Expression/Motion动作入队
+                }
+
+                // 处理"]"后面的text
+                let text = splitList_[1];
+                let sentences = multipleSplit(text, seps);
+                let sentenceBuffer = '';
+                for (let sentence of sentences.slice(0, -1)) {
+                    sentenceBuffer += sentence;
+                    if (sentenceBuffer.length < MIN_SENTENCE_LENGTH) continue;
+                    addSentence(sentenceBuffer);
+                    sentenceBuffer = '';
+                }
+                self.buffer = sentenceBuffer + (sentences[sentences.length - 1] || '');
 
             } else {
                 console.warn(`Found unbalanced brackets when parsing message delta! (Current buffer: ${self.buffer})`);
