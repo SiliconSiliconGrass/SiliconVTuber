@@ -11,10 +11,11 @@ function makeDanmuku(danmuku) {
     danmukuContainer.style.position = 'relative';
     danmukuContainer.style.opacity = '0';
     danmukuContainer.style.transform = 'translateX(-100px)';
-    danmukuContainer.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    danmukuContainer.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
     danmukuContainer.style.marginLeft = '10%';
     danmukuContainer.style.marginRight = '10%';
     danmukuContainer.style.marginTop = '5%';
+    danmukuContainer.style.marginBottom = '5%';
     danmukuContainer.style.borderRadius = '10px';
     danmukuContainer.style.background = 'white';
     danmukuContainer.style.textAlign = 'left';
@@ -51,7 +52,8 @@ export default class BilbiliDanmuku extends AbstractPlugin {
 
         this.language = language;
 
-        // this.showDanmuku({content: "testDanmuku1", username: "guiguicao"}) // debug
+        for (let i = 0; i < 10; i++)
+            this.showDanmuku({content: "testDanmuku1", username: "guiguicao"}) // debug
     }
 
     /**
@@ -68,6 +70,10 @@ export default class BilbiliDanmuku extends AbstractPlugin {
             setTimeout(() => {
                 danmukuElement.style.opacity = 1;
                 danmukuElement.style.transform = 'translateY(0)';
+            });
+            this.displayArea.scrollTo({
+                top: this.displayArea.scrollHeight,
+                behavior: 'smooth'
             });
         }
     }
