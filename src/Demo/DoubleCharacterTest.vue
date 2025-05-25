@@ -1,6 +1,9 @@
 <template>
     <div>
         <div class="background-image"></div>
+
+        <div class="danmuku-area" ref="danmukuArea"></div>
+
         <div class="user-interface" id="user-interface">
             <!-- UI区域 -->
             <button v-if="!audioEnabled" @click="enableAudioActivities">启用音频</button>
@@ -133,7 +136,7 @@ export default {
         let e = document.getElementById('user-interface');
         console.log(e);
 
-        const agent1 = Soyo(this.$refs.testCanvas1, this.$refs.subtitle1, this.$refs.subtitle2);
+        const agent1 = Soyo(this.$refs.testCanvas1, this.$refs.subtitle1, this.$refs.subtitle2, this.$refs.danmukuArea);
         const agent2 = Anon(this.$refs.testCanvas2, this.$refs.subtitle3, this.$refs.subtitle4);
 
         console.log('agents:', {agent1, agent2});
@@ -221,6 +224,14 @@ export default {
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: #2c3e50;
+}
+
+.danmuku-area {
+    position: fixed;
+    width: 30vw;
+    height: 100vh;
+    /* border: 1px solid black; */
+    overflow-y: scroll;
 }
 
 .canvas-container {

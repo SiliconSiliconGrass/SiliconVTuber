@@ -15,9 +15,10 @@ import BilbiliDanmuku from "@/SiliconVTuberCore/plugins/silicon-plugins/Bilibili
  * @param {HTMLCanvasElement} live2dCanvas 展示Live2D的Canvas元素
  * @param {HTMLElement} subtitle 日语字幕元素
  * @param {HTMLElement} transSubtitle 中文翻译字幕元素
+ * @param {HTMLElement} danmukuArea 弹幕显示区域
  * @returns {VTuber} Soyo Agent
  */
-export function Soyo(live2dCanvas, subtitle, transSubtitle) {
+export function Soyo(live2dCanvas, subtitle, transSubtitle, danmukuArea) {
 
     LIVE2D_CONFIG.canvas = live2dCanvas;
 
@@ -58,7 +59,9 @@ export function Soyo(live2dCanvas, subtitle, transSubtitle) {
                 translationElement: transSubtitle
             }],
             [BilbiliDanmuku, {
-                url: "http://localhost:5252/"
+                url: "http://localhost:5252/",
+                display: true,
+                displayArea: danmukuArea
             }
 
             ]
