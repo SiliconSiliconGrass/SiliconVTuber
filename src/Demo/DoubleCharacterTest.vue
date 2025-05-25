@@ -233,6 +233,9 @@ export default {
     /* border: 1px solid black; */
     overflow-y: scroll;
 }
+.danmuku-area:-webkit-scrollbar {
+    display: none;
+}
 
 .canvas-container {
     margin: 0;
