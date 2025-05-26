@@ -9,7 +9,7 @@ app.logger.setLevel(logging.DEBUG)
 # 设置 CORS，允许特定来源的跨域请求
 CORS(app, resources={
     "/*": {  # 匹配所有路由
-        "origins": ["http://localhost:8080"],  # 允许的域名
+        "origins": ["*"],  # 允许的域名
         "methods": ["GET", "POST", "PUT", "DELETE"],  # 允许的方法
         "allow_headers": ["Content-Type", "Authorization"],  # 允许的请求头
     }
@@ -27,7 +27,7 @@ API routes
 messages = []
 
 @app.route('/newMessage', methods=['post'])
-def getAllMemory():
+def newMessage():
     global messages
     data = json.loads(request.data.decode('utf-8'))
     app.logger.info(f'New message received: {data}')
