@@ -51,9 +51,6 @@ export default class BilbiliDanmuku extends AbstractPlugin {
         this.newMessages = [];
 
         this.language = language;
-
-        for (let i = 0; i < 10; i++)
-            this.showDanmuku({content: "testDanmuku1", username: "guiguicao"}) // debug
     }
 
     /**
@@ -106,6 +103,7 @@ export default class BilbiliDanmuku extends AbstractPlugin {
                             this.messageIds.push(message.id);
                             this.newMessages.push(message);
                             this.messages.push(message);
+                            this.showDanmuku(message);
                         }
                     }
                 })
@@ -118,9 +116,9 @@ export default class BilbiliDanmuku extends AbstractPlugin {
     async queryToLLM(agent, userInput) {
         console.log('BilbiliDanmuku.queryToLLM', this.newMessages)
 
-        for (let danmuku of this.newMessages) {
-            this.showDanmuku(danmuku);
-        }
+        // for (let danmuku of this.newMessages) {
+        //     this.showDanmuku(danmuku);
+        // }
 
         if (this.newMessages.length === 0) {
             return '';
@@ -129,18 +127,16 @@ export default class BilbiliDanmuku extends AbstractPlugin {
         let danmukuPrompt = '';
 
         if (this.language === 'zh') {
-            danmukuPrompt = '收到了以下新弹幕:\n';
+            danmukuPrompt = '【追加任务】收到了直播间观众的弹幕，请先朗读弹幕（如果语言不同，请先翻译，然后读出翻译结果），再针对弹幕作出回应。弹幕如下：\n';
             for (let danmuku of this.newMessages) {
                 danmukuPrompt += `弹幕内容: ${danmuku.content} （来自用户“${danmuku.username}”）\n`;
             }
-            danmukuPrompt += '请朗读弹幕，并作出回应。'
-        }else if (this.language === 'ja') {
-            danmukuPrompt = '以下の新しいダンマークを受信しました:\n';
+        } else if (this.language === 'ja') {
+            danmukuPrompt = '【追加タスク】配信の視聴者からコメントが届きました。まずコメントを読み上げてください（言語が異なる場合は、まず翻訳してから翻訳結果を読み上げてください）。その後、コメントに対して返答してください。コメント内容は以下の通り：\n';
             for (let danmuku of this.newMessages) {
-                danmukuPrompt += `ダンマーク内容: ${danmuku.content} （ユーザー“${danmuku.username}”からのもの）\n`; 
-            } 
-            danmukuPrompt += 'ダンマークを読み上げ、応答してください。'
-        }else{
+                danmukuPrompt += `コメント内容: ${danmuku.content} （ユーザー「${danmuku.username}」より）\n`;
+            }
+        } else {
             throw new Error('Language not supported');
         }
 

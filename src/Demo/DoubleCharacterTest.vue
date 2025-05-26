@@ -1,9 +1,7 @@
 <template>
     <div>
         <div class="background-image"></div>
-
         <div class="danmuku-area" ref="danmukuArea"></div>
-
         <div class="user-interface" id="user-interface">
             <!-- UI区域 -->
             <button v-if="!audioEnabled" @click="enableAudioActivities">启用音频</button>
@@ -12,12 +10,12 @@
         </div>
 
         <div class="subtitle-area">
-            <div style="position: absolute; width: 100%; height: 100%;">
+            <div class="subtitle-group">
                 <span ref="subtitle1" class="subtitle"></span>
                 <br>
                 <span ref="subtitle2" class="subtitle"></span>
             </div>
-            <div style="position: absolute; width: 100%; height: 100%;">
+            <div class="subtitle-group">
                 <span ref="subtitle3" class="subtitle"></span>
                 <br>
                 <span ref="subtitle4" class="subtitle"></span>
@@ -62,6 +60,8 @@
             <div id="l2dCallbackTrigger"></div>
             <div id="l2dResourcesPath">{{ l2dResourcesPath }}</div>
             <div id="l2dModelDirPath">{{ l2dModelDirPath }}</div>
+
+            <audio ref="bgmAudio" src="/春日影.mp3" loop autoplay></audio>
         </div>
     </div>
 </template>
@@ -88,6 +88,14 @@ export default {
             this.agent1.resourceManager.audioBank.handleUserGesture();
             this.agent2.resourceManager.audioBank.handleUserGesture();
             this.audioEnabled = true;
+
+            // start bgm
+            const audio = this.$refs.bgmAudio
+            audio.play().catch(e => {
+                console.log('BGM Audio error:', e)
+            });
+            audio.volume = 0.1;
+            audio.muted = false;
         },
 
         switchMicrophoneMode() {
@@ -238,6 +246,7 @@ export default {
 }
 
 .canvas-container {
+    position: fixed;
     margin: 0;
     padding: 0;
     /* display: flex; */
@@ -311,10 +320,11 @@ export default {
     z-index: 998;
     margin: 0;
     padding: 0;
-    width: 95vw;
-    left: 50vw;
-    bottom: 30vh;
-    transform: translate(-50%, 0);
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: last baseline;
 }
 
 .subtitle {
@@ -364,7 +374,7 @@ export default {
 }
 
 .background-image {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;

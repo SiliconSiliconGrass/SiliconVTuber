@@ -18,6 +18,8 @@ function multipleSplit(inputString, delimiters) {
         result.push(curr);
     }
 
+    // console.log('multipleSplit', {inputString, delimiters, result});
+
     return result;
 }
 
@@ -34,7 +36,7 @@ function areBracketsBalanced(str) {
     return openBracketCount === closeBracketCount;
 }
 
-const MIN_SENTENCE_LENGTH = 3;
+const MIN_SENTENCE_LENGTH = 8;
 
 const msgDelta = (self, event) => {
     // 定义收到流式请求中的message delta时的处理过程
@@ -46,8 +48,8 @@ const msgDelta = (self, event) => {
 
     if (!areBracketsBalanced(self.buffer)) return; // 若不匹配，则暂不处理
 
-    // const seps = "。？！；.?!;\n、";
-    const seps = "。？！；.?!;\n";
+    const seps = "。？！；.?!;\n、";
+    // const seps = "。？！；.?!;\n";
     let splitList = self.buffer.split('[');
 
     if (splitList.length === 1 && multipleSplit(self.buffer, seps).length === 1) {
@@ -56,7 +58,7 @@ const msgDelta = (self, event) => {
 
     function addSentence(text) {
 
-        console.log({text});
+        // console.log('addSentence', {text});
 
         let ttsResource = new Resource(self.uuid(), 'TTS', {text: text});
         let translationResource = new Resource(self.uuid(), 'Translation', {text: text, context: self.response});
@@ -71,13 +73,14 @@ const msgDelta = (self, event) => {
             // 第一个chunk需要特殊化处理，因为不包含"]", 直接SayAloud
             let sentences = multipleSplit(chunk, seps);
             let sentenceBuffer = '';
-            for (let sentence of sentences) {
+            for (let sentence of sentences.slice(0, -1)) {
                 sentenceBuffer += sentence;
                 if (sentenceBuffer.length < MIN_SENTENCE_LENGTH) continue;
                 addSentence(sentenceBuffer);
                 sentenceBuffer = '';
             }
-            self.buffer = sentenceBuffer;
+            self.buffer = sentenceBuffer + (sentences[sentences.length - 1] || '');
+            console.log('self.buffer =', self.buffer);
         } else if (i < splitList.length - 1) {
             // 一般的chunk处理：先按照"]"切分后，再分别处理
             let splitList_ = chunk.split(']');
@@ -104,6 +107,7 @@ const msgDelta = (self, event) => {
                     sentenceBuffer = '';
                 }
                 self.buffer = sentenceBuffer;
+                console.log('self.buffer =', self.buffer);
 
             } else {
                 console.warn(`Found unbalanced brackets when parsing message delta! (Current buffer: ${self.buffer})`);
@@ -132,6 +136,7 @@ const msgDelta = (self, event) => {
                     sentenceBuffer = '';
                 }
                 self.buffer = sentenceBuffer + (sentences[sentences.length - 1] || '');
+                console.log('self.buffer =', self.buffer);
 
             } else {
                 console.warn(`Found unbalanced brackets when parsing message delta! (Current buffer: ${self.buffer})`);
@@ -142,53 +147,19 @@ const msgDelta = (self, event) => {
 };
 
 const responseDone = (self) => {
-    // console.log(self.response);
-    // 记录智能体输出的信息
-    console.log(self.response);
+
+    // console.log('DEBUG 1 VTuberAgent responseDone:', self.response);
     self.bot.messages.push({
         role: "assistant",
         content: self.response,
         content_type: "text"
     });
-    // console.log('recorded messgaes:', self.messages);
 
-    let sentence = self.buffer;
-
-    // 处理方括号[]中的motion/expression信息
-    let sentenceSplit = sentence.split('[');
-
-    function addSentence(text) {
-        
-        console.log({text});
-
-        let ttsResource = new Resource(self.uuid(), 'TTS', {text: text});
-        let translationResource = new Resource(self.uuid(), 'Translation', {text: text, context: self.response});
-        self.resourceManager.add(ttsResource); // 注册所需TTS audio 资源
-        self.resourceManager.add(translationResource); // 注册所需翻译文本资源
-        self.actionQueue.enqueue({type: "SayAloud", data: text, resources: [ttsResource, translationResource]}); // 将SayAloud动作加入队列
-    }
-
-    for (let split of sentenceSplit) {
-        let splitSplit = split.split(']');
-        if (splitSplit.length == 1) {
-            if (splitSplit[0] !== '') {
-                addSentence(splitSplit[0]);
-            }
-        } else {
-            // splitSplit[0]: expression/motion name
-            // splitSplit[1]: tts text
-
-            // expression/motion 应该不需要resource
-            self.actionQueue.enqueue({type: "Expression/Motion", data: splitSplit[0], resources: []}); // Expression/Motion动作入队
-            
-            if (splitSplit[1] !== '') {
-                addSentence(splitSplit[1]);
-            }
-        }
-    }
+    // console.log('DEBUG 1 self.buffer =', self.buffer)
+    msgDelta(self, new CustomEvent('message_delta', {detail: {content: '\n'}}));
 
     self.actionQueue.enqueue({type: "EndOfResponse", data: {}, resources: []}); // 将EndOfResponse动作加入队列
-    // self.response = '';
+    self.response = ''; // ?
     self.buffer = '';
 }
 

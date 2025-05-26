@@ -30,7 +30,7 @@ export function Soyo(live2dCanvas, subtitle, transSubtitle, danmukuArea) {
             modelName: 'glm-4-flash-250414',
             systemPrompt: live2dPrompter(PROMPT, LIVE2D_CONFIG, 'ja')
         },
-        queryTemplate: '%USER_INPUT% %PLUGIN_INFO%',
+        queryTemplate: 'Anon: %USER_INPUT% \n %PLUGIN_INFO% \n Soyo: ... (output your response directly)',
 
         plugins: [
             [ActionQueue, {
@@ -44,7 +44,6 @@ export function Soyo(live2dCanvas, subtitle, transSubtitle, danmukuArea) {
                     // "text_language": "zh",
                     "temperature": 1.0,
                     "speed": 1.0,
-
 
                     "text": "",
                     "speaker": "soyo0"
