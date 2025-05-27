@@ -85,8 +85,18 @@ export default class AudioBank {
     }
 
     clearAudios() {
-        return;
         this.urls = [];
+
+        Array.from(this.audioContainer.children).forEach(child => {
+            if (child.tagName === 'AUDIO') {
+                const audioSrc = child.src;
+                if (audioSrc.startsWith('blob:')) {
+                    URL.revokeObjectURL(audioSrc); // 释放内存
+                }
+                child.remove();
+            }
+        });
+
         this.audioContainer.innerHTML = "";
     }
 
