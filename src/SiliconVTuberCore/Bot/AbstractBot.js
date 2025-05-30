@@ -1,12 +1,18 @@
+/**
+ * Abstract Bot Class
+ */
 export default class AbstractBot extends EventTarget {
-    /**
-     * Abstract Bot Class
-     */
     constructor() {
         super();
+        /** @type {Array<{role: 'system' | 'user' | 'assistant', content: string}} */
         this.messages = [];
     }
 
+    /**
+     * 添加对话上下文到 this.messages
+     * @param {string} text 对话内容
+     * @param {'user' | 'assistant'} role 身份
+     */
     appendContext(text, role = 'user') {
         this.messages.push({
             role: role,
@@ -16,22 +22,22 @@ export default class AbstractBot extends EventTarget {
     }
     
     async setup() {
-        throw "Abstract Method Not Overrided! (You need to override this method! )";
+        throw new Error("Abstract method 'setup' must be implemented by subclass");
     }
 
+    /**
+     * To send a chat message to LLM bot, and return its response
+     * @param {string} message
+     */
     async respondTo(message) {
-        /**
-         * To send a chat message to coze bot, and return its response
-         * @param message [string]
-         */
-        throw "Abstract Method Not Overrided! (You need to override this method! )";
+        throw new Error("Abstract method 'respondTo' must be implemented by subclass");
     }
 
+    /**
+     * To send recorded history messages to LLM bot, and return its response
+     * @param {Array<{role: 'system' | 'user' | 'assistant', content: string}>} messages recorded history messages
+     */
     async respondToContext(messages) {
-        /**
-         * To send recorded history messages to coze bot, and return its response
-         * @param messages recorded history messages (Array<Object>)
-         */
-        throw "Abstract Method Not Overrided! (You need to override this method! )";
+        throw new Error("Abstract method 'respondToContext' must be implemented by subclass");
     }
 }

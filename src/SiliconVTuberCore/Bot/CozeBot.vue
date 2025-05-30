@@ -1,6 +1,9 @@
 <script>
 import axios from 'axios';
 
+/**
+ * @deprecated
+ */
 export default class CozeBot {
     /**
      * A delegate used to communicate with coze api

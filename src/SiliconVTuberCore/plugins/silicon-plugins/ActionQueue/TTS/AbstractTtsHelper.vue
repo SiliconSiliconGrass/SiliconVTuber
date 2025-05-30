@@ -2,11 +2,11 @@
 /* eslint-disable */
 export default class AbstractTtsHelper {
     setup() {
-        throw "Method setup() is not implemented!";
+        throw new Error("Abstract method 'setup' must be implemented by subclass");
     }
     
     async generateAudio(text) {
-        throw "Method generateAudio() is not implemented!";
+        throw new Error("Abstract method 'generateAudio' must be implemented by subclass");
     }
 }
 </script>

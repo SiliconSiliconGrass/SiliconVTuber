@@ -1,3 +1,7 @@
+for (let e of danmukuElements) {
+    e.handled = true;
+}
+
 setInterval(() => {
     const danmukuElements = document.getElementsByClassName("danmaku-item");
 
@@ -17,7 +21,7 @@ setInterval(() => {
                     type: 'danmuku'
                 }
             })
-        })
+        });
     }
 
     for (let e of danmukuElements) {

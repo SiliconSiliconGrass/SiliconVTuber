@@ -197,9 +197,9 @@ export default class Agent extends AbstractAgent {
         }
         this.queryTemplate = queryTemplate;
 
-        this.buffer = '';          // 接收agent消息的buffer // TODO: 可以考虑移至Bot类
+        this.buffer = '';          // 保存 message delta 以等待分句处理的缓冲区
         this.response = '';        // 用于存储一次的回答
-        this.userInputBuffer = []; // 用户输入的buffer
+        this.userInputBuffer = []; // 用户输入的缓冲区
         this.timeoutId = null;     // mainLoop timeout id
 
         this.plugins = [];         // 所有插件或扩展
@@ -265,10 +265,8 @@ export default class Agent extends AbstractAgent {
         }
         self.userInputBuffer = []; // 清空userInputBffer
 
-        // if (message !== '') message = '硅硅草的输入:' + message; // TODO
-
         let messageEmpty = (message === "");
-        // let messageEmpty = false; // TODO
+
         if (messageEmpty) {
 
             /* TODO: 用户没有输入的时候，应该如何表现？ */

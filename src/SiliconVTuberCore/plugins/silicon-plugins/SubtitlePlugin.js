@@ -81,7 +81,7 @@ export default class SubtitlePlugin extends AbstractPlugin {
             if (!botConfig.systemPrompt) botConfig.systemPrompt = DEFAULT_TRANSLATION_PROMPT;
             let bot = GetBotFromConfig(botConfig);
             if (!bot) {
-                throw `ValueError: Unsupported bot config! ${botConfig}`;
+                throw new Error(`ValueError: Unsupported bot config! ${botConfig}`);
             }
             this.bot = bot;
             this.translationSubtitle = new SubtitleHandler(translationElement);

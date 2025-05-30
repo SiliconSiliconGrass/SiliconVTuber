@@ -37,11 +37,6 @@ export default class GlmBot extends AbstractBot {
     }
 
     async respondToContext(messages) {
-        /**
-         * To send recorded history messages to coze bot, and return its response
-         * @param {Array<Object>} messages recorded history messages (default: this.messages)
-         */
-
         if (!messages) {
             messages = this.messages;
         }
@@ -64,7 +59,7 @@ export default class GlmBot extends AbstractBot {
 
         const data = {
             'model': this.modelName,
-            'messages': filteredMessages, // TODO: 保留的历史记录长度
+            'messages': filteredMessages,
             'stream': true
         }
 
@@ -122,7 +117,7 @@ export default class GlmBot extends AbstractBot {
                                 this.dispatchEvent(new CustomEvent('done'));
                                 return this.response;
                             }
-                            console.error('[CozeBot] An error occurred when is parsing event data:', e);
+                            console.error('[GlmBot] An error occurred when is parsing event data:', e);
                         }
                     }
                 }

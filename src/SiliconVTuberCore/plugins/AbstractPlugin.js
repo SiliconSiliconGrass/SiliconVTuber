@@ -18,7 +18,7 @@ export default class AbstractPlugin extends EventTarget {
      * @param {Agent} agent parent agent
      */
     setup(agent) {
-        throw "Method setup() is not implemented!";
+        throw new Error("Abstract method 'setup' must be implemented by subclass");
     }
 
     /**
@@ -30,6 +30,6 @@ export default class AbstractPlugin extends EventTarget {
      * @returns {Promise<string>} extra prompt text
      */
     async queryToLLM(agent, userInput) {
-        throw "Method queryToLLM() is not implemented!";
+        throw new Error("Abstract method 'queryToLLM' must be implemented by subclass");
     }
 }

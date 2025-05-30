@@ -25,7 +25,7 @@ export function Anon(live2dCanvas, subtitle, transSubtitle) {
         botConfig: {
             type: 'GLM',
             token: getToken('glm'),
-            modelName: 'glm-4-flash',
+            modelName: 'glm-4-flash-250414',
             systemPrompt: live2dPrompter(PROMPT, LIVE2D_CONFIG, 'ja')
         },
         queryTemplate: 'Soyo: %USER_INPUT%\n Anon: ...(output your response directly)(Try some new topics if necessary.)',
