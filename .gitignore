@@ -30,5 +30,7 @@ ai-vtuber-support/whisper-server/temp_files/
 __pycache__/
 *.bak
 
+/public/L2D/*
+
 *.token.js
 /public/Resources/*
