@@ -9,8 +9,8 @@
 
 // import Demo from './Demo/MisakaDemo.vue';
 
-// import Demo from './Demo/TempTest.vue'
-import Demo from './Demo/DoubleCharacterTest.vue'
+import Demo from './Demo/TempTest.vue'
+// import Demo from './Demo/DoubleCharacterTest.vue'
 
 export default {
   components: {

@@ -10,107 +10,47 @@
 
 <script>
 
-import ActionQueue from '@/SiliconVTuberCore/plugins/silicon-plugins/ActionQueue/ActionQueue.js';
-import BatteryStatus from '@/SiliconVTuberCore/plugins/silicon-plugins/BatteryStatus.js';
-import L2dDisplay from '@/SiliconVTuberCore/plugins/silicon-plugins/L2dDisplay/L2dDisplay.js';
-import VTuber from '@/SiliconVTuberCore/Agent/VTuberAgent.js';
-import { getToken } from '@/SiliconVTuberCore/utils/tokenGatewary.js';
-import { createAgent } from '@/SiliconVTuberCore/utils/createAgent.js';
+import XmlStreamParser from '@/SiliconVTuberCore/StreamEventSystem/XmlStreamParser.js';
+import AbstractEventStreamParser from '@/SiliconVTuberCore/StreamEventSystem/AbstractEventStreamParser.js';
+
+class a extends AbstractEventStreamParser {
+    constructor(params) {
+        super(params);
+        console.log("defined a: ", params);
+    }
+    parseDeltaMessageOfEvent(deltaMessage){
+        console.log("a: ", deltaMessage);
+    }
+}
+
+class b extends AbstractEventStreamParser {
+    constructor(params) {
+        super(params);
+        console.log("defined b: ", params);
+    }
+    parseDeltaMessageOfEvent(deltaMessage){
+        console.log("b: ", deltaMessage);
+    }
+}
 
 export default {
-    components: {
-        // ...
-    },
-    data() {
-        return {
-            // ...
-        };
-    },
-
-    methods: {
-        enableAudioActivities() {
-            this.agent1.resourceManager.audioBank.handleUserGesture();
-            this.agent2.resourceManager.audioBank.handleUserGesture();
-            console.log('click!');
-        }
-    },
 
     mounted() {
+        const xmlStreamParser = new XmlStreamParser({"acfun": a, "bilibili": b});
+        xmlStreamParser.onReceiveDelta("<");
+        xmlStreamParser.onReceiveDelta("ac");
+        xmlStreamParser.onReceiveDelta("fun");
+        xmlStreamParser.onReceiveDelta(">");
+        xmlStreamParser.onReceiveDelta("ha");
+        xmlStreamParser.onReceiveDelta("ahha");
+        xmlStreamParser.onReceiveDelta("ahhahda");
+        xmlStreamParser.onReceiveDelta("8oiajfiasf");
+        xmlStreamParser.onReceiveDelta("<");
+        xmlStreamParser.onReceiveDelta("/");
+        xmlStreamParser.onReceiveDelta("acfun>");
+        xmlStreamParser.onReceiveDelta("<");
+        xmlStreamParser.onReceiveDelta("bilibili x=\"1\" y=\"2\"></bilibili><bilibili>ahahsdhahsdhasdhasd</bilibili><bilibili>12123123</bilibili><acfun qawdasd=\"asdasdasd\">12310928389021382139012390<aasdasd></acfun>");
 
-        const testAgentConfig1 = {
-            Agent: VTuber,
-            botConfig: {
-                type: 'GLM',
-                token: getToken('glm'),
-                modelName: 'glm-4-flash',
-            },
-            queryTemplate: null,
-
-            plugins: [
-                [ActionQueue, { ttsConfig: { type: 'gptsovits', character: 'misaka-zh' }, translationConfig: null }],
-                [L2dDisplay, { modelURL: '/Resources/mikoto/mikoto.model.json', canvas: this.$refs.testCanvas1,
-                    motionDict: {
-                        'akimbo': {group: 'tap', order: 0, duration: 1000},
-                        'raise_one_hand': {group: 'tap', order: 1, duration: 1000}
-                    },
-                    expressionDict: {
-                        'no_expression': {order: 0},
-                        'smile': {order: 1},
-                        'frown': {order: 2},
-                        'doubtful': {order: 3},
-                        'smile_with_eyes_closed': {order: 4},
-                        'shocked': {order: 5},
-                        'blush': {order: 6},
-                    } }],
-                [BatteryStatus, {}],
-            ]
-        };
-
-        const testAgentConfig2 = {
-            Agent: VTuber,
-            botConfig: {
-                type: 'GLM',
-                token: getToken('glm'),
-                modelName: 'glm-4-flash',
-            },
-            queryTemplate: null,
-
-            plugins: [
-                [ActionQueue, { ttsConfig: { type: 'gptsovits', character: 'misaka-zh' }, translationConfig: null }],
-                [L2dDisplay, { modelURL: '/Resources/mikoto/mikoto.model.json', canvas: this.$refs.testCanvas2,
-                    motionDict: {
-                        'akimbo': {group: 'tap', order: 0, duration: 1000},
-                        'raise_one_hand': {group: 'tap', order: 1, duration: 1000}
-                    },
-                    expressionDict: {
-                        'no_expression': {order: 0},
-                        'smile': {order: 1},
-                        'frown': {order: 2},
-                        'doubtful': {order: 3},
-                        'smile_with_eyes_closed': {order: 4},
-                        'shocked': {order: 5},
-                        'blush': {order: 6},
-                    } }],
-                [BatteryStatus, {}],
-            ]
-        };
-
-        const agent1 = createAgent(testAgentConfig1);
-        const agent2 = createAgent(testAgentConfig2);
-        console.log(agent1);
-        console.log(agent2);
-
-        agent1.appendContext('你好呀');
-        agent1.respondToContext()
-
-        agent2.appendContext('请说“这是测试语音一”');
-        console.log(agent2.messages);
-        agent2.respondToContext()
-
-        console.log('audioBank', agent1.resourceManager.audioBank);
-
-        this.agent1 = agent1;
-        this.agent2 = agent2;
 
     }
 };

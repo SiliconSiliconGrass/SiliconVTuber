@@ -1,6 +1,7 @@
 import CozeTtsBot from './TTS/TtsBot.vue'; // use coze tts bot
 import GptSovits from './TTS/GptSovits.vue'; // use local Gpt-SoVITS
 import AudioBank from './AudioBank.js';
+import GptSovitsV2 from './TTS/GptSovitsV2.vue';
 
 function delay(ms) {
     if (ms <= 0) {
@@ -53,31 +54,17 @@ export default class ResourceManager {
             this.ttsHelper = new CozeTtsBot(ttsConfig.pat, ttsConfig.botID, 'tts_user_id'); // coze
         } else if (ttsConfig.type === 'gptsovits') {
             let cfg;
-            if (ttsConfig.character === 'misaka-ja') {
-                cfg = {
-                    "refer_wav_path": "misaka-ref2.wav",
-                    "prompt_text": "何かありそうね。クロコに連絡しておこうかな。なんだか騒がしいわね。",
-                    "prompt_language": "ja",
-                    "text_language": "ja",
-                    "temperature": 1.0,
-                    "speed": 1.0,
-                    "text": "",
-                };
-            } else if (ttsConfig.character === 'misaka-zh') {
-                cfg = {
-                    "refer_wav_path": "misaka-ref2.wav",
-                    "prompt_text": "何かありそうね。クロコに連絡しておこうかな。なんだか騒がしいわね。",
-                    "prompt_language": "ja",
-                    "text_language": "zh",
-                    "temperature": 1.0,
-                    "speed": 1.0,
-                    "text": "",
-                };
-            }
 
             if (!cfg) cfg = ttsConfig;
             console.log('RM cfg:', cfg);
-            this.ttsHelper = new GptSovits('http://127.0.0.1:9880', cfg); // gptsovits
+            this.ttsHelper = new GptSovits('http://127.0.0.1:9880/', cfg); // gptsovits
+            this.ttsHelper.setup(); // 初始化
+        }else if (ttsConfig.type === 'gptsovitsv2') {
+            let cfg;
+
+            if (!cfg) cfg = ttsConfig;
+            console.log('RM cfg:', cfg);
+            this.ttsHelper = new GptSovitsV2('http://127.0.0.1:9880/tts', cfg); // gptsovitsv2
             this.ttsHelper.setup(); // 初始化
         }
 

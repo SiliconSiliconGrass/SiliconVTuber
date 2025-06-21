@@ -32,3 +32,4 @@ __pycache__/
 
 *.token.js
 /public/Resources/*
+ai-vtuber-support/BilibiliWatcher/Alternate Solution/main.py

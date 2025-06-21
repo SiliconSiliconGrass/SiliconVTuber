@@ -33,19 +33,17 @@ export function Anon(live2dCanvas, subtitle, transSubtitle) {
         plugins: [
             [ActionQueue, {
                 ttsConfig: {
-                    type: 'gptsovits',
+                    type: 'gptsovitsv2',
                     // character: 'misaka-ja', // debug
-                    "refer_wav_path": "参考音频/Anon干声素材/参考音频/うちの学校本当にバンドやってる子が多いんだなぁ登下校の時も.wav",
-                    "prompt_text": "うちの学校本当にバンドやってる子が多いんだなぁ登下校の時も",
-                    "prompt_language": "ja",
-                    "text_language": "ja", // 要合成的文本的语言
+                    "text_lang": "ja", // 要合成的文本的语言
                     // "text_language": "zh",
                     "temperature": 1.0,
                     "speed": 1.0,
 
 
                     "text": "",
-                    "speaker": "anon"
+                    "speaker": "anon",
+                    "return_fragment" : true,
                 }, translationConfig: null
             }],
 
