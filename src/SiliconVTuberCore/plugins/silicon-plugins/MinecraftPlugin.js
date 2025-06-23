@@ -1,4 +1,3 @@
-import CozeBot from '@/components/Bot/CozeBot.vue';
 import AbstractPlugin from '../AbstractPlugin';
 
 const URL = "http://127.0.0.1:7211/";

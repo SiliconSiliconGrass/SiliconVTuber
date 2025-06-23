@@ -14,11 +14,6 @@ export default class OllamaBot extends AbstractBot {
     }
 
     async respondToContext(messages) {
-        /**
-         * To send recorded history messages to coze bot, and return its response
-         * @param messages recorded history messages (Array<Object>)
-         */
-
         if (!messages) {
             messages = this.messages;
         }

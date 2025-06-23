@@ -58,7 +58,6 @@ export default class BilbiliDanmuku extends AbstractPlugin {
      * @param {{content: string, username: string}} danmuku 弹幕对象
      */
     showDanmuku(danmuku) {
-        // TODO
         console.log(danmuku);
         if (this.display && this.displayArea) {
             // 将弹幕添加到display

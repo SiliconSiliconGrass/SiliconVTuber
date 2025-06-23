@@ -12,7 +12,7 @@ export default class AbstractAgent extends EventTarget {
      * @param {[{role: 'user' | 'agent' | 'system', content: string}] | null} messages 聊天历史 （可选，为空时默认使用Agent的历史）
      */
     async respondToContext(messages) {
-        throw "Abstract Method Not Overrided! (You need to override this method! )";
+        throw new Error("Abstract method 'respondToContext' must be implemented by subclass");
     }
     
     /**
@@ -21,7 +21,7 @@ export default class AbstractAgent extends EventTarget {
      * @param {'user' | 'agent' | 'system'} role 消息角色
      */
     appendContext(text, role = 'user') {
-        throw "Abstract Method Not Overrided! (You need to override this method! )";
+        throw new Error("Abstract method 'appendContext' must be implemented by subclass");
     }
 
     /**

@@ -69,7 +69,7 @@ export default class LongTermMemory extends AbstractPlugin {
         let botConfig = config.botConfig;
         let bot = GetBotFromConfig(botConfig);
         if (!bot) {
-            throw `ValueError: Unsupported bot config! ${botConfig}`;
+            throw new Error(`ValueError: Unsupported bot config! ${botConfig}`);
         }
         this.bot = bot;
 
