@@ -93,6 +93,18 @@ python api_silicon.py
 (按需启动其他后端支持)
 
 ### 2.2 前端启动
+启动前端之前, 请在```frontend/src/tokens/tokens.token.js```中正确配置大模型访问令牌
+例如:
+``` javascript
+// file "tokens.token.js" at "frontend/src/tokens"
+export default {
+    glm: '95d5d******.hDK1******',
+    coze: 'pat_AUQw******'
+}
+```
+Demo 中可能需要使用 glm 的 token
+
+
 ``` sh
 cd frontend
 npm run serve
