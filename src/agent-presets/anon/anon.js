@@ -32,11 +32,11 @@ export function Anon(live2dCanvas, subtitle, transSubtitle) {
 
         plugins: [
             [ActionQueue, {
+
+                // GPT-SOVITS v2
                 ttsConfig: {
                     type: 'gptsovitsv2',
-                    // character: 'misaka-ja', // debug
-                    "text_lang": "ja", // 要合成的文本的语言
-                    // "text_language": "zh",
+                    "text_lang": "ja",
                     "temperature": 1.0,
                     "speed": 1.0,
 
@@ -45,6 +45,22 @@ export function Anon(live2dCanvas, subtitle, transSubtitle) {
                     "speaker": "anon",
                     "return_fragment" : true,
                 }, translationConfig: null
+
+                // // GPT-SOVITS v1
+                // ttsConfig: {
+                //     type: 'gptsovits',
+                //     // "refer_wav_path": "参考音频/Anon干声素材/参考音频/うちの学校本当にバンドやってる子が多いんだなぁ登下校の時も.wav",
+                //     // "prompt_text": "うちの学校本当にバンドやってる子が多いんだなぁ登下校の時も",
+                //     // "prompt_language": "ja",
+                //     "text_language": "ja", // 要合成的文本的语言
+                //     // "text_language": "zh",
+                //     "temperature": 1.0,
+                //     "speed": 1.0,
+
+
+                //     "text": "",
+                //     "speaker": "anon"
+                // }, translationConfig: null
             }],
 
             [L2dDisplay, LIVE2D_CONFIG],

@@ -8,14 +8,8 @@
 // import Demo from './Demo/MisakaMinecraft.vue';
 
 // import Demo from './Demo/MisakaDemo.vue';
-
-<<<<<<< HEAD
-import Demo from './Demo/TempTest.vue'
-// import Demo from './Demo/DoubleCharacterTest.vue'
-=======
 // import Demo from './Demo/TempTest.vue'
 import Demo from './Demo/SoyoAndAnon.vue'
->>>>>>> db0c38381a4493e4c4f64b4dbe3e02802f5d7217
 
 export default {
   components: {

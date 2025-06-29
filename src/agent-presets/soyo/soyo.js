@@ -34,11 +34,11 @@ export function Soyo(live2dCanvas, subtitle, transSubtitle, danmukuArea) {
 
         plugins: [
             [ActionQueue, {
+
+                // GPT-SOVITS v2
                 ttsConfig: {
                     type: 'gptsovitsv2',
-                    // character: 'misaka-ja', // debug
                     "text_lang": "ja", // 要合成的文本的语言
-                    // "text_language": "zh",
                     "temperature": 1.0,
                     "speed": 1.0,
 
@@ -46,6 +46,23 @@ export function Soyo(live2dCanvas, subtitle, transSubtitle, danmukuArea) {
                     "speaker": "soyo0"
 
                 }, translationConfig: null
+
+                // // GPT-SOVITS v1
+                // ttsConfig: {
+                //     type: 'gptsovits',
+                //     // "refer_wav_path": "参考音频/Soyo干声素材/正常参考/うちはとても裕福になった綺麗な家に引っ越して.wav",
+                //     // "prompt_text": "うちはとても裕福になった綺麗な家に引っ越して。",
+                //     // "prompt_language": "ja",
+                //     "text_language": "ja", // 要合成的文本的语言
+                //     // "text_language": "zh",
+                //     "temperature": 1.0,
+                //     "speed": 1.0,
+
+
+                //     "text": "",
+                //     "speaker": "soyo0"
+
+                // }, translationConfig: null
             }],
             [L2dDisplay, LIVE2D_CONFIG],
             [SubtitlePlugin, {
